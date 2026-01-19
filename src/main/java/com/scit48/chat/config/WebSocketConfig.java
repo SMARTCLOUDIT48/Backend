@@ -14,8 +14,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		// 1. 소켓 연결 주소: ws://localhost:8080/ws/chat
 		registry.addEndpoint("/ws/chat")
-				.setAllowedOriginPatterns("*") // ⭐ CORS 허용 (필수)
-				.withSockJS(); // JS에서 SockJS 쓸 때 필요 (테스트 땐 이거 때문에 주소 주의)
+				.setAllowedOriginPatterns("*"); // ⭐ CORS 허용 (필수)
+				//.withSockJS(); // JS에서 SockJS 쓸 때 필요 (테스트 땐 이거 때문에 주소 주의)
 	}
 	
 	@Override
