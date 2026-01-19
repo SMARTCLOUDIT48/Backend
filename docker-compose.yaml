@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+
+  # Redis (동시성/캐시용)
+  redis:
+    image: redis:alpine
+    container_name: scit-chat-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data

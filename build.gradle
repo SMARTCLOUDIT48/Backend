@@ -1,0 +1,74 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.3' // 3.x 버전 (안정화 버전)
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.scit48' // 패키지 그룹명 (팀 설정에 맞게 변경 가능)
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '21' // Java 21 사용
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // =========================================
+    // 1. 웹 & 화면 (Web & View)
+    // =========================================
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // =========================================
+    // 2. 데이터베이스 (Database)
+    // =========================================
+    // JPA (필수: 객체로 DB 다루기)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // MySQL 드라이버 (필수: 로컬 DB 연결용)
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    // Redis (필수: 채팅 캐시 & 세션용)
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // =========================================
+    // 3. 채팅 (WebSocket)
+    // =========================================
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // =========================================
+    // 4. 보안 (Security) - 회원가입/로그인용
+    // =========================================
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6' // 타임리프에서 로그인 정보 쓰기 위해 필요
+
+    // =========================================
+    // 5. 편의 도구 (Utilities)
+    // =========================================
+    // Lombok (필수: Getter, Setter 자동생성)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Validation (추천: 회원가입 시 이메일 형식 등 검사)
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // DevTools (선택: 서버 재시작 없이 html 수정 반영 등)
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // =========================================
+    // 6. 테스트 (Test)
+    // =========================================
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
