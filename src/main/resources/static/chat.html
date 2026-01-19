@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>채팅 테스트</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<h2>🚀 채팅방 연결 테스트</h2>
+<button onclick="connect()">연결하기</button>
+<button onclick="disconnect()">연결끊기</button>
+<hr>
+<div>
+    <input type="text" id="msg" placeholder="메시지 입력">
+    <button onclick="sendMessage()">보내기</button>
+</div>
+<ul id="messageList"></ul>
+
+<script>
+    var stompClient = null;
+
+    function connect() {
+        // SockJS 없이 쌩 WebSocket으로 연결 (팀장님 설정에 맞춤)
+        var socket = new WebSocket('ws://localhost:8080/ws/chat');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            alert("✅ 연결 성공!");
+
+            // 구독(Subscribe) - 방 번호 1번이라고 가정
+            stompClient.subscribe('/sub/chat/room/1', function (message) {
+                showUi(JSON.parse(message.body));
+            });
+
+            // 입장 메시지 전송
+            stompClient.send("/pub/chat/message", {}, JSON.stringify({
+                type: 'ENTER',
+                roomId: '1',
+                sender: '팀장님',
+                message: ''
+            }));
+        });
+    }
+
+    function sendMessage() {
+        var msgContent = document.getElementById('msg').value;
+        stompClient.send("/pub/chat/message", {}, JSON.stringify({
+            type: 'TALK',
+            roomId: '1',
+            sender: '팀장님',
+            message: msgContent
+        }));
+    }
+
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+        console.log("Disconnected");
+    }
+
+    function showUi(message) {
+        var ul = document.getElementById("messageList");
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode(message.sender + ": " + message.message));
+        ul.appendChild(li);
+    }
+</script>
+</body>
+</html>
