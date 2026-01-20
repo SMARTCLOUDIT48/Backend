@@ -1,4 +1,4 @@
-package com.scit48.chat;
+package com.scit48;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
