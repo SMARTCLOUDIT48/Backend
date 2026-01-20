@@ -1,4 +1,4 @@
-package com.scit48.common.domain;
+package com.scit48.chat.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
