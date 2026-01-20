@@ -15,7 +15,7 @@ public class ChatMessageDto {
 	
 	// 메시지 타입 : 입장, 대화, 퇴장
 	public enum MessageType {
-		ENTER, TALK, QUIT
+		ENTER, TALK, QUIT, CORRECT, VOICE
 	}
 	
 	private MessageType type;      // 메시지 타입

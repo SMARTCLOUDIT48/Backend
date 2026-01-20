@@ -2,173 +2,255 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>채팅방</title>
+    <title>Global Chat - Voice Toggle</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
-        /* 카카오톡 스타일 CSS */
-        body { background-color: #b2c7d9; font-family: 'Malgun Gothic', sans-serif; }
-        .chat-container { width: 400px; margin: 0 auto; background-color: #b2c7d9; padding: 20px; }
-        .message-box { list-style: none; padding: 0; margin: 0; }
+        /* --- 기본 스타일 (그대로 유지) --- */
+        body { background-color: #b2c7d9; font-family: 'Malgun Gothic', sans-serif; margin: 0; }
+        .chat-container { width: 100%; max-width: 500px; margin: 0 auto; background-color: #b2c7d9; height: 100vh; display: flex; flex-direction: column; }
+        .message-box { flex: 1; list-style: none; padding: 20px; margin: 0; overflow-y: auto; padding-bottom: 120px; }
+        .message-li { margin-bottom: 15px; display: flex; flex-direction: column; }
 
-        .message-li { margin-bottom: 10px; display: flex; flex-direction: column; }
-
-        /* 공통 말풍선 스타일 */
-        .bubble {
-            display: inline-block;
-            padding: 7px 10px;
-            border-radius: 10px;
-            max-width: 70%;
-            font-size: 14px;
-            position: relative;
-        }
-
-        /* 1. 내가 보낸 메시지 (오른쪽 + 노란색) */
+        .bubble { display: inline-block; padding: 8px 12px; border-radius: 10px; max-width: 75%; font-size: 14px; word-wrap: break-word; box-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
         .me { align-items: flex-end; }
         .me .bubble { background-color: #ffeb33; margin-left: 5px; }
-        .me .sender { display: none; } /* 내 이름은 안 보여줌 */
-
-        /* 2. 남이 보낸 메시지 (왼쪽 + 흰색) */
         .other { align-items: flex-start; }
-        .other .bubble { background-color: #ffffff; margin-right: 5px; }
-        .other .sender { font-size: 12px; margin-bottom: 3px; color: #555; }
-
-        /* 3. 입장/퇴장 메시지 (가운데 정렬) */
+        .other .bubble { background-color: #ffffff; margin-right: 5px; cursor: pointer; }
+        .other .sender { font-size: 12px; margin-bottom: 5px; color: #555; padding-left: 5px; }
         .center { align-items: center; }
-        .center .bubble { background-color: transparent; color: #555; font-size: 12px; }
+        .center .bubble { background-color: rgba(0,0,0,0.05); color: #555; font-size: 12px; padding: 4px 10px; border-radius: 20px; box-shadow: none; }
+        .time { font-size: 10px; color: #555; margin-left: 5px; vertical-align: bottom; }
 
-        /* 시간 표시 */
-        .time { font-size: 10px; color: #555; margin-top: 3px; }
+        .correction-bubble { background-color: #e3f2fd !important; border: 1px solid #90caf9; }
+        .correction-title { display: block; font-weight: bold; color: #1976d2; font-size: 12px; margin-bottom: 5px; }
 
-        /* 입력창 스타일 */
-        .input-area {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: white; padding: 10px; display: flex; justify-content: center;
+        /* --- 하단 영역 --- */
+        .bottom-area {
+            position: fixed; bottom: 0; width: 100%; max-width: 500px;
+            background: #ffffff; border-top: 1px solid #ddd;
+            display: flex; flex-direction: column;
         }
-        #msg { width: 300px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        #btn-send { padding: 10px 20px; background-color: #ffeb33; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;}
+
+        #preview-box {
+            display: none;
+            padding: 10px; background-color: #f9f9f9; border-bottom: 1px solid #eee;
+            align-items: center; justify-content: space-between;
+        }
+        #preview-player { width: 80%; height: 30px; }
+        #btn-cancel-voice {
+            background: #ff5252; color: white; border-radius: 50%; width: 25px; height: 25px;
+            display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer;
+        }
+
+        .input-wrapper { padding: 8px; display: flex; align-items: center; }
+        #msg { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; outline: none; }
+
+        .btn-group { display: flex; gap: 3px; margin-left: 5px; }
+        button { border: none; border-radius: 4px; padding: 0 10px; height: 38px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
+
+        #btn-grammar { background-color: #e1f5fe; color: #0277bd; border: 1px solid #b3e5fc; }
+        #btn-tone { background-color: #fce4ec; color: #c2185b; border: 1px solid #f8bbd0; }
+        #btn-send { background-color: #ffeb33; color: #333; padding: 0 15px; font-size: 14px; }
+
+        #btn-mic { background-color: #eee; color: #333; border: 1px solid #ccc; font-size: 16px; }
+        /* 녹음 중일 때 깜빡이는 효과 */
+        .recording { background-color: #ff3b30 !important; color: white !important; animation: pulse 1s infinite; border-radius: 10px; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="chat-container">
-    <h2>🚀 채팅방</h2>
-    <div style="margin-bottom: 10px;">
-        <button onclick="connect()">🔌 접속하기</button>
-        <button onclick="disconnect()">❌ 나가기</button>
+    <div style="padding: 10px; background: rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 16px;">🚀 글로벌 채팅 (Voice)</h3>
+        <div>
+            <button onclick="connect()" style="height:30px;">접속</button>
+            <button onclick="disconnect()" style="height:30px;">종료</button>
+        </div>
     </div>
-
     <ul id="messageList" class="message-box"></ul>
 </div>
 
-<div class="input-area">
-    <input type="text" id="msg" placeholder="메시지 입력" onkeypress="if(event.keyCode==13) sendMessage()">
-    <button id="btn-send" onclick="sendMessage()">전송</button>
+<div class="bottom-area">
+    <div id="preview-box">
+        <span style="font-size: 12px; color: #555; margin-right: 5px;">음성 대기중:</span>
+        <audio id="preview-player" controls></audio>
+        <div id="btn-cancel-voice" onclick="cancelVoice()" title="녹음 취소">X</div>
+    </div>
+
+    <div class="input-wrapper">
+        <input type="text" id="msg" placeholder="메시지 입력..." onkeypress="if(event.keyCode==13) sendMessage()">
+
+        <div class="btn-group">
+            <button id="btn-mic" onclick="toggleRecording()" title="클릭하여 녹음 시작/중료">🎤</button>
+
+            <button id="btn-grammar" onclick="checkGrammar()" title="문법 검사">📝</button>
+            <button id="btn-tone" onclick="checkTone()" title="호감도 검사">❤️</button>
+            <button id="btn-send" onclick="sendMessage()">전송</button>
+        </div>
+    </div>
 </div>
 
 <script>
     var stompClient = null;
     var currentRoomId = "1";
-
-    // ★ 테스트를 위해 내 ID를 '1'로 가정
-    // 실제 로그인 구현시에는 로그인한 유저의 ID를 여기에 넣어야 함
     var mySenderId = 1;
     var mySenderName = "팀장님";
+
+    // --- 녹음 관련 변수 ---
+    var mediaRecorder = null;
+    var audioChunks = [];
+    var currentVoiceBlob = null;
+    var isRecording = false; // ★ 녹음 상태 체크용 변수
 
     function connect() {
         var socket = new WebSocket('ws://localhost:8080/ws/chat');
         stompClient = Stomp.over(socket);
-
         stompClient.connect({}, function (frame) {
-            console.log('Connected: ' + frame);
-
-            // 1. 구독
             stompClient.subscribe('/sub/chat/room/' + currentRoomId, function (message) {
                 showUi(JSON.parse(message.body));
             });
-
-            // 2. 입장 알림
             stompClient.send("/pub/chat/message", {}, JSON.stringify({
-                type: 'ENTER',
-                roomId: currentRoomId,
-                sender: mySenderName,
-                senderId: mySenderId,
-                message: ''
+                type: 'ENTER', roomId: currentRoomId, sender: mySenderName, senderId: mySenderId, message: ''
             }));
-
-            // 3. 과거 내역 불러오기
             loadChatHistory();
         });
     }
 
+    // ★ [핵심] 토글 기능 구현
+    function toggleRecording() {
+        if (!isRecording) {
+            // 녹음 시작
+            startRecording();
+        } else {
+            // 녹음 중지 (저장 및 미리보기)
+            stopRecording();
+        }
+    }
+
+    function startRecording() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = e => {
+                    if(e.data.size > 0) audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    currentVoiceBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    var audioUrl = URL.createObjectURL(currentVoiceBlob);
+                    var player = document.getElementById("preview-player");
+                    player.src = audioUrl;
+
+                    document.getElementById("preview-box").style.display = "flex";
+                    document.getElementById("msg").placeholder = "음성 전송하려면 [전송] 클릭";
+                };
+
+                mediaRecorder.start();
+                isRecording = true; // 상태 변경
+                document.getElementById("btn-mic").classList.add("recording"); // 빨간불 켜기
+            })
+            .catch(err => {
+                console.error("마이크 에러:", err);
+                alert("마이크 사용 권한이 필요합니다.");
+            });
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+            isRecording = false; // 상태 변경
+            document.getElementById("btn-mic").classList.remove("recording"); // 빨간불 끄기
+        }
+    }
+
+    function cancelVoice() {
+        currentVoiceBlob = null;
+        document.getElementById("preview-box").style.display = "none";
+        document.getElementById("msg").placeholder = "메시지 입력...";
+        document.getElementById("preview-player").src = "";
+    }
+
     function sendMessage() {
-        var messageInput = document.getElementById("msg");
-        var messageContent = messageInput.value;
-
-        if (messageContent && stompClient) {
-            var chatMessage = {
-                roomId: currentRoomId,
-                sender: mySenderName,
-                senderId: mySenderId,
-                message: messageContent,
-                type: 'TALK'
-            };
-            stompClient.send("/pub/chat/message", {}, JSON.stringify(chatMessage));
-            messageInput.value = '';
+        if (currentVoiceBlob) {
+            uploadAndSendVoice();
+        } else {
+            var msgInput = document.getElementById("msg");
+            if (msgInput.value && stompClient) {
+                stompClient.send("/pub/chat/message", {}, JSON.stringify({
+                    type: 'TALK', roomId: currentRoomId, sender: mySenderName, senderId: mySenderId, message: msgInput.value
+                }));
+                msgInput.value = '';
+            }
         }
     }
 
-    function disconnect() {
-        if (stompClient !== null) {
-            stompClient.disconnect();
-        }
+    function uploadAndSendVoice() {
+        var formData = new FormData();
+        formData.append("file", currentVoiceBlob, "voice_msg.webm");
+
+        fetch("/api/file/upload", {
+            method: "POST", body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if(stompClient) {
+                    stompClient.send("/pub/chat/message", {}, JSON.stringify({
+                        type: 'VOICE', roomId: currentRoomId, sender: mySenderName, senderId: mySenderId, message: data.url
+                    }));
+                }
+                cancelVoice();
+            })
+            .catch(err => {
+                console.error(err);
+                alert("음성 전송 실패");
+            });
     }
 
-    // ★ UI 그리는 핵심 함수 (카톡 스타일 적용)
     function showUi(message) {
         var ul = document.getElementById("messageList");
         var li = document.createElement("li");
-
-        var type = message.type; // ENTER, TALK, QUIT
-        var senderId = message.senderId; // 보낸 사람 ID
+        var type = message.type;
+        var senderId = message.senderId;
         var content = message.message;
         var time = message.time ? message.time : "";
-        var senderName = message.sender;
 
-        // 1. 입장/퇴장 메시지 처리 (가운데 정렬)
         if (type === 'ENTER' || type === 'QUIT') {
             li.classList.add("message-li", "center");
             li.innerHTML = "<div class='bubble'>" + content + "</div>";
         }
-        // 2. 일반 대화 메시지
+        else if (type === 'VOICE') {
+            if (senderId == mySenderId) li.classList.add("message-li", "me");
+            else li.classList.add("message-li", "other");
+
+            var audioPlayer = "<audio controls src='" + content + "' style='height:30px; width:200px;'></audio>";
+
+            if(senderId == mySenderId) li.innerHTML = "<span class='time'>" + time + "</span><div class='bubble' style='padding:5px;'>" + audioPlayer + "</div>";
+            else li.innerHTML = "<div class='sender'>" + message.sender + "</div><div class='bubble' style='padding:5px;'>" + audioPlayer + "</div><span class='time'>" + time + "</span>";
+        }
+        else if (type === 'CORRECT') {
+            li.innerHTML = "<div class='bubble center'>[첨삭] " + content + "</div>";
+        }
         else {
-            // 내가 보낸 건지 남이 보낸 건지 확인
             if (senderId == mySenderId) {
                 li.classList.add("message-li", "me");
-                // 내 거는 이름 숨김, 시간 + 내용
-                li.innerHTML = "<div class='bubble'>" + content + " <span class='time'>" + time + "</span></div>";
+                li.innerHTML = "<span class='time'>" + time + "</span><div class='bubble'>" + content + "</div>";
             } else {
                 li.classList.add("message-li", "other");
-                // 남의 거는 이름 + 내용 + 시간
-                li.innerHTML = "<div class='sender'>" + senderName + "</div>" +
-                    "<div class='bubble'>" + content + " <span class='time'>" + time + "</span></div>";
+                li.innerHTML = "<div class='sender'>" + message.sender + "</div><div class='bubble' onclick='sendCorrection(\"" + content + "\")'>" + content + "</div><span class='time'>" + time + "</span>";
             }
         }
-
         ul.appendChild(li);
-
-        // 스크롤 맨 아래로 내리기
         window.scrollTo(0, document.body.scrollHeight);
     }
 
-    function loadChatHistory() {
-        fetch("/chat/history/" + currentRoomId)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(chat => {
-                    showUi(chat);
-                });
-            });
-    }
+    function checkGrammar() { alert("문법 검사 기능 구현 필요"); }
+    function checkTone() { alert("호감도 검사 기능 구현 필요"); }
+    function sendCorrection(orig) { console.log("첨삭 요청: " + orig); }
+    function disconnect() { if(stompClient) stompClient.disconnect(); }
+    function loadChatHistory() { fetch("/chat/history/" + currentRoomId).then(r=>r.json()).then(d=>d.forEach(c=>showUi(c))); }
 </script>
 </body>
 </html>
