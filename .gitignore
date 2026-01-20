@@ -38,3 +38,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Secret Keys ###
+secrets.properties

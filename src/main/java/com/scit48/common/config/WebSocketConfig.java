@@ -1,4 +1,4 @@
-package com.scit48.chat.config;
+package com.scit48.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
