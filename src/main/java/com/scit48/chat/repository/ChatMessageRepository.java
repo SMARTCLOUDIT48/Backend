@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
 	
-	
-	List<ChatMessage> findByRoomIdOrderByIdAsc(Long roomId);
+	// 수정 전: findByRoomIdOrderByIdAsc
+	// 수정 후: findByRoomIdOrderByMsgIdAsc (Id -> MsgId)
+	List<ChatMessage> findByRoomIdOrderByMsgIdAsc(Long roomId);
 }
