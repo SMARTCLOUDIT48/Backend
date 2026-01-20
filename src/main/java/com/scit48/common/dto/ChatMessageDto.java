@@ -1,4 +1,4 @@
-package com.scit48.chat.dto;
+package com.scit48.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
