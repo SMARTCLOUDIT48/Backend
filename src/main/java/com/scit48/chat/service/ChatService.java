@@ -1,6 +1,6 @@
 package com.scit48.chat.service;
 
-import com.scit48.common.domain.ChatMessage;
+import com.scit48.chat.domain.ChatMessage;
 import com.scit48.common.dto.ChatMessageDto;
 import com.scit48.chat.repository.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
