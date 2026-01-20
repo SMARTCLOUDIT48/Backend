@@ -2,69 +2,172 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>채팅 테스트</title>
+    <title>채팅방</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        /* 카카오톡 스타일 CSS */
+        body { background-color: #b2c7d9; font-family: 'Malgun Gothic', sans-serif; }
+        .chat-container { width: 400px; margin: 0 auto; background-color: #b2c7d9; padding: 20px; }
+        .message-box { list-style: none; padding: 0; margin: 0; }
+
+        .message-li { margin-bottom: 10px; display: flex; flex-direction: column; }
+
+        /* 공통 말풍선 스타일 */
+        .bubble {
+            display: inline-block;
+            padding: 7px 10px;
+            border-radius: 10px;
+            max-width: 70%;
+            font-size: 14px;
+            position: relative;
+        }
+
+        /* 1. 내가 보낸 메시지 (오른쪽 + 노란색) */
+        .me { align-items: flex-end; }
+        .me .bubble { background-color: #ffeb33; margin-left: 5px; }
+        .me .sender { display: none; } /* 내 이름은 안 보여줌 */
+
+        /* 2. 남이 보낸 메시지 (왼쪽 + 흰색) */
+        .other { align-items: flex-start; }
+        .other .bubble { background-color: #ffffff; margin-right: 5px; }
+        .other .sender { font-size: 12px; margin-bottom: 3px; color: #555; }
+
+        /* 3. 입장/퇴장 메시지 (가운데 정렬) */
+        .center { align-items: center; }
+        .center .bubble { background-color: transparent; color: #555; font-size: 12px; }
+
+        /* 시간 표시 */
+        .time { font-size: 10px; color: #555; margin-top: 3px; }
+
+        /* 입력창 스타일 */
+        .input-area {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; padding: 10px; display: flex; justify-content: center;
+        }
+        #msg { width: 300px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        #btn-send { padding: 10px 20px; background-color: #ffeb33; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;}
+    </style>
 </head>
 <body>
-<h2>🚀 채팅방 연결 테스트</h2>
-<button onclick="connect()">연결하기</button>
-<button onclick="disconnect()">연결끊기</button>
-<hr>
-<div>
-    <input type="text" id="msg" placeholder="메시지 입력">
-    <button onclick="sendMessage()">보내기</button>
+
+<div class="chat-container">
+    <h2>🚀 채팅방</h2>
+    <div style="margin-bottom: 10px;">
+        <button onclick="connect()">🔌 접속하기</button>
+        <button onclick="disconnect()">❌ 나가기</button>
+    </div>
+
+    <ul id="messageList" class="message-box"></ul>
 </div>
-<ul id="messageList"></ul>
+
+<div class="input-area">
+    <input type="text" id="msg" placeholder="메시지 입력" onkeypress="if(event.keyCode==13) sendMessage()">
+    <button id="btn-send" onclick="sendMessage()">전송</button>
+</div>
 
 <script>
     var stompClient = null;
+    var currentRoomId = "1";
+
+    // ★ 테스트를 위해 내 ID를 '1'로 가정
+    // 실제 로그인 구현시에는 로그인한 유저의 ID를 여기에 넣어야 함
+    var mySenderId = 1;
+    var mySenderName = "팀장님";
 
     function connect() {
-        // SockJS 없이 쌩 WebSocket으로 연결 (팀장님 설정에 맞춤)
         var socket = new WebSocket('ws://localhost:8080/ws/chat');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            alert("✅ 연결 성공!");
 
-            // 구독(Subscribe) - 방 번호 1번이라고 가정
-            stompClient.subscribe('/sub/chat/room/1', function (message) {
+            // 1. 구독
+            stompClient.subscribe('/sub/chat/room/' + currentRoomId, function (message) {
                 showUi(JSON.parse(message.body));
             });
 
-            // 입장 메시지 전송
+            // 2. 입장 알림
             stompClient.send("/pub/chat/message", {}, JSON.stringify({
                 type: 'ENTER',
-                roomId: '1',
-                sender: '팀장님',
+                roomId: currentRoomId,
+                sender: mySenderName,
+                senderId: mySenderId,
                 message: ''
             }));
+
+            // 3. 과거 내역 불러오기
+            loadChatHistory();
         });
     }
 
     function sendMessage() {
-        var msgContent = document.getElementById('msg').value;
-        stompClient.send("/pub/chat/message", {}, JSON.stringify({
-            type: 'TALK',
-            roomId: '1',
-            sender: '팀장님',
-            message: msgContent
-        }));
+        var messageInput = document.getElementById("msg");
+        var messageContent = messageInput.value;
+
+        if (messageContent && stompClient) {
+            var chatMessage = {
+                roomId: currentRoomId,
+                sender: mySenderName,
+                senderId: mySenderId,
+                message: messageContent,
+                type: 'TALK'
+            };
+            stompClient.send("/pub/chat/message", {}, JSON.stringify(chatMessage));
+            messageInput.value = '';
+        }
     }
 
     function disconnect() {
         if (stompClient !== null) {
             stompClient.disconnect();
         }
-        console.log("Disconnected");
     }
 
+    // ★ UI 그리는 핵심 함수 (카톡 스타일 적용)
     function showUi(message) {
         var ul = document.getElementById("messageList");
         var li = document.createElement("li");
-        li.appendChild(document.createTextNode(message.sender + ": " + message.message));
+
+        var type = message.type; // ENTER, TALK, QUIT
+        var senderId = message.senderId; // 보낸 사람 ID
+        var content = message.message;
+        var time = message.time ? message.time : "";
+        var senderName = message.sender;
+
+        // 1. 입장/퇴장 메시지 처리 (가운데 정렬)
+        if (type === 'ENTER' || type === 'QUIT') {
+            li.classList.add("message-li", "center");
+            li.innerHTML = "<div class='bubble'>" + content + "</div>";
+        }
+        // 2. 일반 대화 메시지
+        else {
+            // 내가 보낸 건지 남이 보낸 건지 확인
+            if (senderId == mySenderId) {
+                li.classList.add("message-li", "me");
+                // 내 거는 이름 숨김, 시간 + 내용
+                li.innerHTML = "<div class='bubble'>" + content + " <span class='time'>" + time + "</span></div>";
+            } else {
+                li.classList.add("message-li", "other");
+                // 남의 거는 이름 + 내용 + 시간
+                li.innerHTML = "<div class='sender'>" + senderName + "</div>" +
+                    "<div class='bubble'>" + content + " <span class='time'>" + time + "</span></div>";
+            }
+        }
+
         ul.appendChild(li);
+
+        // 스크롤 맨 아래로 내리기
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function loadChatHistory() {
+        fetch("/chat/history/" + currentRoomId)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(chat => {
+                    showUi(chat);
+                });
+            });
     }
 </script>
 </body>
