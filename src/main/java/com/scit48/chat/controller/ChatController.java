@@ -1,6 +1,6 @@
 package com.scit48.chat.controller;
 
-import com.scit48.chat.dto.ChatMessageDto;
+import com.scit48.common.dto.ChatMessageDto;
 import com.scit48.chat.service.ChatService;
 import com.scit48.chat.service.RedisService;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.scit48.chat.repository;
 
-import com.scit48.chat.domain.ChatMessage;
+import com.scit48.common.domain.ChatMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
