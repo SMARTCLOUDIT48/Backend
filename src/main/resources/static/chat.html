@@ -7,171 +7,64 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
     <style>
-        /* --- 1. 전체 레이아웃 (좌우 분할) --- */
-        body {
-            background-color: #f4f6f9;
-            font-family: 'Malgun Gothic', sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .app-container {
-            width: 1200px; /* 전체 너비 */
-            height: 90vh;  /* 전체 높이 */
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            display: flex;
-            overflow: hidden; /* 둥근 모서리 유지 */
-        }
-
-        /* --- 2. 왼쪽 사이드바 (채팅방 목록) --- */
-        .sidebar {
-            width: 350px;
-            background-color: #f8f9fa;
-            border-right: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            font-weight: bold;
-            font-size: 18px;
-            border-bottom: 1px solid #eee;
-            color: #333;
-        }
-
-        .room-list {
-            flex: 1;
-            overflow-y: auto;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .room-item {
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            border-bottom: 1px solid #f1f1f1;
-            transition: 0.2s;
-        }
+        /* --- CSS 스타일 (기존과 동일) --- */
+        body { background-color: #f4f6f9; font-family: 'Malgun Gothic', sans-serif; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .app-container { width: 1200px; height: 90vh; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; overflow: hidden; }
+        .sidebar { width: 350px; background-color: #f8f9fa; border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; font-weight: bold; font-size: 18px; border-bottom: 1px solid #eee; color: #333; }
+        .room-list { flex: 1; overflow-y: auto; list-style: none; padding: 0; margin: 0; }
+        .room-item { padding: 15px 20px; display: flex; align-items: center; cursor: pointer; border-bottom: 1px solid #f1f1f1; transition: 0.2s; }
         .room-item:hover { background-color: #fff; }
         .room-item.active { background-color: #e3f2fd; border-left: 4px solid #1976d2; }
-
-        .room-avatar {
-            width: 45px; height: 45px;
-            border-radius: 50%; background: #ddd;
-            margin-right: 15px; display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-        }
+        .room-avatar { width: 45px; height: 45px; border-radius: 50%; background: #ddd; margin-right: 15px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
         .room-info { flex: 1; }
         .room-name { font-weight: bold; font-size: 14px; margin-bottom: 5px; color: #333; }
-        .room-last-msg { font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
-
-        /* --- 3. 오른쪽 메인 채팅 영역 --- */
-        .chat-area {
-            flex: 1; /* 남은 공간 다 차지 */
-            display: flex;
-            flex-direction: column;
-            background-color: #fff;
-        }
-
-        .chat-header {
-            padding: 15px 25px;
-            border-bottom: 1px solid #eee;
-            display: flex; justify-content: space-between; align-items: center;
-            height: 50px;
-        }
+        .room-last-msg { font-size: 12px; color: #888; }
+        .chat-area { flex: 1; display: flex; flex-direction: column; background-color: #fff; position: relative; } /* position: relative 추가 */
+        .chat-header { padding: 15px 25px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; height: 50px; }
         .chat-title { font-size: 16px; font-weight: bold; }
         .chat-status { font-size: 12px; color: #666; }
-
-        .message-box {
-            flex: 1; /* 높이 유연하게 */
-            padding: 20px;
-            overflow-y: auto;
-            background-color: #fdfdfd;
-            list-style: none; margin: 0;
-        }
-
-        /* 말풍선 스타일 (기존 유지 + 다듬기) */
+        .message-box { flex: 1; padding: 20px; overflow-y: auto; background-color: #fdfdfd; list-style: none; margin: 0; }
         .message-li { margin-bottom: 15px; display: flex; flex-direction: column; }
         .bubble { display: inline-block; padding: 10px 14px; border-radius: 12px; max-width: 70%; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
-
-        .me { align-items: flex-end; }
-        .me .bubble { background-color: #ffeb33; margin-left: 5px; border-top-right-radius: 0; }
-
-        .other { align-items: flex-start; }
-        .other .bubble { background-color: #f1f3f5; margin-right: 5px; border-top-left-radius: 0; }
+        .me { align-items: flex-end; } .me .bubble { background-color: #ffeb33; margin-left: 5px; border-top-right-radius: 0; }
+        .other { align-items: flex-start; } .other .bubble { background-color: #f1f3f5; margin-right: 5px; border-top-left-radius: 0; }
         .sender { font-size: 12px; margin-bottom: 5px; color: #666; padding-left: 5px; }
-
-        .center { align-items: center; }
-        .center .bubble { background-color: rgba(0,0,0,0.05); color: #555; font-size: 12px; border-radius: 20px; }
-
-        /* --- 4. 입력창 영역 (고정 아님, Flex 내부 배치) --- */
-        .input-area {
-            padding: 20px;
-            border-top: 1px solid #eee;
-            background: #fff;
-        }
-
-        /* 녹음 미리보기 */
-        #preview-box {
-            display: none; padding: 10px; margin-bottom: 10px;
-            background: #f8f9fa; border-radius: 8px; border: 1px solid #eee;
-            align-items: center; justify-content: space-between;
-        }
-
+        .center { align-items: center; } .center .bubble { background-color: rgba(0,0,0,0.05); color: #555; font-size: 12px; border-radius: 20px; }
+        .input-area { padding: 20px; border-top: 1px solid #eee; background: #fff; }
+        #preview-box { display: none; padding: 10px; margin-bottom: 10px; background: #f8f9fa; border-radius: 8px; border: 1px solid #eee; align-items: center; justify-content: space-between; }
         .input-wrapper { display: flex; gap: 10px; align-items: center; }
-        #msg {
-            flex: 1; padding: 12px;
-            border: 1px solid #ddd; border-radius: 8px;
-            outline: none; background: #f8f9fa; transition: 0.2s;
-        }
+        #msg { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; background: #f8f9fa; }
         #msg:focus { border-color: #1976d2; background: #fff; }
-
         .btn-group { display: flex; gap: 5px; }
-        button {
-            border: none; border-radius: 8px;
-            width: 40px; height: 40px;
-            cursor: pointer; font-size: 16px;
-            transition: 0.2s; display: flex; align-items: center; justify-content: center;
-        }
-
-        #btn-mic { background: #f1f3f5; color: #555; }
-        #btn-grammar { background: #e3f2fd; color: #1976d2; }
-        #btn-tone { background: #fce4ec; color: #d81b60; }
+        button { border: none; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
         #btn-send { background: #ffeb33; color: #333; width: 60px; font-weight: bold; font-size: 14px; }
-
-        /* 녹음 중 애니메이션 */
         .recording { background-color: #ff3b30 !important; color: white !important; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
-        /* AI 첨삭 스타일 */
-        .correction-bubble { background: #e3f2fd !important; border: 1px solid #90caf9; width: 80%; }
-        .correction-btn { width: 100%; margin-top: 5px; padding: 5px; background: white; border: 1px solid #90caf9; color: #1565c0; border-radius: 4px; cursor: pointer; }
-
+        /* ✨ AI 모달창 스타일 추가 ✨ */
+        .ai-modal { display: none; position: absolute; bottom: 80px; left: 20px; right: 20px; background: white; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); padding: 20px; z-index: 100; }
+        .ai-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .ai-title { font-weight: bold; font-size: 16px; color: #1976d2; }
+        .ai-close { cursor: pointer; font-weight: bold; color: #999; }
+        .ai-result-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        .ai-corrected { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .ai-tabs { display: flex; gap: 10px; margin-bottom: 10px; }
+        .ai-tab { padding: 5px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; border: 1px solid #ddd; background: white; }
+        .ai-tab.active { background: #1976d2; color: white; border-color: #1976d2; }
+        .ai-explanation { font-size: 14px; line-height: 1.5; color: #555; }
+        #btn-ai { background: #e3f2fd; color: #1976d2; width: 40px; } /* AI 버튼 스타일 */
     </style>
 </head>
 <body>
 
 <div class="app-container">
-
     <div class="sidebar">
-        <div class="sidebar-header">
-            채팅 목록 💬
-        </div>
-        <ul class="room-list" id="roomListArea">
-        </ul>
+        <div class="sidebar-header">채팅 목록 💬</div>
+        <ul class="room-list" id="roomListArea"></ul>
     </div>
 
     <div class="chat-area">
-
         <div class="chat-header">
             <div class="chat-title" id="roomTitle">채팅방을 선택해주세요</div>
             <div class="chat-status" id="connectionStatus">🔴 연결 안됨</div>
@@ -181,87 +74,96 @@
             <li class="message-li center"><div class="bubble">왼쪽 목록에서 채팅방을 선택하세요.</div></li>
         </ul>
 
+        <div id="aiModal" class="ai-modal">
+            <div class="ai-header">
+                <div class="ai-title">🤖 AI 문법 선생님</div>
+                <div class="ai-close" onclick="closeAiModal()">X</div>
+            </div>
+            <div class="ai-result-box">
+                <div class="ai-corrected" id="aiCorrectedText">Checking...</div>
+            </div>
+            <div class="ai-tabs">
+                <div class="ai-tab active" id="tabKr" onclick="switchTab('kr')">🇰🇷 한국어 설명</div>
+                <div class="ai-tab" id="tabJp" onclick="switchTab('jp')">🇯🇵 日本語 説明</div>
+            </div>
+            <div class="ai-explanation" id="aiExplanationText">잠시만 기다려주세요...</div>
+
+            <button onclick="applyCorrection()" style="width:100%; margin-top:10px; background:#333; color:white; height:35px; font-size:13px;">입력창에 적용하기</button>
+        </div>
+
         <div class="input-area">
             <div id="preview-box">
                 <audio id="preview-player" controls style="height:30px; flex:1; margin-right:10px;"></audio>
-                <button onclick="cancelVoice()" style="width:30px; height:30px; background:#ff5252; color:white; font-size:12px;">X</button>
+                <button onclick="cancelVoice()" style="width:30px; height:30px; background:#ff5252; color:white;">X</button>
             </div>
-
             <div class="input-wrapper">
                 <input type="text" id="msg" placeholder="메시지를 입력하세요..." onkeypress="if(event.keyCode==13) sendMessage()">
-
                 <div class="btn-group">
+                    <button id="btn-ai" onclick="checkGrammar()" title="문법 검사">🤖</button>
                     <button id="btn-mic" onclick="toggleRecording()" title="음성 녹음">🎤</button>
-                    <button id="btn-grammar" onclick="checkGrammar()" title="문법 검사">📝</button>
-                    <button id="btn-tone" onclick="checkTone()" title="감정 분석">❤️</button>
                     <button id="btn-send" onclick="sendMessage()">전송</button>
                 </div>
             </div>
         </div>
     </div>
-
 </div>
 
 <script>
-    // --- 1. 가짜 데이터 (나중에는 DB에서 불러와야 함) ---
-    const myChatRooms = [
-        // id를 "room1" (문자) -> 1 (숫자)로 변경!
-        { id: 1, name: "드라마친구 🍿", lastMsg: "스토너 드라마 있어요?", avatar: "🎬" },
-        { id: 2, name: "Alex (English) 🇺🇸", lastMsg: "How are you doing?", avatar: "🇺🇸" },
-        { id: 3, name: "개발자 모임 💻", lastMsg: "서버 배포 완료했습니다.", avatar: "💻" }
-    ];
-    // --- 2. 전역 변수 ---
+    // --- 1. 전역 변수 설정 ---
     var stompClient = null;
     var currentRoomId = null;
-    var mySenderId = 1;
-    var mySenderName = "팀장님";
-    var subscription = null; // 현재 구독 정보 저장 (방 옮길 때 끊기 위해)
+    var mySenderId = 1;     // 임시 ID (실제론 로그인 세션에서 가져와야 함)
+    var mySenderName = "팀장님"; // 임시 이름
+    var subscription = null;
 
-    // --- 3. 초기화 (화면 로드시 목록 그리기) ---
-    window.onload = function() {
-        renderRoomList();
-    };
+    // ✨ AI 데이터 저장용 변수
+    var aiData = {};
 
-    function renderRoomList() {
-        var listArea = document.getElementById("roomListArea");
-        listArea.innerHTML = ""; // 초기화
+    // --- 2. 페이지 로드 시 실행 ---
+    document.addEventListener('DOMContentLoaded', () => {
+        loadChatRooms(); // 방 목록 불러오기
+    });
 
-        myChatRooms.forEach(room => {
-            var li = document.createElement("li");
-            li.className = "room-item";
-            li.onclick = function() { enterRoom(room.id, room.name); }; // 클릭 이벤트
-            li.innerHTML = `
-                <div class="room-avatar">${room.avatar}</div>
-                <div class="room-info">
-                    <div class="room-name">${room.name}</div>
-                    <div class="room-last-msg">${room.lastMsg}</div>
-                </div>
-            `;
-            listArea.appendChild(li);
-        });
+    // --- 3. 채팅방 목록 가져오기 ---
+    function loadChatRooms() {
+        fetch('/api/chat/rooms') // RoomController의 경로
+            .then(res => res.json())
+            .then(rooms => {
+                const listArea = document.getElementById("roomListArea");
+                listArea.innerHTML = "";
+                rooms.forEach(room => {
+                    const li = document.createElement("li");
+                    li.className = "room-item";
+                    li.onclick = () => enterRoom(room.id, room.name, li); // 클릭 이벤트 연결
+                    li.innerHTML = `
+                        <div class="room-avatar">💬</div>
+                        <div class="room-info">
+                            <div class="room-name">${room.name}</div>
+                            <div class="room-last-msg">ID: ${room.id}</div>
+                        </div>`;
+                    listArea.appendChild(li);
+                });
+            });
     }
 
-    // --- 4. 방 입장 (클릭 시 실행) ---
-    function enterRoom(roomId, roomName) {
-        if (currentRoomId === roomId) return; // 이미 들어온 방이면 무시
+    // --- 4. 방 입장 및 소켓 연결 ---
+    function enterRoom(roomId, roomName, element) {
+        if (currentRoomId === roomId) return;
 
         currentRoomId = roomId;
         document.getElementById("roomTitle").innerText = roomName;
-        document.getElementById("messageList").innerHTML = ""; // 이전 메시지 청소
+        document.getElementById("messageList").innerHTML = ""; // 화면 초기화
 
-        // UI 활성화 표시
-        var items = document.querySelectorAll(".room-item");
-        items.forEach(item => item.classList.remove("active"));
-        event.currentTarget.classList.add("active");
+        // UI 활성화 효과
+        document.querySelectorAll(".room-item").forEach(item => item.classList.remove("active"));
+        if(element) element.classList.add("active");
 
-        connect(roomId); // 소켓 연결 시도
+        connect(roomId); // 소켓 연결 시작
     }
 
-    // --- 5. 소켓 연결 ---
     function connect(roomId) {
-        // 이미 연결되어 있다면 기존 구독 해제 후 재구독
+        // 이미 연결된 상태라면 구독만 변경
         if (stompClient && stompClient.connected) {
-            if (subscription) subscription.unsubscribe(); // 기존 방 구독 취소
             subscribeToRoom(roomId);
             return;
         }
@@ -276,75 +178,129 @@
     }
 
     function subscribeToRoom(roomId) {
-        // 구독하고 결과를 변수에 저장 (나중에 해제할 수 있게)
+        // 이전 방 구독 해제 (중복 수신 방지)
+        if (subscription) {
+            subscription.unsubscribe();
+        }
+
+        // 새 방 구독
         subscription = stompClient.subscribe('/sub/chat/room/' + roomId, function (message) {
             showUi(JSON.parse(message.body));
         });
 
-        // 입장 메시지 전송 (선택사항)
-        // stompClient.send("/pub/chat/message", {}, JSON.stringify({
-        //     type: 'ENTER', roomId: roomId, sender: mySenderName, senderId: mySenderId, message: ''
-        // }));
-
-        // DB에서 이전 대화 불러오기 (API 구현되어 있다면)
+        // ⭐ 중요: 입장하자마자 이전 대화 내역 불러오기
         loadChatHistory(roomId);
     }
 
-    // --- UI 렌더링 함수 ---
+    // --- 5. 이전 대화 내역 불러오기 ---
+    function loadChatHistory(roomId) {
+        fetch('/chat/history/' + roomId)
+            .then(res => {
+                if (!res.ok) throw new Error("Load failed");
+                return res.json();
+            })
+            .then(messages => {
+                const ul = document.getElementById("messageList");
+                ul.innerHTML = ""; // 로딩 전 초기화
+
+                if (messages.length > 0) {
+                    messages.forEach(msg => {
+                        showUi({
+                            type: msg.type,
+                            sender: msg.sender,
+                            senderId: msg.senderId,
+                            message: msg.message // DTO 필드명 매칭
+                        });
+                    });
+                    showSystemMessage("--- 이전 대화 내역을 불러왔습니다 ---");
+                } else {
+                    showSystemMessage("이전 대화 내역이 없습니다.");
+                }
+            })
+            .catch(err => console.error(err));
+    }
+
+    // --- 6. 화면에 메시지 그리기 ---
     function showUi(message) {
         var ul = document.getElementById("messageList");
         var li = document.createElement("li");
-        var type = message.type;
-        var senderId = message.senderId;
-        var content = message.message;
 
-        if (type === 'VOICE') {
-            li.className = (senderId == mySenderId) ? "message-li me" : "message-li other";
-            var audioPlayer = `<audio controls src="${content}" style="height:30px; width:220px;"></audio>`;
-            li.innerHTML = `<div class="sender">${message.sender}</div><div class="bubble" style="padding:5px;">${audioPlayer}</div>`;
+        var isMe = (message.senderId == mySenderId);
+        li.className = isMe ? "message-li me" : "message-li other";
+
+        if (message.type === 'VOICE') {
+            li.innerHTML = `<div class="sender">${message.sender}</div>
+                            <div class="bubble" style="padding:5px;">
+                                <audio controls src="${message.message}" style="height:30px; width:220px;"></audio>
+                            </div>`;
+        } else {
+            li.innerHTML = `<div class="sender">${message.sender}</div>
+                            <div class="bubble">${message.message}</div>`;
         }
-        else if (type === 'CORRECT') {
-            // ... (기존 AI 로직)
-        }
-        else { // 일반 텍스트
-            li.className = (senderId == mySenderId) ? "message-li me" : "message-li other";
-            li.innerHTML = `<div class="sender">${message.sender}</div><div class="bubble">${content}</div>`;
-        }
+
         ul.appendChild(li);
-        ul.scrollTop = ul.scrollHeight; // 스크롤 하단 이동
+        ul.scrollTop = ul.scrollHeight;
     }
 
-    // --- 기타 기능 (녹음, AI 등 기존 로직 유지) ---
+    function showSystemMessage(text) {
+        var ul = document.getElementById("messageList");
+        var li = document.createElement("li");
+        li.className = "message-li center";
+        li.innerHTML = `<div class="bubble">${text}</div>`;
+        ul.appendChild(li);
+        ul.scrollTop = ul.scrollHeight;
+    }
+
+    // --- 7. 메시지 전송 로직 ---
+    function sendMessage() {
+        if (!currentRoomId) { alert("방을 선택해주세요!"); return; }
+
+        // 음성 메시지 처리
+        if (currentVoiceBlob) {
+            uploadAndSendVoice();
+            return;
+        }
+
+        // 텍스트 메시지 처리
+        var msgInput = document.getElementById("msg");
+        if (msgInput.value && stompClient) {
+            stompClient.send("/pub/chat/message", {}, JSON.stringify({
+                type: 'TALK',
+                roomId: currentRoomId,
+                sender: mySenderName,
+                senderId: mySenderId,
+                message: msgInput.value
+            }));
+            msgInput.value = '';
+        }
+    }
+
+    // --- 8. 녹음 기능 (간소화) ---
     var mediaRecorder = null;
     var audioChunks = [];
     var currentVoiceBlob = null;
     var isRecording = false;
 
     function toggleRecording() {
-        if (!isRecording) startRecording();
-        else stopRecording();
-    }
-
-    function startRecording() {
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-            mediaRecorder = new MediaRecorder(stream);
-            audioChunks = [];
-            mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
-            mediaRecorder.onstop = () => {
-                currentVoiceBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                document.getElementById("preview-player").src = URL.createObjectURL(currentVoiceBlob);
-                document.getElementById("preview-box").style.display = "flex";
-            };
-            mediaRecorder.start();
-            isRecording = true;
-            document.getElementById("btn-mic").classList.add("recording");
-        });
-    }
-
-    function stopRecording() {
-        if(mediaRecorder) mediaRecorder.stop();
-        isRecording = false;
-        document.getElementById("btn-mic").classList.remove("recording");
+        if (!isRecording) {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    currentVoiceBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    document.getElementById("preview-player").src = URL.createObjectURL(currentVoiceBlob);
+                    document.getElementById("preview-box").style.display = "flex";
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                document.getElementById("btn-mic").classList.add("recording");
+            });
+        } else {
+            mediaRecorder.stop();
+            isRecording = false;
+            document.getElementById("btn-mic").classList.remove("recording");
+        }
     }
 
     function cancelVoice() {
@@ -352,25 +308,10 @@
         document.getElementById("preview-box").style.display = "none";
     }
 
-    function sendMessage() {
-        if (!currentRoomId) { alert("채팅방을 먼저 선택해주세요!"); return; }
-
-        if (currentVoiceBlob) {
-            uploadAndSendVoice();
-        } else {
-            var msgInput = document.getElementById("msg");
-            if (msgInput.value && stompClient) {
-                stompClient.send("/pub/chat/message", {}, JSON.stringify({
-                    type: 'TALK', roomId: currentRoomId, sender: mySenderName, senderId: mySenderId, message: msgInput.value
-                }));
-                msgInput.value = '';
-            }
-        }
-    }
-
     function uploadAndSendVoice() {
         var formData = new FormData();
         formData.append("file", currentVoiceBlob, "voice.webm");
+
         fetch("/api/file/upload", { method: "POST", body: formData })
             .then(r => r.json())
             .then(data => {
@@ -381,40 +322,75 @@
             });
     }
 
+    // ==========================================================
+    // ✨✨✨ 9. AI 문법 검사 기능 (여기가 핵심입니다!) ✨✨✨
+    // ==========================================================
+
     function checkGrammar() {
-        var text = document.getElementById("msg").value;
-        if(!text) return alert("내용을 입력하세요");
+        var msgInput = document.getElementById("msg");
+        var text = msgInput.value.trim();
 
-        var btn = document.getElementById("btn-grammar");
-        btn.innerText = "⏳";
+        if (!text) {
+            alert("검사할 내용을 입력해주세요!");
+            return;
+        }
 
-        fetch("/api/bot/grammar", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: text })
-        }).then(r => r.json()).then(data => {
-            var ul = document.getElementById("messageList");
-            var li = document.createElement("li");
-            li.className = "message-li center";
-            li.innerHTML = `
-                <div class="bubble correction-bubble">
-                    <b>🤖 AI 선생님</b><br>
-                    <s>${data.original}</s><br>
-                    <b style="color:blue">➡️ ${data.corrected}</b><br>
-                    <small>${data.explanation}</small>
-                    <button class="correction-btn" onclick="document.getElementById('msg').value='${data.corrected}'">적용하기</button>
-                </div>
-            `;
-            ul.appendChild(li);
-            ul.scrollTop = ul.scrollHeight;
-            btn.innerText = "📝";
-        });
+        // 모달창 열고 로딩 표시
+        document.getElementById("aiModal").style.display = 'block';
+        document.getElementById("aiCorrectedText").innerText = "AI가 생각 중입니다... 🧠";
+        document.getElementById("aiExplanationText").innerText = "";
+
+        // API 호출
+        fetch('/api/ai/grammar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ "message": text })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("AI 결과:", data);
+                aiData = data; // 결과 저장 (탭 전환용)
+
+                // 결과 화면에 뿌리기
+                document.getElementById("aiCorrectedText").innerText = data.corrected;
+
+                // 기본은 한국어 탭 활성화
+                switchTab('kr');
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById("aiCorrectedText").innerText = "오류가 발생했습니다.";
+                document.getElementById("aiExplanationText").innerText = "서버 연결을 확인해주세요.";
+            });
     }
 
-    function checkTone() { alert("호감도 기능 준비중"); }
-    function loadChatHistory(rid) {
-        // fetch("/chat/history/" + rid).then... (구현 필요)
+    function switchTab(lang) {
+        // 데이터가 없으면 무시
+        if (!aiData.corrected) return;
+
+        // 탭 스타일 변경
+        document.getElementById("tabKr").className = (lang === 'kr') ? "ai-tab active" : "ai-tab";
+        document.getElementById("tabJp").className = (lang === 'jp') ? "ai-tab active" : "ai-tab";
+
+        // 내용 변경 (저장해둔 데이터에서 꺼내오기)
+        var explanationDiv = document.getElementById("aiExplanationText");
+        if (lang === 'kr') {
+            explanationDiv.innerText = aiData.explanation_kr || "설명이 없습니다.";
+        } else {
+            explanationDiv.innerText = aiData.explanation_jp || "説明がありません。";
+        }
     }
 
+    function closeAiModal() {
+        document.getElementById("aiModal").style.display = 'none';
+    }
+
+    function applyCorrection() {
+        if (aiData.corrected) {
+            document.getElementById("msg").value = aiData.corrected;
+            closeAiModal();
+        }
+    }
 </script>
 </body>
 </html>
