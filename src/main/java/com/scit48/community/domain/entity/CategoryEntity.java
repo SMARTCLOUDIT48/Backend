@@ -19,7 +19,5 @@ public class CategoryEntity {
 	@Column(nullable = false, unique = true)
 	private String name; // 예: "Q&A", "RECRUIT" 등
 	
-	public CategoryEntity(String name) {
-		this.name = name;
-	}
+	
 }
