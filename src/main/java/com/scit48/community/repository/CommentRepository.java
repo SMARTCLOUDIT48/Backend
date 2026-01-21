@@ -10,4 +10,5 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
 	// 특정 게시글의 모든 댓글 조회 (오래된 순/최신 순)
 	List<CommentEntity> findAllByBoardIdOrderByCreatedAtAsc(Long boardId);
 	
+	
 }

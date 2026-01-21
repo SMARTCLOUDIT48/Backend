@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class BoardEntity {
 	private String filePath;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "member_id")
+	@JoinColumn(name = "user_id")
 	private UserEntity user; // 작성자
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -43,10 +44,20 @@ public class BoardEntity {
 	private CategoryEntity category; // 카테고리
 	
 	@OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
-	private List<CategoryEntity> comments = new ArrayList<>();
+	private List<CommentEntity> comments = new ArrayList<>();
 	
 	@OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
 	private List<LikeEntity> likes = new ArrayList<>();
 	
 	// 생성자, 빌더 등 추가 구현
+	
+	// 1. 필드 직접 추가
+	private LocalDateTime createdAt;
+	
+	// 2. 저장 전 자동으로 현재 시간을 세팅하는 메소드
+	@PrePersist
+	public void prePersist() {
+		this.createdAt = LocalDateTime.now();
+		
+	}
 }
