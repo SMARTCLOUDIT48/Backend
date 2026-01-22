@@ -49,6 +49,12 @@ public class UserEntity {
 	@ColumnDefault("36.5")
 	private BigDecimal manner;
 	
+	@Column(name = "native_language")
+	private String nativeLanguage;
+	
+	@Column(name = "level_language")
+	private String levelLanguage;
+	
 	@Column(name = "profile_image_name")
 	private String profileImageName;
 	
@@ -63,6 +69,7 @@ public class UserEntity {
 	@Builder
 	public UserEntity(String email, String password, String nickname, Gender gender,
 					  String intro, Integer age, String nation, BigDecimal manner,
+					  String nativeLanguage, String levelLanguage,
 					  String profileImageName, String profileImagePath) {
 		this.email = email;
 		this.password = password;
@@ -71,6 +78,8 @@ public class UserEntity {
 		this.intro = intro;
 		this.age = age;
 		this.nation = nation;
+		this.nativeLanguage = nativeLanguage;
+		this.levelLanguage = levelLanguage;
 		
 		// manner 값이 입력되지 않았다면(null) 기본값 36.5를 할당
 		this.manner = (manner != null) ? manner : BigDecimal.valueOf(36.5);
