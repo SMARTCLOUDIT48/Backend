@@ -1,11 +1,11 @@
-package com.scit48.common.dto;
+package com.scit48.recommend.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.scit48.common.enums.Gender;
 import com.scit48.common.domain.entity.UserEntity;
+import com.scit48.common.dto.UserDTO;
+import com.scit48.common.enums.Gender;
 import lombok.*;
+
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,22 +13,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @ToString
-public class UserDTO {
+public class RecommendDTO {
 	
 	private Long id; // PK
-	
-	private String email;
-	
-	// 중요: 클라이언트 -> 서버 전송(입력) 시에는 동작하지만,
-// 서버 -> 클라이언트 응답(조회) 시에는 JSON에서 제외됩니다.
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private String password;
 	
 	private String nickname;
 	
 	private Gender gender; // Enum
-	
-	private String intro;
 	
 	private Integer age;
 	
@@ -44,9 +35,9 @@ public class UserDTO {
 	
 	private String levelLanguage;
 	
-	private LocalDateTime createdAt;
-
-// --- DTO 변환 메서드 (편의성 제공) ---
+	private int matchPoint;
+	
+	// --- DTO 변환 메서드 (편의성 제공) ---
 	
 	/*
 	 * DTO -> Entity 변환
@@ -55,11 +46,8 @@ public class UserDTO {
 	 */
 	public UserEntity toEntity() {
 		return UserEntity.builder()
-				.email(this.email)
-				.password(this.password) // 암호화 전 평문 혹은 암호화된 값 (Service 로직에 따라 다름)
 				.nickname(this.nickname)
 				.gender(this.gender)
-				.intro(this.intro)
 				.age(this.age)
 				.nation(this.nation)
 				.manner(this.manner) // 값이 없으면 Entity Builder에서 36.5로 처리됨
@@ -92,6 +80,4 @@ public class UserDTO {
 				.createdAt(entity.getCreatedAt())
 				.build();
 	}
-	
 }
-
