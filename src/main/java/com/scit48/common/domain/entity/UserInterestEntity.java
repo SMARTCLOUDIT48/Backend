@@ -26,9 +26,9 @@ public class UserInterestEntity {
 	@Column(name = "user_interest_id")
 	private Long id; // interest_id
 	
-	//@ManyToOne(fetch = FetchType.LAZY)
-	//@JoinColumn(name = "user_id", nullable = false)
-	//private User user; //user > user_id 호출
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private UserEntity user; //user > user_id 호출
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length = 50)
