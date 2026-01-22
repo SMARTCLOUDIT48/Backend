@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LangMate - Global Chat</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <link rel="stylesheet" href="/css/style.css?v=1.0">
+</head>
+<body>
+
+<div class="app-container">
+    <div class="sidebar">
+        <div class="sidebar-header">채팅 목록 💬</div>
+        <ul class="room-list" id="roomListArea"></ul>
+    </div>
+
+    <div class="chat-area">
+        <div class="chat-header">
+            <div class="chat-title" id="roomTitle">채팅방을 선택해주세요</div>
+            <div class="chat-status" id="connectionStatus">🔴 연결 안됨</div>
+        </div>
+
+        <ul id="messageList" class="message-box">
+            <li class="message-li center"><div class="bubble">왼쪽 목록에서 채팅방을 선택하세요.</div></li>
+        </ul>
+
+        <div id="aiModal" class="ai-modal">
+            <div class="ai-header">
+                <div class="ai-title">🤖 AI 문법 선생님</div>
+                <div class="ai-close" onclick="closeAiModal()">X</div>
+            </div>
+            <div class="ai-result-box">
+                <div class="ai-corrected" id="aiCorrectedText">Checking...</div>
+            </div>
+            <div class="ai-tabs">
+                <div class="ai-tab active" id="tabKr" onclick="switchTab('kr')">🇰🇷 한국어 설명</div>
+                <div class="ai-tab" id="tabJp" onclick="switchTab('jp')">🇯🇵 日本語 説明</div>
+            </div>
+            <div class="ai-explanation" id="aiExplanationText">잠시만 기다려주세요...</div>
+            <button onclick="applyCorrection()" style="width:100%; margin-top:10px; background:#333; color:white; height:35px; font-size:13px;">입력창에 적용하기</button>
+        </div>
+
+        <div class="input-area">
+            <div id="preview-box">
+                <audio id="preview-player" controls style="height:30px; flex:1; margin-right:10px;"></audio>
+                <button onclick="cancelVoice()" style="width:30px; height:30px; background:#ff5252; color:white;">X</button>
+            </div>
+            <div class="input-wrapper">
+                <input type="text" id="msg" placeholder="메시지를 입력하세요..." onkeypress="if(event.keyCode==13) sendMessage()">
+                <div class="btn-group">
+                    <button id="btn-ai" onclick="checkGrammar()" title="문법 검사">🤖</button>
+                    <button id="btn-mic" onclick="toggleRecording()" title="음성 녹음">🎤</button>
+                    <button id="btn-send" onclick="sendMessage()">전송</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/chat.js?v=1.1"></script>
+
+</body>
+</html>
