@@ -1,6 +1,6 @@
-package com.scit48.community.repository;
+package com.scit48.common.repository;
 
-import com.scit48.community.domain.entity.UserEntity;
+import com.scit48.common.domain.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

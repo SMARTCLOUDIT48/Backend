@@ -1,5 +1,6 @@
-package com.scit48.community.domain.entity;
+package com.scit48.common.domain.entity;
 
+import com.scit48.common.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;

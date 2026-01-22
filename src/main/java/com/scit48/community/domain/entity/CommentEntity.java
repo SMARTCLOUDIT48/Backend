@@ -1,5 +1,6 @@
 package com.scit48.community.domain.entity;
 
+import com.scit48.common.domain.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

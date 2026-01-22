@@ -1,8 +1,8 @@
-package com.scit48.community.domain.dto;
+package com.scit48.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.scit48.community.domain.entity.Gender;
-import com.scit48.community.domain.entity.UserEntity;
+import com.scit48.common.enums.Gender;
+import com.scit48.common.domain.entity.UserEntity;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
