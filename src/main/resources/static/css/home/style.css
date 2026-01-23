@@ -285,7 +285,7 @@ body {
 
   background:
     linear-gradient(rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.07)),
-    url("../img/hero_4.png") center 25% / cover no-repeat;
+    url("../../images/hero_4.png") center 25% / cover no-repeat;
 
   box-shadow:
     0 40px 60px -30px rgba(0, 0, 0, 0.35);
