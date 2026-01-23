@@ -1,0 +1,241 @@
+:root {
+    --primary-color: #FF7F50; /* 이미지의 주황색 포인트 */
+    --bg-gradient-start: #fdfbfb;
+    --bg-gradient-end: #ebedee;
+    /* 이미지와 유사한 배경 그라데이션 */
+    --bg-mesh: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #f3e7e9; /* Fallback */
+    background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%); /* 파스텔톤 배경 */
+    min-height: 100vh;
+    color: #333;
+}
+
+/* 헤더 스타일 */
+.site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary-color);
+    letter-spacing: -1px;
+}
+
+nav span {
+    margin: 0 15px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+}
+
+nav span.active {
+    color: var(--primary-color);
+    font-weight: 700;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.header-profile {
+    width: 40px;
+    height: 40px;
+    background-color: #ddd;
+    border-radius: 50%;
+}
+
+/* 메인 컨테이너 */
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* 히어로 섹션 */
+.hero-section {
+    position: relative;
+    padding: 20px 0 40px;
+    text-align: left;
+}
+
+.category-display {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.hero-icon {
+    font-size: 40px;
+}
+
+.hero-text h2 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.hero-text p {
+    color: #666;
+    font-size: 14px;
+}
+
+/* 배경 말풍선 데코 */
+.bubble {
+    position: absolute;
+    background: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #888;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.bubble-1 { top: 10px; right: 100px; transform: rotate(-5deg); }
+.bubble-2 { top: 40px; right: 20px; transform: rotate(5deg); }
+.bubble-3 { top: 70px; right: 120px; }
+
+
+/* 작성 카드 스타일 */
+.write-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+/* 작성자 정보 */
+.writer-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.avatar img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.info-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.nickname { font-weight: 700; color: #333; }
+.temp {
+    color: #888;
+    background: #f5f5f5;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+/* 입력 필드 */
+.input-title {
+    width: 100%;
+    border: none;
+    font-size: 20px;
+    font-weight: 500;
+    padding: 10px 0;
+    background: transparent;
+    outline: none;
+}
+.input-title::placeholder { color: #ccc; }
+
+.divider {
+    border: 0;
+    height: 1px;
+    background: #eee;
+    margin: 10px 0 20px;
+}
+
+.content-area {
+    position: relative;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-content {
+    width: 100%;
+    border: none;
+    resize: none;
+    font-size: 16px;
+    line-height: 1.6;
+    background: transparent;
+    outline: none;
+    flex-grow: 1;
+    min-height: 200px;
+}
+
+/* 하단 날짜 (content 내부 좌측 하단) */
+.meta-info {
+    margin-top: auto;
+    color: #bbb;
+    font-size: 12px;
+    padding-bottom: 10px;
+}
+
+/* 하단 툴바 */
+.bottom-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #f5f5f5;
+}
+
+.attach-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.attach-btn {
+    background: #f9f9f9;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: #666;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.2s;
+}
+.attach-btn:hover { background: #eee; }
+
+.submit-btn {
+    background: linear-gradient(90deg, #FF7F50, #FF6B6B);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 127, 80, 0.3);
+    transition: transform 0.2s;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+}

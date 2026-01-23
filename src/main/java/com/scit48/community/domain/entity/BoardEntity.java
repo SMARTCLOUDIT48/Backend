@@ -2,17 +2,16 @@ package com.scit48.community.domain.entity;
 
 import com.scit48.common.domain.entity.UserEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -23,7 +22,7 @@ public class BoardEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "board_id")
-	private Long id;
+	private Long boardId;
 	
 	@Column(nullable = false)
 	private String title;
@@ -33,8 +32,11 @@ public class BoardEntity {
 	
 	private int viewCount;
 	
+	@Column(name = "file_original_name")
+	private String fileOriginalName;
+	
+	@Column(name = "file_name")
 	private String fileName;
-	private String filePath;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
@@ -44,9 +46,12 @@ public class BoardEntity {
 	@JoinColumn(name = "category_id")
 	private CategoryEntity category; // 카테고리
 	
+	@Builder.Default
 	@OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
 	private List<CommentEntity> comments = new ArrayList<>();
 	
+	
+	@Builder.Default
 	@OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
 	private List<LikeEntity> likes = new ArrayList<>();
 	
@@ -56,7 +61,8 @@ public class BoardEntity {
 	private LocalDateTime createdAt;
 	
 	// 2. 저장 전 자동으로 현재 시간을 세팅하는 메소드
-	@PrePersist
+	@CreatedDate // 자동으로 생성 시간 주입
+	@Column(name = "created_at", updatable = false)
 	public void prePersist() {
 		this.createdAt = LocalDateTime.now();
 		
