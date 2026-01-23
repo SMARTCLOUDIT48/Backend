@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>MUSUBI - 일상 공유</title>
+    <link rel="stylesheet" th:href="@{/css/feedWrite.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<main class="feed-container">
+    <form action="/board/daily/write" method="post" enctype="multipart/form-data" class="feed-card">
+
+        <div class="card-header">
+            <div class="user-profile">
+                <img th:src="${user.profileImagePath != null ? user.profileImagePath : '/images/default_profile.png'}"
+                     alt="User" class="profile-img">
+                <div class="user-info">
+                    <span class="username" th:text="${user.nickname}">최동욱</span>
+                    <span class="location">Seoul, Korea 🇰🇷</span>
+                </div>
+            </div>
+            <button type="button" class="close-btn" onclick="history.back()">✕</button>
+        </div>
+
+        <div class="image-preview-area" id="previewArea">
+            <div class="placeholder-text">
+                <span>📷</span>
+                <p>사진을 끌어오거나 클릭해서 업로드하세요</p>
+            </div>
+            <img id="imagePreview" src="" alt="Preview" style="display:none;">
+            <input type="file" name="file" id="fileInput" accept="image/*" required>
+        </div>
+
+        <div class="content-area">
+            <textarea name="content" placeholder="문득 든 생각이나 일상을 공유해보세요..." required></textarea>
+            <input type="hidden" name="title" value="일상 피드입니다.">
+        </div>
+
+        <div class="card-footer">
+            <button type="submit" class="share-btn">공유하기</button>
+        </div>
+
+    </form>
+</main>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const previewArea = document.getElementById('previewArea');
+    const imagePreview = document.getElementById('imagePreview');
+    const placeholder = document.querySelector('.placeholder-text');
+
+    // 영역 클릭 시 파일창 열기
+    previewArea.addEventListener('click', () => fileInput.click());
+
+    // 파일 선택 시 미리보기 변경
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+</body>
+</html>

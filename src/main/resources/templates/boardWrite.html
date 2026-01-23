@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
 <header class="site-header">
     <div class="logo">MUSUBI</div>
     <nav>
@@ -26,25 +25,34 @@
         <div class="category-display">
             <span class="hero-icon">🌏</span>
             <div class="hero-text">
-                <h2 id="category-title">카테고리</h2>
-                <p>자유롭게 질문하는 글, 모임 모집 및 파트너를 찾는 글을 작성해보세요!</p>
+                <h2>새로운 글 작성</h2>
+
+                <select id="viewSelect" class="category-select" onchange="syncCategory()">
+                    <option th:each="cate : ${categories}"
+                            th:value="${cate.categoryId}"
+                            th:text="${cate.name}">카테고리명</option>
+                </select>
+
+                <p style="margin-top: 10px;">작성하실 글의 주제에 맞는 카테고리를 선택해주세요.</p>
             </div>
         </div>
-        <div class="bubble bubble-1">Hello!</div>
-        <div class="bubble bubble-2">Bonjour!</div>
-        <div class="bubble bubble-3">안녕하세요!</div>
+        <div class="bubble bubble-1">こんにちは!</div>
+        <div class="bubble bubble-2">안녕하세요!</div>
     </section>
 
     <form action="/board/write" method="post" enctype="multipart/form-data" class="write-card">
 
-        <input type="hidden" name="id" th:value="${boardDTO?.id}"> <input type="hidden" name="userId" th:value="${session.loginUserId}"> <input type="hidden" name="categoryId" value="1">
+        <input type="hidden" name="id" th:value="${boardDTO?.id}">
+        <input type="hidden" name="userId" th:value="${session.loginUserId}">
+
+        <input type="hidden" id="realCategoryId" name="categoryId" value="">
 
         <div class="writer-info">
             <div class="avatar">
-                <img src="/images/default_profile.png" alt="Profile"> </div>
+                <img src="/images/default_profile.png" alt="Profile">
+            </div>
             <div class="info-text">
                 <span class="nickname">최동욱</span> <span class="flag">🇰🇷</span>
-                <span class="temp">37.3°C <span class="temp-icon">🔥</span></span>
             </div>
         </div>
 
@@ -56,31 +64,47 @@
 
         <div class="input-group content-area">
             <textarea name="content" class="input-content" placeholder="어떤 부분이 궁금한가요?" required></textarea>
-
             <div class="meta-info">
-                <span class="created-at" id="currentDate">2026.01.22</span>
+                <span class="created-at" id="currentDate"></span>
             </div>
         </div>
 
         <div class="bottom-toolbar">
             <div class="attach-buttons">
                 <label for="file-upload" class="attach-btn">
-                    <span>📷</span> 사진
+                    <span>📎</span> 파일 첨부
                 </label>
                 <input type="file" id="file-upload" name="file" style="display: none;">
-
-                <button type="button" class="attach-btn">
-                    <span>🎙️</span> 음성
-                </button>
             </div>
 
-            <button type="submit" class="submit-btn">질문 등록하기</button>
+            <button type="submit" class="submit-btn">등록하기</button>
         </div>
     </form>
 </main>
 
 <script>
+    // 날짜 설정
     document.getElementById('currentDate').innerText = new Date().toLocaleDateString();
+
+    // 파일 선택 알림
+    document.getElementById('file-upload').addEventListener('change', function(e) {
+        if(e.target.files.length > 0) {
+            alert(e.target.files[0].name + " 파일이 선택되었습니다.");
+        }
+    });
+
+    // [중요] 셀렉트 박스 동기화 스크립트
+    // 화면상의 select 값이 바뀌면 form 안의 hidden input 값을 업데이트합니다.
+    function syncCategory() {
+        const selectBox = document.getElementById('viewSelect');
+        const hiddenInput = document.getElementById('realCategoryId');
+        hiddenInput.value = selectBox.value;
+    }
+
+    // 페이지 로드 시 초기값 설정
+    window.onload = function() {
+        syncCategory();
+    };
 </script>
 </body>
 </html>

@@ -92,6 +92,25 @@ nav span.active {
     font-size: 14px;
 }
 
+
+/* 추가된 Select 박스 스타일 */
+        .category-select {
+            margin-top: 15px;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 2px solid #FF7F50; /* MUSUBI 주황색 */
+            border-radius: 12px;
+            background-color: white;
+            color: #333;
+            font-family: 'Noto Sans KR', sans-serif;
+            cursor: pointer;
+            outline: none;
+        }
+        .category-select:hover {
+            background-color: #fff8f0;
+        }
+
+
 /* 배경 말풍선 데코 */
 .bubble {
     position: absolute;
