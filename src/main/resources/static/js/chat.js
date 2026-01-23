@@ -1,12 +1,12 @@
 /* ==========================================================
-   LangMate Global Chat Logic (Updated for New UI)
+   LangMate Global Chat Logic (Final Integrated Version)
    ========================================================== */
 
 // --- 1. 전역 설정 ---
 const myNativeLanguage = 'KO'; // 나의 모국어 (KO: 한국어)
 var stompClient = null;
 var currentRoomId = null;
-var mySenderId = Math.floor(Math.random() * 1000) + 1;
+var mySenderId = Math.floor(Math.random() * 1000) + 1; // 내 ID (임시 랜덤)
 var mySenderName = "익명" + mySenderId;
 var subscription = null;
 var aiData = {};
@@ -15,10 +15,10 @@ var aiData = {};
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Chat Init...");
     loadChatRooms();
-    createLoadingOverlay(); // 로딩 오버레이 DOM 생성 (없을 경우 대비)
+    createLoadingOverlay(); // 로딩 오버레이 DOM 생성
 });
 
-// 로딩 오버레이 동적 생성 (HTML에 누락되었을 경우를 위한 안전장치)
+// 로딩 오버레이 동적 생성
 function createLoadingOverlay() {
     if (!document.getElementById("loadingOverlay")) {
         const overlay = document.createElement("div");
@@ -67,7 +67,14 @@ function enterRoom(roomId, roomName, element) {
     if (currentRoomId === roomId) return;
 
     currentRoomId = roomId;
+
+    // 헤더 정보 업데이트
     document.getElementById("roomTitle").innerText = roomName;
+
+    // 배지 초기화 (일단 숨김)
+    const badge = document.getElementById('activityBadge');
+    if (badge) badge.style.display = 'none';
+
     document.getElementById("messageList").innerHTML = "";
 
     document.querySelectorAll(".room-item").forEach(item => item.classList.remove("active"));
@@ -94,12 +101,20 @@ function connect(roomId) {
     });
 }
 
-// --- 6. 방 구독 ---
+// --- 6. 방 구독 (핵심 로직 수정됨) ---
 function subscribeToRoom(roomId) {
     if (subscription) subscription.unsubscribe();
 
     subscription = stompClient.subscribe('/sub/chat/room/' + roomId, function (message) {
-        showUi(JSON.parse(message.body));
+        const msgObj = JSON.parse(message.body);
+
+        // 1. UI 그리기
+        showUi(msgObj);
+
+        // 2. ✨ [추가] 상대방이 메시지를 보냈다면 활동량 배지 즉시 갱신
+        if (msgObj.senderId != mySenderId) {
+            checkPartnerActivity(msgObj.senderId);
+        }
     });
 
     loadChatHistory(roomId);
@@ -112,23 +127,62 @@ function loadChatHistory(roomId) {
         .then(messages => {
             const ul = document.getElementById("messageList");
             ul.innerHTML = "";
+
+            let lastPartnerId = null;
+
             if (messages && messages.length > 0) {
-                messages.forEach(msg => showUi(msg));
+                messages.forEach(msg => {
+                    showUi(msg);
+                    // 상대방 ID 찾기 (마지막 메시지 기준)
+                    if(msg.senderId != mySenderId) {
+                        lastPartnerId = msg.senderId;
+                    }
+                });
                 showSystemMessage("--- 이전 대화 내역 ---");
+            }
+
+            // ✨ [추가] 과거 대화 내역을 불러온 후, 상대방의 활동량 체크 실행
+            if (lastPartnerId) {
+                checkPartnerActivity(lastPartnerId);
             }
         });
 }
 
 // ==========================================================
-// ✨ 8. UI 그리기 (ToolBar 스타일 적용)
+// ✨ 8. UI 그리기 (프로필 사진 + 카톡 스타일 레이아웃)
 // ==========================================================
 function showUi(message) {
     var ul = document.getElementById("messageList");
     var li = document.createElement("li");
 
     var isMe = (message.senderId == mySenderId);
-    li.className = isMe ? "message-li me" : "message-li other";
 
+    // ✨ CSS 클래스 변경: 좌우 배치 및 정렬을 위한 클래스 추가
+    li.className = isMe ? "message-li me right" : "message-li other left";
+
+    // --- 1. 프로필 이미지 생성 (상대방일 때만) ---
+    if (!isMe) {
+        const profileImg = document.createElement("img");
+        // 아래 getProfileImage 함수 사용
+        profileImg.src = getProfileImage(message.senderId, message.sender);
+        profileImg.className = "profile-img"; // style.css에 정의된 동그라미 스타일
+        profileImg.alt = "프로필";
+        li.appendChild(profileImg);
+    }
+
+    // --- 2. 메시지 내용을 감싸는 래퍼 생성 (이름 + 말풍선) ---
+    const wrapper = document.createElement("div");
+    wrapper.className = "msg-content-wrapper";
+
+    // (1) 이름 표시 (상대방일 때만)
+    if (!isMe) {
+        const senderDiv = document.createElement("div");
+        senderDiv.className = "sender-name"; // 기존 sender -> sender-name으로 변경 권장
+        senderDiv.innerText = message.sender;
+        wrapper.appendChild(senderDiv);
+    }
+
+    // (2) 말풍선 내용 처리 (음성 vs 텍스트)
     let bubbleContent = "";
     let cleanText = "";
 
@@ -139,12 +193,9 @@ function showUi(message) {
         bubbleContent = message.message;
         var tempDiv = document.createElement("div");
         tempDiv.innerHTML = message.message;
+        // 마이크 아이콘 등 제거하고 순수 텍스트만 추출 (TTS용)
         cleanText = tempDiv.innerText.replace("🎤", "").replace("[음성 메시지]", "").trim();
     }
-
-    const senderDiv = document.createElement("div");
-    senderDiv.className = "sender";
-    senderDiv.innerText = message.sender;
 
     const bubbleDiv = document.createElement("div");
     bubbleDiv.className = "bubble";
@@ -154,6 +205,7 @@ function showUi(message) {
     contentDiv.innerHTML = bubbleContent;
     bubbleDiv.appendChild(contentDiv);
 
+    // (3) 액션 툴바 (TTS, 번역 등) - 말풍선 안에 포함
     const actionToolbar = document.createElement("div");
     actionToolbar.className = "msg-actions";
 
@@ -166,6 +218,7 @@ function showUi(message) {
         actionToolbar.appendChild(ttsBtn);
     }
 
+    // 번역 결과 박스
     const transResultBox = document.createElement("div");
     transResultBox.className = "trans-box";
     transResultBox.innerText = "번역 중...";
@@ -188,9 +241,11 @@ function showUi(message) {
     }
 
     bubbleDiv.appendChild(actionToolbar);
-    li.appendChild(senderDiv);
-    li.appendChild(bubbleDiv);
-    li.appendChild(transResultBox);
+    wrapper.appendChild(bubbleDiv); // 말풍선 추가
+    wrapper.appendChild(transResultBox); // 번역 박스 추가
+
+    // 래퍼를 li에 추가
+    li.appendChild(wrapper);
 
     ul.appendChild(li);
     ul.scrollTop = ul.scrollHeight;
@@ -361,7 +416,7 @@ function speakText(text, lang) {
 
 
 /* ==========================================================
-   💘 1. 전체 호감도 분석 (Updated for New Header UI)
+   💘 1. 전체 호감도 분석
    ========================================================== */
 function checkLoveSignal() {
     if (!currentRoomId) { alert("대화방에 먼저 입장해주세요!"); return; }
@@ -376,16 +431,13 @@ function checkLoveSignal() {
         chatLog += text + "\n";
     });
 
-    // ✨ UI 업데이트: 헤더 버튼 클래스 변경 (.love-btn-header)
     const btn = document.querySelector(".love-btn-header");
-    const btnSpan = btn.querySelector("span"); // 텍스트가 들어있는 span 선택
+    const btnSpan = btn.querySelector("span");
     const originalText = btnSpan.innerText;
 
-    // 로딩 상태 시작
     btnSpan.innerText = "분석중...";
     btn.disabled = true;
 
-    // 오버레이 표시
     const overlay = document.getElementById("loadingOverlay");
     if(overlay) overlay.style.display = "flex";
 
@@ -403,7 +455,6 @@ function checkLoveSignal() {
             alert("분석 실패!");
         })
         .finally(() => {
-            // 로딩 상태 종료
             btnSpan.innerText = originalText;
             btn.disabled = false;
             if(overlay) overlay.style.display = "none";
@@ -438,7 +489,7 @@ function closeLoveModal() {
 
 
 /* ==========================================================
-   💌 2. 보내기 전 멘트 체크 (Updated for Tooltip UI)
+   💌 2. 보내기 전 멘트 체크
    ========================================================== */
 function checkMessageScore() {
     var msgInput = document.getElementById("msg");
@@ -450,9 +501,8 @@ function checkMessageScore() {
         return;
     }
 
-    // 로딩 표시 (입력창 왼쪽 작은 버튼)
     var btn = document.getElementById("btn-love-check");
-    var originalHTML = btn.innerHTML; // 아이콘 유지를 위해 HTML 저장
+    var originalHTML = btn.innerHTML;
     btn.innerText = "⏳";
     btn.disabled = true;
 
@@ -470,7 +520,7 @@ function checkMessageScore() {
             alert("오류 발생!");
         })
         .finally(() => {
-            btn.innerHTML = originalHTML; // 원래 아이콘 복구
+            btn.innerHTML = originalHTML;
             btn.disabled = false;
         });
 }
@@ -489,7 +539,6 @@ function showLoveTooltip(data) {
     scoreSpan.innerHTML = `${data.score}점 ${emoji} <span style="font-size:0.8rem; color:#666;">(${data.risk})</span>`;
     feedbackDiv.innerText = data.feedback;
 
-    // 추천 멘트가 있을 때만 표시
     if (data.better_version && data.better_version.trim() !== "") {
         recommendBox.style.display = "block";
         recommendBox.innerHTML = `
@@ -513,10 +562,48 @@ function applyTooltipCorrection() {
     if (newText) {
         msgInput.value = newText;
         closeLoveTooltip();
-        msgInput.focus(); // 입력창으로 포커스 이동
+        msgInput.focus();
     }
 }
 
 function closeLoveTooltip() {
     document.getElementById("loveTooltip").style.display = "none";
+}
+
+
+/* ==========================================================
+   🖼️ 3. 유틸리티 (프로필 이미지 & 활동량 체크)
+   ========================================================== */
+
+// 사용자 ID와 이름을 받아서, 보여줄 프로필 이미지 URL을 반환
+function getProfileImage(userId, userName) {
+    // 임시 아바타 생성 (나중에 실제 DB 연동 시 변경)
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&color=fff&rounded=true`;
+}
+
+// ✨ 상대방의 활동량(인기도) 체크 및 배지 표시
+function checkPartnerActivity(partnerId) {
+    if (!partnerId) return;
+
+    fetch(`/chat/activity/${partnerId}`)
+        .then(res => res.json())
+        .then(count => {
+            const badge = document.getElementById('activityBadge');
+            if (!badge) return; // HTML에 배지가 없으면 패스
+
+            badge.style.display = 'inline-block';
+            badge.className = 'activity-badge'; // 클래스 초기화
+
+            if (count >= 10) {
+                badge.classList.add('badge-hot');
+                badge.innerHTML = `🔥 ${count}명과 대화 중! (인기)`;
+            } else if (count > 0) {
+                badge.classList.add('badge-normal');
+                badge.innerHTML = `💬 오늘 ${count}명과 대화함`;
+            } else {
+                badge.classList.add('badge-normal');
+                badge.innerHTML = `✨ 지금 대화하면 칼답 가능성!`;
+            }
+        })
+        .catch(err => console.error("활동량 조회 실패:", err));
 }
