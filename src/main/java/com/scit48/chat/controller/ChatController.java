@@ -23,15 +23,16 @@ public class ChatController {
 	private final ChatService chatService; // DB 저장용
 	private final RedisService redisService; // 인원수 카운팅용
 	
+	// 1. 실시간 메시지 처리 (웹소켓)
 	@MessageMapping("/chat/message")
 	public void message(ChatMessageDto message) {
 		
-		// 1. 로그인 기능 없으므로 임시 사용자 이름 처리
+		// 임시 이름 처리
 		if (message.getSender() == null) {
 			message.setSender("익명" + message.getSenderId());
 		}
 		
-		// 2. 메시지 타입별 로직 (Redis 인원수 체크)
+		// 입장/퇴장 처리 (현재 접속자 수 관리)
 		if (ChatMessageDto.MessageType.ENTER.equals(message.getType())) {
 			redisService.userEnter(message.getRoomId());
 			message.setMessage(message.getSender() + "님이 입장하셨습니다.");
@@ -43,23 +44,30 @@ public class ChatController {
 			log.info("사용자 퇴장: 방 번호 {}", message.getRoomId());
 		}
 		
-		// 3. 현재 인원수 가져오기 (로그 확인용)
+		// 현재 방 인원수 로그
 		long count = redisService.getUserCount(message.getRoomId());
 		log.info("현재 방({}) 인원수: {}명", message.getRoomId(), count);
 		
-		// (선택 사항) 클라이언트에게 인원수 정보를 같이 보내고 싶다면 DTO에 userCount 필드를 추가해서 담아 보내면 됩니다.
-		// message.setUserCount(count);
-		
-		// 4. DB에 저장 (모든 메시지 기록)
+		// ★ 핵심: DB 저장 + Redis 활동량 기록 (ChatService 내부에서 처리됨)
 		chatService.saveMessage(message);
 		
-		// 5. 구독자들에게 메시지 발송
+		// 구독자들에게 메시지 발송
 		messagingTemplate.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
 	}
 	
+	// 2. 채팅 내역 불러오기 (기존 기능)
 	@GetMapping("/chat/history/{roomId}")
 	@ResponseBody
 	public List<ChatMessageDto> getChatHistory(@PathVariable String roomId) {
 		return chatService.getMessages(roomId);
 	}
+	
+	// 3. ✨ [추가된 기능] 상대방(또는 나)의 오늘 활동량 조회 API ✨
+	// 요청 주소 예시: /chat/activity/100 (100번 유저가 오늘 몇 명과 대화했는지)
+	@GetMapping("/chat/activity/{userId}")
+	@ResponseBody
+	public Long getUserActivity(@PathVariable Long userId) {
+		return redisService.getTodayInteractionCount(userId);
+	}
+	
 }
