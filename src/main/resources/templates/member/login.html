@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LANG:MATE - 로그인</title>
+    <link rel="stylesheet" href="/css/member/login.css" />
+</head>
+
+<body>
+
+    <div class="login-wrapper">
+
+        <div class="brand">
+            <h1><span>LANG</span>:MATE</h1>
+            <p>새로운 언어로 새로운 인연을 만나보세요!</p>
+        </div>
+
+    <form class="login-card" id="loginForm">
+        <h2>로그인</h2>
+    
+        <div class="field">
+            <span class="icon">📧</span>
+            <input type="id" name="id" placeholder="ID" required />
+        </div>
+    
+        <div class="field">
+            <span class="icon">🔒</span>
+            <input type="password" name="password" placeholder="비밀번호" required />
+        </div>
+    
+        <button type="submit">로그인</button>
+    
+        <label class="keep">
+            <input type="checkbox" id="rememberMe" />
+            로그인 상태 유지
+        </label>
+    
+        <div class="links">
+            <a href="#">비밀번호 찾기</a>
+            <span>|</span>
+            <a href="/signup">회원가입</a>
+        </div>
+    </form>
+    
+    <script src="/js/member/login.js"></script>
+
+
+    </div>
+
+</body>
+
+</html>
