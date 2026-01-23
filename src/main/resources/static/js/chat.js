@@ -156,33 +156,40 @@ function showUi(message) {
     var li = document.createElement("li");
 
     var isMe = (message.senderId == mySenderId);
-
-    // ✨ CSS 클래스 변경: 좌우 배치 및 정렬을 위한 클래스 추가
     li.className = isMe ? "message-li me right" : "message-li other left";
 
-    // --- 1. 프로필 이미지 생성 (상대방일 때만) ---
+    // --- 1. 프로필 이미지 (상대방일 때만) ---
     if (!isMe) {
         const profileImg = document.createElement("img");
-        // 아래 getProfileImage 함수 사용
         profileImg.src = getProfileImage(message.senderId, message.sender);
-        profileImg.className = "profile-img"; // style.css에 정의된 동그라미 스타일
-        profileImg.alt = "프로필";
+        profileImg.className = "profile-img";
         li.appendChild(profileImg);
     }
 
-    // --- 2. 메시지 내용을 감싸는 래퍼 생성 (이름 + 말풍선) ---
-    const wrapper = document.createElement("div");
-    wrapper.className = "msg-content-wrapper";
+    // --- 2. 메인 컨테이너 (이름 + 내용래퍼) ---
+    // 이름은 말풍선 위에, 말풍선과 시간은 옆에 와야 하므로 별도 컨테이너가 필요
+    const mainContainer = document.createElement("div");
+    mainContainer.style.display = "flex";
+    mainContainer.style.flexDirection = "column";
+    mainContainer.style.maxWidth = "70%";
 
-    // (1) 이름 표시 (상대방일 때만)
+    // (1) 이름 표시 (상대방일 때만 메인 컨테이너 맨 위에)
     if (!isMe) {
         const senderDiv = document.createElement("div");
-        senderDiv.className = "sender-name"; // 기존 sender -> sender-name으로 변경 권장
+        senderDiv.className = "sender-name";
         senderDiv.innerText = message.sender;
-        wrapper.appendChild(senderDiv);
+        mainContainer.appendChild(senderDiv);
     }
 
-    // (2) 말풍선 내용 처리 (음성 vs 텍스트)
+    // (2) 내용 래퍼 (말풍선 + 시간 + 읽음숫자) -> 여기가 CSS flex-row 적용됨
+    const contentWrapper = document.createElement("div");
+    contentWrapper.className = "msg-content-wrapper";
+
+    // --- A. 말풍선 영역 (툴바 포함) ---
+    const bubbleArea = document.createElement("div");
+    bubbleArea.style.position = "relative"; // 툴바 위치 기준
+
+    // 말풍선 내용 처리
     let bubbleContent = "";
     let cleanText = "";
 
@@ -193,32 +200,22 @@ function showUi(message) {
         bubbleContent = message.message;
         var tempDiv = document.createElement("div");
         tempDiv.innerHTML = message.message;
-        // 마이크 아이콘 등 제거하고 순수 텍스트만 추출 (TTS용)
         cleanText = tempDiv.innerText.replace("🎤", "").replace("[음성 메시지]", "").trim();
     }
 
-    const bubbleDiv = document.createElement("div");
-    bubbleDiv.className = "bubble";
-
-    const contentDiv = document.createElement("div");
-    contentDiv.className = "msg-content";
-    contentDiv.innerHTML = bubbleContent;
-    bubbleDiv.appendChild(contentDiv);
-
-    // (3) 액션 툴바 (TTS, 번역 등) - 말풍선 안에 포함
+    // 툴바 (TTS, 번역)
     const actionToolbar = document.createElement("div");
     actionToolbar.className = "msg-actions";
 
     if (cleanText.length > 0) {
         const ttsBtn = document.createElement("button");
         ttsBtn.className = "action-btn";
-        ttsBtn.innerHTML = "🔊";
-        ttsBtn.title = "듣기 (TTS)";
+        ttsBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> 🔊'; // 아이콘 텍스트 대체 가능
         ttsBtn.onclick = () => speakText(cleanText);
         actionToolbar.appendChild(ttsBtn);
     }
 
-    // 번역 결과 박스
+    // 번역 버튼
     const transResultBox = document.createElement("div");
     transResultBox.className = "trans-box";
     transResultBox.innerText = "번역 중...";
@@ -227,8 +224,6 @@ function showUi(message) {
         const transBtn = document.createElement("button");
         transBtn.className = "action-btn";
         transBtn.innerHTML = "🇰🇷↔🇯🇵";
-        transBtn.title = "번역 보기";
-
         transBtn.onclick = function() {
             if (transResultBox.style.display === "block") {
                 transResultBox.style.display = "none";
@@ -240,15 +235,58 @@ function showUi(message) {
         actionToolbar.appendChild(transBtn);
     }
 
-    bubbleDiv.appendChild(actionToolbar);
-    wrapper.appendChild(bubbleDiv); // 말풍선 추가
-    wrapper.appendChild(transResultBox); // 번역 박스 추가
+    // 말풍선 DOM 조립
+    const bubbleDiv = document.createElement("div");
+    bubbleDiv.className = "bubble";
+    bubbleDiv.innerHTML = bubbleContent;
 
-    // 래퍼를 li에 추가
-    li.appendChild(wrapper);
+    bubbleArea.appendChild(actionToolbar);
+    bubbleArea.appendChild(bubbleDiv);
+    bubbleArea.appendChild(transResultBox);
 
+    // --- B. 메타 정보 (읽음 숫자 + 시간) ---
+    const metaDiv = document.createElement("div");
+    metaDiv.className = "msg-meta";
+
+    // 1. 읽음 숫자 (데이터가 없으면 0 처리)
+    const unReadCount = message.unReadCount || 0;
+    if (unReadCount > 0) {
+        const readSpan = document.createElement("span");
+        readSpan.className = "read-status";
+        readSpan.innerText = unReadCount;
+        metaDiv.appendChild(readSpan);
+    }
+
+    // 2. 시간 (데이터가 없으면 현재 시간 포맷팅)
+    const timeSpan = document.createElement("span");
+    timeSpan.className = "send-time";
+    // message.time이 서버에서 오면 그대로 쓰고, 없으면 JS에서 만듦
+    timeSpan.innerText = message.time ? message.time : formatTime(new Date());
+    metaDiv.appendChild(timeSpan);
+
+    // --- 최종 조립 ---
+    contentWrapper.appendChild(bubbleArea);
+    contentWrapper.appendChild(metaDiv); // 말풍선 옆에 메타정보 붙이기
+
+    mainContainer.appendChild(contentWrapper);
+    li.appendChild(mainContainer);
     ul.appendChild(li);
     ul.scrollTop = ul.scrollHeight;
+}
+
+// 8 - 2
+// 현재 시간을 '오후 3:04' 형식으로 반환하는 함수
+function formatTime(date) {
+    const d = new Date(date);
+    let hour = d.getHours();
+    let min = d.getMinutes();
+    const ampm = hour >= 12 ? '오후' : '오전';
+
+    hour = hour % 12;
+    hour = hour ? hour : 12; // 0시는 12시로 표시
+    min = min < 10 ? '0' + min : min;
+
+    return `${ampm} ${hour}:${min}`;
 }
 
 // --- 9. 시스템 메시지 ---
