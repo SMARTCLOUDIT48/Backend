@@ -1,58 +1,94 @@
 package com.scit48.chat.controller;
 
+import com.scit48.chat.service.AiService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files; // ✨ 추가됨
+import java.nio.file.Path;  // ✨ 추가됨
+import java.nio.file.Paths; // ✨ 추가됨
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/ai")
 @RequiredArgsConstructor
 public class AiController {
 	
-	// 1. 문법 검사 (Grammar Check)
+	private final AiService aiService;
+	
+	// 파일 저장 경로 (FileController와 동일하게 맞춤)
+	// 윈도우 사용자라면 경로가 맞는지 확인해주세요 (C:/scit_chat/upload/)
+	private final String UPLOAD_DIR = "C:/scit_chat/upload/";
+	
+	// 1. 문법 검사 (기존)
 	@PostMapping("/grammar")
 	public Map<String, Object> checkGrammar(@RequestBody Map<String, String> request) {
-		String message = request.get("message");
-		Map<String, Object> response = new HashMap<>();
+		return aiService.checkGrammar(request.get("message"));
+	}
+	
+	// 2. 텍스트 번역 (기존)
+	@PostMapping("/translate")
+	public Map<String, String> translateMessage(@RequestBody Map<String, String> request) {
+		String translated = aiService.translate(request.get("message"));
+		return Map.of("translated", translated);
+	}
+	
+	// ✨ 3. [수정완료] 음성 -> 텍스트 -> 번역 (파일 소실 방지 버전)
+	@PostMapping("/voice-send")
+	public Map<String, String> voiceToTextAndTranslate(@RequestParam("file") MultipartFile file) throws IOException {
 		
-		if (message == null || message.trim().isEmpty()) {
-			response.put("result", "입력 없음");
-			return response;
-		}
+		// (1) 폴더 확인 및 생성
+		File folder = new File(UPLOAD_DIR);
+		if (!folder.exists()) folder.mkdirs();
 		
-		// [가짜 로직] 문법 체크 시뮬레이션
-		if (message.contains("I is") || message.contains("She have")) {
-			response.put("valid", false);
-			response.put("advice", "❌ 문법 오류 발견: 'be동사'나 '수일치'를 확인해보세요.");
-		} else {
-			response.put("valid", true);
-			response.put("advice", "✅ 문법이 완벽합니다!");
-		}
+		// 파일명 생성
+		String saveName = UUID.randomUUID().toString() + ".webm";
+		Path savePath = Paths.get(UPLOAD_DIR + saveName);
+		
+		// 🚨 [핵심 수정] transferTo 대신 Files.write 사용
+		// transferTo는 파일을 이동시켜버려서 AI가 읽을 때 파일이 없지만,
+		// 이 방식은 데이터를 복사해서 저장하므로 AI한테 넘겨줄 데이터가 살아있습니다.
+		byte[] fileData = file.getBytes();
+		Files.write(savePath, fileData);
+		
+		String fileUrl = "/files/" + saveName;
+		
+		// (2) AI에게 받아쓰기 시킴 (STT)
+		// 위에서 파일 데이터를 메모리에 가지고 있으므로 안전하게 전달 가능
+		String sttText = aiService.stt(file);
+		log.info("받아쓰기 결과: {}", sttText);
+		
+		// (3) 받아쓴 글자를 번역 시킴 (Translation)
+		String translatedText = aiService.translate(sttText);
+		log.info("번역 결과: {}", translatedText);
+		
+		// (4) 결과 리턴
+		Map<String, String> response = new HashMap<>();
+		response.put("audioUrl", fileUrl);       // 듣기용 주소
+		response.put("text", sttText);           // 받아쓴 원문 (한국어)
+		response.put("translated", translatedText); // 번역된 글 (일본어)
+		
 		return response;
 	}
 	
-	// 2. 호감도/톤 검사 (Tone Check)
-	@PostMapping("/tone")
-	public Map<String, Object> checkTone(@RequestBody Map<String, String> request) {
-		String message = request.get("message");
-		Map<String, Object> response = new HashMap<>();
-		
-		// [가짜 로직] 단어에 따른 상대방 반응 예측
-		if (message.contains("stupid") || message.contains("bad") || message.contains("hate")) {
-			response.put("mood", "BAD");
-			response.put("advice", "😰 상대방이 상처받을 수 있어요. 조금 더 부드럽게 말해볼까요?");
-			response.put("score", 20);
-		} else if (message.contains("love") || message.contains("thanks") || message.contains("good")) {
-			response.put("mood", "GOOD");
-			response.put("advice", "🥰 상대방이 아주 좋아할 말투입니다! 호감도 상승 예정!");
-			response.put("score", 95);
-		} else {
-			response.put("mood", "NEUTRAL");
-			response.put("advice", "😐 무난하고 사무적인 말투입니다.");
-			response.put("score", 50);
-		}
-		return response;
+	// 3. 호감도 분석 요청
+	@PostMapping("/sentiment")
+	public Map<String, Object> analyzeSentiment(@RequestBody Map<String, String> request) {
+		String chatHistory = request.get("chatHistory");
+		log.info("호감도 분석 요청 들어옴");
+		return aiService.analyzeSentiment(chatHistory);
+	}
+	
+	// 4. 보내기 전 호감도 체크
+	@PostMapping("/pre-check")
+	public Map<String, Object> preCheckMessage(@RequestBody Map<String, String> request) {
+		return aiService.analyzeMessage(request.get("message"));
 	}
 }

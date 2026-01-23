@@ -1,4 +1,4 @@
-package com.scit48.chat.config;
+package com.scit48.common.config; // 👈 common 패키지 확인
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,9 +14,10 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-				.csrf(AbstractHttpConfigurer::disable) // 소켓 연결 필수
+				.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth -> auth
-						.anyRequest().permitAll() // 일단 모든 사람 문 열어주기 (테스트용)
+						.requestMatchers("/api/ai/**").permitAll() // AI 요청 허용
+						.anyRequest().permitAll() // 나머지 다 허용 (테스트)
 				);
 		return http.build();
 	}
