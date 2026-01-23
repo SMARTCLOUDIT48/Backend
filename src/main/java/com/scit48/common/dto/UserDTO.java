@@ -40,6 +40,10 @@ public class UserDTO {
 	
 	private String profileImagePath;
 	
+	private String nativeLanguage;
+	
+	private String levelLanguage;
+	
 	private LocalDateTime createdAt;
 
 // --- DTO 변환 메서드 (편의성 제공) ---
@@ -59,6 +63,8 @@ public class UserDTO {
 				.age(this.age)
 				.nation(this.nation)
 				.manner(this.manner) // 값이 없으면 Entity Builder에서 36.5로 처리됨
+				.nativeLanguage(this.nativeLanguage)
+				.levelLanguage(this.levelLanguage)
 				.profileImageName(this.profileImageName)
 				.profileImagePath(this.profileImagePath)
 				.build();
@@ -79,6 +85,8 @@ public class UserDTO {
 				.age(entity.getAge())
 				.nation(entity.getNation())
 				.manner(entity.getManner())
+				.nativeLanguage(entity.getNativeLanguage())
+				.levelLanguage(entity.getLevelLanguage())
 				.profileImageName(entity.getProfileImageName())
 				.profileImagePath(entity.getProfileImagePath())
 				.createdAt(entity.getCreatedAt())

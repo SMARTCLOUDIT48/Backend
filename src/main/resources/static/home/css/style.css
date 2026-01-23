@@ -1,0 +1,1018 @@
+/* =========================
+   RESET
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Pretendard, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+/* =========================
+   THEME VARIABLES
+========================= */
+:root {
+  /* 🔥 강한 컬러 배경 (3번째 레퍼런스 급) */
+  --bg:
+    radial-gradient(1200px 800px at 10% 10%, rgba(255, 90, 150, 0.75), transparent 55%),
+    radial-gradient(1000px 700px at 90% 20%, rgba(120, 140, 255, 0.75), transparent 55%),
+    radial-gradient(900px 800px at 50% 90%, rgba(120, 220, 200, 0.75), transparent 55%),
+    linear-gradient(180deg, #eceeff 0%, #e6ebff 100%);
+
+
+  --hero-text: rgba(19, 29, 53, 0.88);
+  --section-title: rgba(19, 29, 53, 0.88);
+  --muted: #555;
+  --header-h: 72px;
+
+  --blue: #4a6cff;
+  --red: #ff6f91;
+
+  /* 💎 Glass */
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
+  --radius-lg: 28px;
+  --radius-md: 20px;
+}
+
+/* =========================
+   BODY
+========================= */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+
+  background:
+    radial-gradient(circle at 20% 30%, rgba(130, 180, 255, 0.6), transparent 40%),
+    radial-gradient(circle at 70% 40%, rgba(255, 150, 200, 0.6), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(180, 255, 220, 0.6), transparent 50%);
+
+  filter: blur(40px);
+  opacity: 0.6;
+}
+
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  padding-top: var(--header-h);
+  min-height: 100vh;
+}
+
+/* =========================
+   HEADER
+========================= */
+/* ===== HEADER ===== */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-h);
+
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  transition:
+    background 0.35s ease,
+    backdrop-filter 0.35s ease,
+    box-shadow 0.35s ease;
+
+  z-index: 100;
+}
+
+
+
+.header-inner {
+  max-width: 1200px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-weight: 800;
+  display: flex;
+  gap: 8px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  /* ✅ 핵심: 메뉴 간격 */
+}
+
+.nav a {
+  position: relative;
+  padding: 8px 14px;
+  border-radius: 999px;
+
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* ✨ hover glass glow */
+.nav a:hover {
+  color: #222;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 6px 18px rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+
+  transform: translateY(-1px);
+}
+
+
+.nav .divider {
+  color: #ddd;
+  font-size: 13px;
+  margin: 0 -6px;
+  /* divider는 살짝만 */
+}
+
+
+.nav a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ff8fb1, #4a6cff);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: width 0.25s ease;
+}
+
+.nav a:hover {
+  color: #222;
+}
+
+.nav a:hover::after {
+  width: 100%;
+}
+
+
+.login-btn {
+  background: linear-gradient(135deg, #ff6f91, #ff9f7f);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 12px 30px rgba(255, 120, 150, 0.45);
+  cursor: pointer;
+}
+
+.login-btn {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.05);
+
+}
+
+.login-btn:active {
+  transform: translateY(-1px) scale(0.97);
+  box-shadow:
+    0 10px 20px rgba(255, 120, 150, 0.35),
+    0 0 0 10px rgba(255, 120, 150, 0.25);
+}
+
+/* =========================
+   HEADER AUTH BUTTONS
+========================= */
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* 회원가입 버튼 (서브) */
+.signup-btn {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+
+  padding: 10px 18px;
+  border-radius: 999px;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(40, 60, 120, 0.8);
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 18px rgba(80, 100, 180, 0.15);
+
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.signup-btn:hover {
+  background: rgba(255, 255, 255, 0.75);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(80, 100, 180, 0.25);
+}
+
+
+/* =========================
+   COMMON
+========================= */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.blue {
+  color: var(--blue);
+}
+
+.red {
+  color: var(--red);
+}
+
+/* =========================
+   HERO
+========================= */
+.hero {
+
+  width: 100vw;
+  /* 화면 전체 폭 */
+  max-width: none;
+  /* max-width 제거 */
+  margin-left: 50%;
+  transform: translateX(-50%);
+  border-radius: 0;
+  /* 좌우 둥근거 원하면 나중에 다시 */
+  position: relative;
+  overflow: visible;
+
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.07)),
+    url("../img/hero_4.png") center 25% / cover no-repeat;
+
+  box-shadow:
+    0 40px 60px -30px rgba(0, 0, 0, 0.35);
+}
+
+.hero-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 72px 64px;
+}
+
+.hero-text {
+  max-width: 420px;
+  padding: 40px 44px;
+  color: var(--hero-text);
+  /* 💎 투명 글래스 (레퍼런스 스타일) */
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(5px) saturate(160%);
+  -webkit-backdrop-filter: blur(5px) saturate(160%);
+
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    0 24px 60px rgba(0, 0, 0, 0.18);
+}
+
+
+.hero-text h1 {
+  font-size: 30px;
+  line-height: 1.25;
+  letter-spacing: -0.6px;
+}
+
+.hero-text p {
+  margin-top: 80px;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+
+
+
+
+
+/* =========================
+   MATCH – Whale Space Style
+========================= */
+
+.match {
+  padding: 80px 0;
+}
+
+.match-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 32px;
+  color: rgba(30, 40, 60, 0.75);
+  /* ✔ 연한 텍스트 */
+}
+
+/* 전체 글라스 패널 */
+.match-glass {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 64px;
+
+  padding: 56px 64px;
+  border-radius: 32px;
+}
+
+/* ✔ 더 깔끔한 글라스 */
+.glass-clean {
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0.35));
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 40px 80px rgba(40, 60, 120, 0.18);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  /* ✔ 제목 기준 정렬 */
+  gap: 16px;
+  /* ✔ 제목과 버튼 간격 */
+  margin-bottom: 32px;
+}
+
+.section-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(40, 50, 80, 0.95);
+}
+
+/* 헤더 옆 CTA */
+.header-cta {
+  padding: 10px 22px;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  color: #4a6cff;
+  font-weight: 600;
+
+  box-shadow: 0 8px 20px rgba(80, 100, 180, 0.15);
+  cursor: pointer;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+
+.header-cta:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 12px 28px rgba(80, 100, 180, 0.25);
+}
+
+/* ===== 왼쪽 설명 ===== */
+.match-desc {
+  max-width: 420px;
+}
+
+.match-desc h3 {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin-bottom: 16px;
+  color: rgba(20, 30, 50, 0.85);
+}
+
+.match-desc p {
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: rgba(60, 70, 90, 0.7);
+  margin-bottom: 28px;
+}
+
+/* ✔ 옅은 글라스 버튼 */
+.cta-glass {
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+
+  color: rgba(40, 60, 120, 0.8);
+  background: rgba(255, 255, 255, 0.45);
+
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 8px 20px rgba(60, 80, 140, 0.18);
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.cta-glass:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 32px rgba(60, 80, 140, 0.28);
+}
+
+/* ===== 오른쪽 SVG 그리드 ===== */
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+.profile-grid img {
+  width: 300px;
+  /* ✔ 크기 키움 */
+  display: block;
+
+  border-radius: 12px;
+  box-shadow:
+    0 16px 32px rgba(40, 60, 120, 0.25);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.profile-grid img:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 26px 48px rgba(40, 60, 120, 0.35);
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 900px) {
+  .match-glass {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-grid {
+    margin-top: 32px;
+  }
+}
+
+/* =========================================================
+   🔥 MAIN CTA & PROFILE INTERACTION (ADD-ON ONLY)
+   기존 CSS 수정 없음
+========================================================= */
+
+/* =========================
+   HEADER CTA – 메인 기능 강조
+========================= */
+.header-cta {
+  position: relative;
+  overflow: hidden;
+}
+
+
+
+
+
+
+
+/* =========================
+   PROFILE CARD – Hover Interaction
+========================= */
+.profile-grid img {
+  position: relative;
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* 선택 가능성 링 */
+.profile-grid img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  border: 2px solid rgba(120, 150, 255, 0.6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Hover 효과 */
+.profile-grid img:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow:
+    0 26px 48px rgba(40, 60, 120, 0.35),
+    0 0 0 4px rgba(120, 150, 255, 0.15);
+}
+
+.profile-grid img:hover::after {
+  opacity: 1;
+}
+
+/* =========================================================
+   🔥 HEADER CTA – ENHANCED PREMIUM EFFECT
+========================================================= */
+
+.header-cta {
+  isolation: isolate;
+}
+
+/* 🌈 오로라 흐름 레이어 */
+.header-cta::before {
+  opacity: 0;
+  background:
+    linear-gradient(120deg,
+      rgba(120, 150, 255, 0.35),
+      rgba(255, 160, 200, 0.35),
+      rgba(140, 220, 200, 0.35));
+  background-size: 200% 200%;
+  animation: ctaAurora 6s ease infinite;
+}
+
+/* ✨ 스윕 라이트 */
+.header-cta::after {
+  content: "";
+  position: absolute;
+  inset: -150%;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.45),
+      transparent);
+  transform: translateX(-100%);
+  transition: transform 0.8s ease;
+  pointer-events: none;
+}
+
+/* Hover */
+.header-cta:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow:
+    0 20px 40px rgba(90, 120, 220, 0.35),
+    0 0 0 6px rgba(120, 150, 255, 0.12);
+}
+
+.header-cta:hover::before {
+  opacity: 1;
+}
+
+.header-cta:hover::after {
+  transform: translateX(100%);
+}
+
+/* Active */
+.header-cta:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow:
+    0 10px 20px rgba(90, 120, 220, 0.25);
+}
+
+/* 🌈 오로라 애니메이션 */
+@keyframes ctaAurora {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* =========================================================
+   🔥 PROFILE CARD – PREMIUM HOVER INTERACTION
+========================================================= */
+
+.profile-grid img {
+  transform-style: preserve-3d;
+}
+
+/* 🌈 컬러 그라데이션 링 */
+.profile-grid img::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 16px;
+  background: linear-gradient(135deg,
+      #7b8cff,
+      #ff9fcf,
+      #7be0cf);
+  opacity: 0;
+  z-index: -1;
+  filter: blur(10px);
+  transition: opacity 0.35s ease;
+}
+
+/* Hover */
+.profile-grid img:hover {
+  transform:
+    translateY(-10px) scale(1.06);
+  box-shadow:
+    0 35px 70px rgba(40, 60, 120, 0.45),
+    0 0 0 6px rgba(120, 150, 255, 0.18);
+}
+
+.profile-grid img:hover::before {
+  opacity: 1;
+}
+
+.profile-grid img:hover::after {
+  opacity: 1;
+}
+
+/* Active (선택 느낌) */
+.profile-grid img:active {
+  transform:
+    translateY(-4px) scale(1.02);
+}
+
+/* =========================
+   PROFILE CURSOR – pointer 제거
+========================= */
+.profile-grid img {
+  cursor: default;
+}
+
+
+/* =========================
+   COMMUNITY SLIDER (FINAL)
+========================= */
+
+.community-slider {
+  position: relative;
+  padding: 80px 0;
+  overflow: hidden;
+}
+
+.community-label-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  max-width: 900px;
+  margin: 0 auto 56px;
+
+  padding: 14px;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 20px 40px rgba(80, 100, 180, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+/* 개별 탭 */
+.community-label-bar .label {
+  padding: 10px 22px;
+  border-radius: 999px;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(60, 70, 90, 0.65);
+
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* hover */
+.community-label-bar .label:hover {
+  background: rgba(255, 255, 255, 0.7);
+  color: rgba(40, 60, 120, 0.85);
+}
+
+.community-bg {
+  padding: 80px 0;
+  background:
+    radial-gradient(800px 400px at 20% 20%, rgba(180, 210, 255, 0.45), transparent 60%),
+    radial-gradient(800px 400px at 80% 30%, rgba(255, 200, 230, 0.45), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45));
+  backdrop-filter: blur(40px);
+}
+
+.community-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 48px;
+  color: rgba(30, 40, 60, 0.9);
+}
+
+/* ===== SLIDER WRAP ===== */
+.slider-wrap {
+  position: relative;
+  width: 340px;
+
+  margin: 0 auto;
+  overflow: visible;
+  /* ⭐ 핵심 */
+}
+
+/* ===== TRACK ===== */
+.slider-track {
+  display: flex;
+  gap: 32px;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* ===== CARD ===== */
+.community-card {
+  width: 340px;
+  flex-shrink: 0;
+
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+
+  box-shadow: 0 20px 40px rgba(40, 60, 120, 0.18);
+  transition:
+    transform 0.45s ease,
+    opacity 0.45s ease,
+    box-shadow 0.45s ease;
+}
+
+.community-card.active {
+  transform: scale(1);
+  opacity: 1;
+  box-shadow: 0 40px 80px rgba(40, 60, 120, 0.35);
+}
+
+.community-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-content {
+  padding: 28px;
+}
+
+.card-content h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.card-content p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(60, 70, 90, 0.75);
+  margin-bottom: 20px;
+}
+
+.card-content button {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ===== NAV BUTTONS ===== */
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+
+  display: grid;
+  place-items: center;
+
+  font-size: 20px;
+  line-height: 1;
+  /* 🔥 필수 */
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  z-index: 10;
+
+  transition:
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
+}
+
+.slider-btn span {
+  display: block;
+  font-size: 20px;
+  line-height: 1;
+  transform: translateY(-1px);
+  /* ← 여기서만 미세조정 */
+}
+
+.slider-btn.prev {
+  left: -36px;
+}
+
+.slider-btn.next {
+  right: -36px;
+}
+
+.slider-btn:hover {
+  filter: brightness(1.08);
+  box-shadow:
+    0 16px 32px rgba(80, 120, 220, 0.28),
+    0 0 0 6px rgba(120, 150, 255, 0.15);
+}
+
+.slider-btn:active {
+  filter: brightness(1.12);
+  box-shadow:
+    0 0 0 10px rgba(120, 150, 255, 0.25),
+    0 20px 40px rgba(80, 120, 220, 0.35);
+}
+
+/* ===== DOTS ===== */
+.slider-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.slider-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(120, 140, 200, 0.4);
+  transition: all 0.3s ease;
+}
+
+.slider-dots .dot.active {
+  width: 20px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7b8cff, #7be0cf);
+}
+
+/* =========================
+   FOOTER
+========================= */
+.site-footer {
+  margin-top: 120px;
+  padding: 64px 0 40px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(30px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* 상단 링크 */
+.footer-links {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 48px;
+  margin-bottom: 48px;
+}
+
+.footer-col h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: rgba(30, 40, 60, 0.85);
+}
+
+.footer-col a {
+  display: block;
+  font-size: 13px;
+  color: rgba(60, 70, 90, 0.65);
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: color 0.2s ease;
+}
+
+.footer-col a:hover {
+  color: rgba(30, 40, 60, 0.9);
+}
+
+/* 하단 정보 */
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: rgba(60, 70, 90, 0.6);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 24px;
+}
+
+.footer-meta span {
+  margin-right: 6px;
+}
+
+/* 반응형 */
+@media (max-width: 900px) {
+  .footer-links {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 900px) {
+  .hero {
+    height: 360px;
+    margin: 24px 16px 0;
+  }
+
+  .hero-inner {
+    padding: 48px 32px;
+  }
+
+  .hero-text h1 {
+    font-size: 34px;
+  }
+
+  .community-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .nav {
+    display: none;
+  }
+
+  .hero-text h1 {
+    font-size: 28px;
+  }
+}
