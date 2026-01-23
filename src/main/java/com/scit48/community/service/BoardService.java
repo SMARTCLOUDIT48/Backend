@@ -34,8 +34,8 @@ public class BoardService {
 				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다. id=" + boardDTO.getId()));
 		
 		// 2. 카테고리 조회 (DTO에서 ID를 받아옴)
-		CategoryEntity categoryEntity = ctr.findById(boardDTO.getCategoryId())
-				.orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 없습니다. id=" + boardDTO.getCategoryId()));
+		CategoryEntity categoryEntity = ctr.findByName(boardDTO.getCategoryName())
+				.orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 없습니다. name=" + boardDTO.getCategoryName()));
 		
 		
 		// 4. Entity 변환 및 저장 (Builder 패턴 사용)
