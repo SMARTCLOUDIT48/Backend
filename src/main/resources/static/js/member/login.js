@@ -12,40 +12,21 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        try {
-            const res = await fetch("/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    memberId,
-                    password
-                })
-            });
+        const res = await fetch("/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ memberId, password })
+        });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                alert(data.message || "로그인에 실패했습니다.");
-                return;
-            }
-
-            //  JWT 저장
-            localStorage.setItem("accessToken", data.accessToken);
-            localStorage.setItem("refreshToken", data.refreshToken);
-
-            // (선택) 로그인 유지 체크 시
-            if (document.getElementById("rememberMe").checked) {
-                localStorage.setItem("rememberMe", "true");
-            }
-
-            //  로그인 성공 → 메인 페이지
-            window.location.href = "/";
-
-        } catch (err) {
-            console.error(err);
-            alert("서버 오류가 발생했습니다.");
+        if (!res.ok) {
+            alert("로그인 실패");
+            return;
         }
+
+        const data = await res.json();
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
+
+        location.href = "/";
     });
 });

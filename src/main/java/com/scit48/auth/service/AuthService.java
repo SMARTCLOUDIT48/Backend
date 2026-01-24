@@ -12,17 +12,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.scit48.common.file.FileStorageService;;
 
 @Service
 @RequiredArgsConstructor
-
 public class AuthService {
 
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileStorageService fileStorageService;
 
+    // ===============================
+    // 회원가입
+    // ===============================
     public void signup(SignupRequestDto request, MultipartFile image) {
 
         if (memberRepository.findByMemberId(request.getMemberId()).isPresent()) {
@@ -39,9 +43,17 @@ public class AuthService {
                 request.getNativeLanguage(),
                 request.getLevelLanguage());
 
+        if (image != null && !image.isEmpty()) {
+            String savedName = fileStorageService.save(image);
+            member.setProfileImage(savedName, "/images/" + savedName);
+        }
+
         memberRepository.save(member);
     }
 
+    // ===============================
+    // 로그인
+    // ===============================
     public JwtToken login(LoginRequestDto request) {
 
         MemberEntity member = memberRepository.findByMemberId(request.getMemberId())
@@ -51,24 +63,43 @@ public class AuthService {
             throw new IllegalArgumentException("ID 또는 비밀번호가 틀렸습니다.");
         }
 
-        String accessToken = jwtProvider.createAccessToken(member.getId(), member.getRole());
+        String accessToken = jwtProvider.createAccessToken(
+                member.getId(),
+                member.getRole());
+
         String refreshToken = jwtProvider.createRefreshToken(member.getId());
         refreshTokenRepository.save(member.getId(), refreshToken);
 
         return new JwtToken(accessToken, refreshToken);
     }
 
+    // ===============================
+    // 토큰 재발급
+    // ===============================
     public JwtToken reissue(String refreshToken) {
+
+        // 1. 토큰 자체 검증
+        if (!jwtProvider.validate(refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+        }
+
         Claims claims = jwtProvider.parseClaims(refreshToken);
 
+        // 2. Refresh Token인지 확인
         if (!"REFRESH".equals(claims.get("type"))) {
             throw new IllegalArgumentException("Refresh Token이 아닙니다.");
         }
 
         Long memberId = Long.valueOf(claims.getSubject());
+
+        // 3. Redis에 저장된 토큰과 비교
         refreshTokenRepository.validate(memberId, refreshToken);
 
-        String newAccessToken = jwtProvider.createAccessToken(memberId, "ROLE_MEMBER");
+        // 4. 새 Access Token 발급
+        String newAccessToken = jwtProvider.createAccessToken(
+                memberId,
+                "ROLE_MEMBER");
+
         return new JwtToken(newAccessToken, refreshToken);
     }
 }

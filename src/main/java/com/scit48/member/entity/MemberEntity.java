@@ -21,7 +21,7 @@ public class MemberEntity {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(name = "member_id", nullable = false, unique = true, length = 50)
     private String memberId;
 
     @Column(nullable = false, length = 255)
@@ -46,24 +46,29 @@ public class MemberEntity {
     @Column(columnDefinition = "TEXT")
     private String intro;
 
-    @Column(length = 255)
+    @Column(name = "profile_image_name", length = 255)
     private String profileImageName;
 
-    @Column(length = 255)
+    @Column(name = "profile_image_path", length = 255)
     private String profileImagePath;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String role;
 
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false, length = 10)
+    @Column(name = "native_language", nullable = false, length = 10)
     private String nativeLanguage;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "level_language", nullable = false, length = 20)
     private LanguageLevel levelLanguage;
+
+    public void setProfileImage(String name, String path) {
+        this.profileImageName = name;
+        this.profileImagePath = path;
+    }
 
     // 생성자
     public MemberEntity(
@@ -85,6 +90,6 @@ public class MemberEntity {
         this.levelLanguage = levelLanguage;
         this.role = "ROLE_MEMBER";
         this.createdAt = LocalDateTime.now();
+        this.manner = new BigDecimal("36.5");
     }
-
 }

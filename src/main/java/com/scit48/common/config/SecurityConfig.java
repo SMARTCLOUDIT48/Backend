@@ -54,8 +54,13 @@ public class SecurityConfig {
 
 						// ===== 인증 관련 API =====
 						.requestMatchers(
-								"/auth/**")
+								"/auth/login",
+								"/auth/signup")
 						.permitAll()
+
+						.requestMatchers(
+								"/auth/reissue")
+						.authenticated()
 
 						// ===== 그 외 =====
 						.anyRequest().authenticated())

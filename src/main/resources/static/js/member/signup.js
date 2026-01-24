@@ -1,58 +1,58 @@
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("signupForm");
     const imageInput = document.getElementById("imageInput");
-    const preview = document.getElementById("preview");
+    const nativeLanguage = document.getElementById("nativeLanguage");
+    const tos = document.getElementById("tos");
+    const privacy = document.getElementById("privacy");
 
-    /* =========================
-       이미지 미리보기
-    ========================= */
-    imageInput.addEventListener("change", () => {
-        const file = imageInput.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = e => {
-            preview.src = e.target.result;
-            preview.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-    });
-
-    /* =========================
-       회원가입 submit
-    ========================= */
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        // 비밀번호 확인
-        const password = form.password.value;
-        const passwordConfirm = form.passwordConfirm.value;
-
-        if (password !== passwordConfirm) {
+        // ===== 기본 검증 =====
+        if (form.password.value !== form.passwordConfirm.value) {
             alert("비밀번호가 일치하지 않습니다.");
             return;
         }
 
-        // 약관 동의 체크
-        if (!document.getElementById("tos").checked ||
-            !document.getElementById("privacy").checked) {
-            alert("필수 약관에 동의해주세요.");
+        if (!tos.checked || !privacy.checked) {
+            alert("약관에 동의해주세요.");
             return;
         }
 
-        // DTO 데이터 구성
+   
+        if (!form.gender.value) {
+            alert("성별을 선택해주세요.");
+            return;
+        }
+
+        if (!form.nation.value) {
+            alert("국가를 선택해주세요.");
+            return;
+        }
+
+        if (!nativeLanguage.value) {
+            alert("학습 언어를 선택해주세요.");
+            return;
+        }
+
+        if (!form.levelLanguage.value) {
+            alert("언어 레벨을 선택해주세요.");
+            return;
+        }
+
+        // ===== 전송 데이터 =====
         const signupData = {
-            email: form.memberId.value,
-            password: password,
+            memberId: form.memberId.value.trim(),
+            password: form.password.value,
             nickname: form.nickname.value,
-            gender: form.gender.value,
+            gender: form.gender.value,              // MALE / FEMALE
             age: Number(form.age.value),
-            nation: form.nation.value,
-            nativeLanguage: document.getElementById("nativeLanguage").value,
-            levelLanguage: form.levelLanguage.value
+            nation: form.nation.value,              // KOREA / JAPAN
+            nativeLanguage: nativeLanguage.value,   // KOREAN / JAPANESE
+            levelLanguage: form.levelLanguage.value // BEGINNER / ...
         };
 
-        // multipart/form-data 생성
+        // ===== multipart/form-data 구성 =====
         const formData = new FormData();
         formData.append(
             "data",
@@ -65,24 +65,18 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append("image", imageInput.files[0]);
         }
 
-        try {
-            const res = await fetch("/auth/signup", {
-                method: "POST",
-                body: formData
-            });
+        // ===== 요청 =====
+        const res = await fetch("/auth/signup", {
+            method: "POST",
+            body: formData
+        });
 
-            if (!res.ok) {
-                const err = await res.json();
-                alert(err.message || "회원가입 실패");
-                return;
-            }
-
-            alert("회원가입 완료!\n이메일 인증 후 로그인해주세요.");
-            window.location.href = "/login";
-
-        } catch (err) {
-            console.error(err);
-            alert("서버 오류가 발생했습니다.");
+        if (!res.ok) {
+            alert("회원가입 실패");
+            return;
         }
+
+        alert("회원가입 완료");
+        location.href = "/login";
     });
 });

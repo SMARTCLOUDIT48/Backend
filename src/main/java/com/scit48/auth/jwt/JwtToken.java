@@ -5,6 +5,6 @@ package com.scit48.auth.jwt;
  * - 로그인, 재발급 응답용
  */
 public record JwtToken(
-        String accessToken,
-        String refreshToken) {
+                String accessToken,
+                String refreshToken) {
 }

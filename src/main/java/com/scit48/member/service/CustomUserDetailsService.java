@@ -27,9 +27,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         MemberEntity memberEntity = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new UsernameNotFoundException("회원 없음"));
-
         return new User(
-                memberEntity.getMemberId().toString(),
+                memberEntity.getId().toString(),
                 memberEntity.getPassword(),
                 List.of(new SimpleGrantedAuthority(memberEntity.getRole())));
     }
