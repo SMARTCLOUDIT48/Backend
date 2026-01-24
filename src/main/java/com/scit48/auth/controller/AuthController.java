@@ -5,56 +5,75 @@ import com.scit48.auth.dto.LoginRequestDto;
 import com.scit48.auth.dto.SignupRequestDto;
 import com.scit48.auth.jwt.JwtToken;
 import com.scit48.auth.service.AuthService;
+import com.scit48.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+        private final AuthService authService;
+        private final MemberRepository memberRepository;
 
-    @PostMapping(value = "/signup", consumes = "multipart/form-data")
-    public ResponseEntity<Void> signup(
-            @RequestPart("data") String data,
-            @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
+        private final ObjectMapper objectMapper = new ObjectMapper();
 
-        System.out.println("===== SIGNUP RAW DATA =====");
-        System.out.println(data);
+        /*
+         * =========================
+         * 회원가입
+         * =========================
+         */
+        @PostMapping(value = "/signup", consumes = "multipart/form-data")
+        public ResponseEntity<Void> signup(
+                        @RequestPart("data") String data,
+                        @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
 
-        SignupRequestDto request = objectMapper.readValue(data, SignupRequestDto.class);
+                SignupRequestDto request = objectMapper.readValue(data, SignupRequestDto.class);
 
-        System.out.println("===== SIGNUP PARSED DTO =====");
-        System.out.println("memberId = " + request.getMemberId());
-        System.out.println("password = " + request.getPassword());
-        System.out.println("nickname = " + request.getNickname());
-        System.out.println("gender = " + request.getGender());
-        System.out.println("age = " + request.getAge());
-        System.out.println("nation = " + request.getNation());
-        System.out.println("nativeLanguage = " + request.getNativeLanguage());
-        System.out.println("levelLanguage = " + request.getLevelLanguage());
+                authService.signup(request, image);
+                return ResponseEntity.ok().build();
+        }
 
-        authService.signup(request, image);
-        return ResponseEntity.ok().build();
-    }
+        /*
+         * =========================
+         * 로그인
+         * =========================
+         */
+        @PostMapping("/login")
+        public ResponseEntity<JwtToken> login(
+                        @RequestBody LoginRequestDto request) {
+                return ResponseEntity.ok(authService.login(request));
+        }
 
-    @PostMapping("/login")
-    public ResponseEntity<JwtToken> login(@RequestBody LoginRequestDto request) {
-        return ResponseEntity.ok(authService.login(request));
-    }
+        /*
+         * =========================
+         * 토큰 재발급
+         * =========================
+         */
+        @PostMapping("/reissue")
+        public ResponseEntity<JwtToken> reissue(
+                        @RequestHeader("Authorization") String authorization) {
+                String refreshToken = authorization.startsWith("Bearer ")
+                                ? authorization.substring(7)
+                                : authorization;
 
-    @PostMapping("/reissue")
-    public ResponseEntity<JwtToken> reissue(
-            @RequestHeader("Authorization") String authorization) {
+                return ResponseEntity.ok(authService.reissue(refreshToken));
+        }
 
-        String refreshToken = authorization.startsWith("Bearer ")
-                ? authorization.substring(7)
-                : authorization;
+        /*
+         * =========================
+         * 아이디 중복 확인
+         * =========================
+         */
+        @GetMapping("/check-member-id")
+        public Map<String, Boolean> checkMemberId(
+                        @RequestParam String memberId) {
+                boolean exists = memberRepository.findByMemberId(memberId).isPresent();
 
-        return ResponseEntity.ok(authService.reissue(refreshToken));
-    }
+                return Map.of("available", !exists);
+        }
 }

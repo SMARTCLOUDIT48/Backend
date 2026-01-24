@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const res = await fetch("/auth/login", {
+        const res = await fetch(`${CONTEXT_PATH}auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ memberId, password })
@@ -27,6 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
 
-        location.href = "/";
+        location.href = `${CONTEXT_PATH}`;
     });
 });

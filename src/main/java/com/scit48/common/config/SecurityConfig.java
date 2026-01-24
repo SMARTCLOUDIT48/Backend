@@ -1,4 +1,4 @@
-package com.scit48.common.config; // 👈 common 패키지 확인
+package com.scit48.common.config;
 
 import com.scit48.auth.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -28,44 +28,55 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http
-				// CSRF 비활성화 (JWT + Form 혼용해도 문제 없음)
+				// CSRF 비활성화
 				.csrf(csrf -> csrf.disable())
 
-				// 세션 사용 안 함 (JWT)
+				// JWT → 세션 미사용
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-				// 요청 권한 설정
 				.authorizeHttpRequests(auth -> auth
 
-						// ===== 페이지 URL (Controller 경유) =====
+						// =====================
+						// 페이지 (Controller)
+						// =====================
 						.requestMatchers(
 								"/",
-								"/signup",
-								"/login")
+								"/home/**",
+								"/login",
+								"/signup")
 						.permitAll()
 
-						// ===== 정적 리소스 =====
+						// =====================
+						// 정적 리소스
+						// =====================
 						.requestMatchers(
 								"/css/**",
 								"/js/**",
 								"/images/**",
+								"/home/css/**",
+								"/home/js/**",
+								"/home/images/**",
 								"/favicon.ico")
 						.permitAll()
 
-						// ===== 인증 관련 API =====
+						// =====================
+						// 인증 API
+						// =====================
 						.requestMatchers(
 								"/auth/login",
-								"/auth/signup")
+								"/auth/signup",
+								"/auth/check-member-id")
 						.permitAll()
 
-						.requestMatchers(
-								"/auth/reissue")
+						.requestMatchers("/auth/reissue")
 						.authenticated()
 
-						// ===== 그 외 =====
+						// =====================
+						// 나머지는 인증 필요
+						// =====================
 						.anyRequest().authenticated())
 
-				// JWT 필터 등록
+				// JWT 필터
 				.addFilterBefore(
 						jwtAuthenticationFilter,
 						UsernamePasswordAuthenticationFilter.class);

@@ -1,11 +1,20 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>LANG:MATE - 로그인</title>
-    <link rel="stylesheet" href="/css/member/login.css" />
+
+    <!-- 정적 CSS -->
+    <link rel="stylesheet" th:href="@{/css/member/login.css}" />
+
+
+    <script th:inline="javascript">
+
+        const CONTEXT_PATH = /*[[@{/}]]*/ "/";
+
+    </script>
 </head>
 
 <body>
@@ -17,38 +26,37 @@
             <p>새로운 언어로 새로운 인연을 만나보세요!</p>
         </div>
 
-    <form class="login-card" id="loginForm">
-        <h2>로그인</h2>
-    
-        <div class="field">
-            <span class="icon">📧</span>
-    <input type="text" name="memberId" placeholder="ID" required />
-        </div>
+        <form class="login-card" id="loginForm">
+            <h2>로그인</h2>
 
+            <div class="field">
+                <span class="icon">📧</span>
+                <input type="text" name="memberId" placeholder="ID" required />
+            </div>
 
-        <div class="field">
-            <span class="icon">🔒</span>
-            <input type="password" name="password" placeholder="비밀번호" required />
-        </div>
-    
-        <button type="submit">로그인</button>
-    
-        <label class="keep">
-            <input type="checkbox" id="rememberMe" />
-            로그인 상태 유지
-        </label>
-    
-        <div class="links">
-            <a href="#">비밀번호 찾기</a>
-            <span>|</span>
-            <a href="/signup">회원가입</a>
-        </div>
-    </form>
-    
-    <script src="/js/member/login.js"></script>
+            <div class="field">
+                <span class="icon">🔒</span>
+                <input type="password" name="password" placeholder="비밀번호" required />
+            </div>
 
+            <button type="submit">로그인</button>
+
+            <label class="keep">
+                <input type="checkbox" id="rememberMe" />
+                로그인 상태 유지
+            </label>
+
+            <div class="links">
+                <a href="#">비밀번호 찾기</a>
+                <span>|</span>
+                <a th:href="@{/signup}">회원가입</a>
+            </div>
+        </form>
 
     </div>
+
+    <!-- 정적 JS -->
+    <script th:src="@{/js/member/login.js}" defer></script>
 
 </body>
 
