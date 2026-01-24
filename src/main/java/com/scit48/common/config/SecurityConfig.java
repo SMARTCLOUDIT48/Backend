@@ -28,17 +28,16 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http
-				// CSRF 비활성화
+				// CSRF 비활성화 (JWT 사용)
 				.csrf(csrf -> csrf.disable())
 
-				// JWT → 세션 미사용
+				// 세션 사용 안 함
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+				// 권한 설정
 				.authorizeHttpRequests(auth -> auth
 
-						// =====================
-						// 페이지 (Controller)
-						// =====================
+						// 페이지 접근 허용
 						.requestMatchers(
 								"/",
 								"/home/**",
@@ -46,9 +45,7 @@ public class SecurityConfig {
 								"/signup")
 						.permitAll()
 
-						// =====================
-						// 정적 리소스
-						// =====================
+						// 정적 리소스 허용
 						.requestMatchers(
 								"/css/**",
 								"/js/**",
@@ -59,24 +56,13 @@ public class SecurityConfig {
 								"/favicon.ico")
 						.permitAll()
 
-						// =====================
-						// 인증 API
-						// =====================
-						.requestMatchers(
-								"/auth/login",
-								"/auth/signup",
-								"/auth/check-member-id")
-						.permitAll()
+						// 인증 관련 API 전부 허용
+						.requestMatchers("/auth/**").permitAll()
 
-						.requestMatchers("/auth/reissue")
-						.authenticated()
-
-						// =====================
 						// 나머지는 인증 필요
-						// =====================
 						.anyRequest().authenticated())
 
-				// JWT 필터
+				// JWT 인증 필터
 				.addFilterBefore(
 						jwtAuthenticationFilter,
 						UsernamePasswordAuthenticationFilter.class);
