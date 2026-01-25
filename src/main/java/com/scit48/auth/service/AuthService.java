@@ -100,9 +100,12 @@ public class AuthService {
 
         refreshTokenRepository.validate(memberId, refreshToken);
 
+        UserEntity member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new UnauthorizedException("회원이 존재하지 않습니다."));
+
         String newAccessToken = jwtProvider.createAccessToken(
                 memberId,
-                "ROLE_MEMBER");
+                member.getRole());
 
         return new JwtToken(newAccessToken, refreshToken);
     }

@@ -7,14 +7,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const memberId = form.memberId.value.trim();
     const password = form.password.value.trim();
 
-    if (!memberId || !password) {
-      alert("ID와 비밀번호를 입력해주세요.");
-      return;
-    }
-
     const res = await fetch(`${CONTEXT_PATH}api/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include", // ⭐ 쿠키 받기
       body: JSON.stringify({ memberId, password })
     });
 
@@ -25,11 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const { accessToken, refreshToken } = result.data;
-
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("refreshToken", refreshToken);
-
+    // 쿠키는 서버가 세팅함 → 그냥 이동
     location.href = `${CONTEXT_PATH}`;
   });
 });

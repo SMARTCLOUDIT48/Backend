@@ -1,14 +1,13 @@
 package com.scit48.auth.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.scit48.common.response.ApiResponse;
 import com.scit48.member.service.CustomUserDetailsService;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,7 +24,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService userDetailsService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void doFilterInternal(
@@ -33,48 +31,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
+        String token = extractAccessToken(request);
+
+        // 토큰 없으면 비로그인 상태로 통과
+        if (!StringUtils.hasText(token)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
-            String token = resolveToken(request);
+            Claims claims = jwtProvider.parseClaims(token);
 
-            if (StringUtils.hasText(token)) {
-                if (!jwtProvider.validate(token)) {
-                    sendError(response, "유효하지 않은 토큰입니다.");
-                    return;
-                }
-
-                Long memberId = jwtProvider.getMemberId(token);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(memberId.toString());
-
-                Authentication authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            // ACCESS 토큰만 인증에 사용
+            if (!"ACCESS".equals(claims.get("type"))) {
+                filterChain.doFilter(request, response);
+                return;
             }
 
-            filterChain.doFilter(request, response);
+            Long memberId = Long.valueOf(claims.getSubject());
+            UserDetails userDetails = userDetailsService.loadUserByUsername(memberId.toString());
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities());
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (Exception e) {
-            sendError(response, "인증 처리 중 오류가 발생했습니다.");
+            // 토큰 문제 있어도 강제 차단 ❌
+            // 그냥 비로그인 상태로 통과
+            SecurityContextHolder.clearContext();
         }
+
+        filterChain.doFilter(request, response);
     }
 
-    private void sendError(HttpServletResponse response, String message)
-            throws IOException {
+    private String extractAccessToken(HttpServletRequest request) {
+        if (request.getCookies() == null)
+            return null;
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
-
-        ApiResponse<?> body = ApiResponse.error(message);
-        response.getWriter().write(objectMapper.writeValueAsString(body));
-    }
-
-    private String resolveToken(HttpServletRequest request) {
-        String bearer = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7);
+        for (Cookie cookie : request.getCookies()) {
+            if ("accessToken".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
         }
         return null;
     }

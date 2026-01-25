@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Repository
@@ -19,6 +20,9 @@ public class RefreshTokenRepository {
         this.redisTemplate = redisTemplate;
     }
 
+    // =========================
+    // 저장
+    // =========================
     public void save(long memberId, String refreshToken) {
         redisTemplate.opsForValue().set(
                 RedisKeyFactory.refreshToken(memberId),
@@ -27,6 +31,9 @@ public class RefreshTokenRepository {
                 TimeUnit.DAYS);
     }
 
+    // =========================
+    // 검증
+    // =========================
     public void validate(long memberId, String refreshToken) {
         String saved = redisTemplate.opsForValue()
                 .get(RedisKeyFactory.refreshToken(memberId));
@@ -36,7 +43,28 @@ public class RefreshTokenRepository {
         }
     }
 
+    // =========================
+    // 삭제 (memberId 기준)
+    // =========================
     public void delete(long memberId) {
         redisTemplate.delete(RedisKeyFactory.refreshToken(memberId));
+    }
+
+    // =========================
+    // 삭제 (refreshToken 기준) – 로그아웃용
+    // =========================
+    public void deleteByToken(String refreshToken) {
+        Set<String> keys = redisTemplate.keys("auth:refresh:user_id_*");
+
+        if (keys == null || keys.isEmpty())
+            return;
+
+        for (String key : keys) {
+            String saved = redisTemplate.opsForValue().get(key);
+            if (refreshToken.equals(saved)) {
+                redisTemplate.delete(key);
+                return;
+            }
+        }
     }
 }

@@ -1,31 +1,41 @@
 /**
  * optionalAuthFetch
  * ----------------------------------------
- *  인증이 "선택"인 API 요청용 fetch 래퍼
+ * 인증이 "선택"인 API 요청용 fetch 래퍼
  *
- * ✔ 토큰이 있으면 Authorization 헤더 자동 추가
- * ✔ 토큰이 없으면 그냥 일반 fetch처럼 동작
- * ✔ 로그인 강제 이동 ❌
- *
- * 사용 대상:
- * - 메인 페이지
- * - 로그인 유무에 따라 UX만 달라지는 API
+ * ✔ 로그인/비로그인 모두 접근 가능
+ * ✔ 쿠키 기반 자동 인증
+ * ✔ 401 발생 시 한 번만 재발급 시도
+ * ✔ 실패해도 로그인 강제 이동 ❌
  */
-
 export async function optionalAuthFetch(url, options = {}) {
-    const accessToken = localStorage.getItem("accessToken");
 
-    // 토큰이 없는 경우 → 그냥 fetch
-    if (!accessToken) {
-        return fetch(url, options);
+    let response = await fetch(url, {
+        ...options,
+        credentials: "include"
+    });
+
+    // 정상 응답이면 그대로 반환
+    if (response.status !== 401) {
+        return response;
     }
 
-    // 토큰이 있는 경우 → Authorization 헤더 추가
-    return fetch(url, {
-        ...options,
-        headers: {
-            ...(options.headers || {}),
-            Authorization: `Bearer ${accessToken}`
-        }
+    // 401 → accessToken 만료 가능성
+    //  조용히 재발급 시도
+    const reissueResponse = await fetch(`${CONTEXT_PATH}api/reissue`, {
+        method: "POST",
+        credentials: "include"
     });
+
+    // 재발급 성공 → 요청 재시도
+    if (reissueResponse.ok) {
+        return fetch(url, {
+            ...options,
+            credentials: "include"
+        });
+    }
+
+    // 재발급 실패 → 그냥 401 반환 (비로그인 취급)
+    return response;
 }
+
