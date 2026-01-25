@@ -1,0 +1,761 @@
+/* =========================
+   RESET
+========================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Pretendard, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+:root {
+    --bg:
+        radial-gradient(1200px 800px at 10% 10%, rgba(255, 90, 150, 0.75), transparent 55%),
+        radial-gradient(1000px 700px at 90% 20%, rgba(120, 140, 255, 0.75), transparent 55%),
+        radial-gradient(900px 800px at 50% 90%, rgba(120, 220, 200, 0.75), transparent 55%),
+        linear-gradient(180deg, #eceeff 0%, #e6ebff 100%);
+
+    --text: rgba(19, 29, 53, 0.88);
+    --muted: rgba(60, 70, 90, 0.65);
+
+    --blue: #4a6cff;
+    --red: #ff6f91;
+    --green: #32c48d;
+
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.65);
+    --glass-shadow: 0 30px 80px rgba(40, 60, 120, 0.18);
+
+    --radius-lg: 28px;
+    --radius-md: 20px;
+}
+
+/* =========================
+   BODY BG (MAIN MATCH)
+========================= */
+html,
+body {
+    height: 100%;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(130, 180, 255, 0.6), transparent 40%),
+        radial-gradient(circle at 70% 40%, rgba(255, 150, 200, 0.6), transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(180, 255, 220, 0.6), transparent 50%);
+    filter: blur(40px);
+    opacity: 0.6;
+}
+
+/* =========================
+   TOPBAR
+========================= */
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 72px;
+
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.topbar-inner {
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.brand {
+    font-weight: 900;
+    letter-spacing: -0.4px;
+    font-size: 18px;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.brand-a {
+    color: rgba(255, 111, 145, 0.95);
+}
+
+.brand-dot {
+    color: rgba(40, 60, 120, 0.55);
+}
+
+.brand-b {
+    color: rgba(19, 29, 53, 0.9);
+}
+
+.topnav {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.topnav a {
+    text-decoration: none;
+    color: rgba(60, 70, 90, 0.75);
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.topnav a:hover {
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+}
+
+.top-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+}
+
+/* =========================
+   COMMON
+========================= */
+.glass {
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.62),
+            rgba(255, 255, 255, 0.38));
+    backdrop-filter: blur(26px) saturate(170%);
+    -webkit-backdrop-filter: blur(26px) saturate(170%);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+        0 30px 80px rgba(40, 60, 120, 0.18),
+        inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.card {
+    border-radius: var(--radius-lg);
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.btn {
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 10px 18px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn-glass {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    color: rgba(40, 60, 120, 0.85);
+    box-shadow: 0 10px 24px rgba(80, 100, 180, 0.18);
+}
+
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
+}
+
+.btn-soft {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    color: rgba(40, 60, 120, 0.85);
+    padding: 10px 16px;
+}
+
+.btn-soft:hover {
+    background: rgba(255, 255, 255, 0.78);
+    transform: translateY(-1px);
+}
+
+/* =========================
+   PAGE LAYOUT
+========================= */
+.page {
+    padding: 28px 0 80px;
+}
+
+.shell {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* HERO (상단 큰 제목 영역) */
+.page-hero {
+    padding: 34px 38px;
+    margin-bottom: 22px;
+}
+
+.page-hero h1 {
+    font-size: 38px;
+    letter-spacing: -0.9px;
+    margin-bottom: 8px;
+}
+
+.page-hero p {
+    color: rgba(60, 70, 90, 0.75);
+    font-size: 14.5px;
+}
+
+/* 메인 그리드 */
+.grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    /* 이미지처럼 왼쪽 넓게 */
+    gap: 28px;
+    align-items: start;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* 프로필 카드 */
+.profile-card {
+    padding: 22px;
+    text-align: center;
+}
+
+.avatar-wrap {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 12px;
+}
+
+.avatar {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 14px 30px rgba(40, 60, 120, 0.28);
+}
+
+.avatar-btn {
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+}
+
+.profile-meta .nickname {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.profile-meta .lang {
+    color: rgba(60, 70, 90, 0.7);
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+/* 메뉴 */
+.menu {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 12px 12px;
+    border-radius: 14px;
+    text-decoration: none;
+
+    color: rgba(40, 60, 120, 0.85);
+    font-size: 14px;
+
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.65);
+    transform: translateY(-1px);
+}
+
+.menu-item.active {
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 10px 24px rgba(80, 100, 180, 0.18);
+    position: relative;
+}
+
+.menu-item.active::before {
+    content: "";
+    position: absolute;
+    left: -12px;
+    top: 10px;
+    bottom: 10px;
+    width: 4px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(255, 111, 145, 0.9), rgba(74, 108, 255, 0.9));
+}
+
+.mi-ico {
+    width: 26px;
+    text-align: center;
+    opacity: 0.9;
+}
+
+.badge {
+    margin-left: auto;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 111, 145, 0.18);
+    border: 1px solid rgba(255, 111, 145, 0.28);
+    color: rgba(255, 111, 145, 0.95);
+    font-weight: 800;
+}
+
+/* 왼쪽 작은 카드 */
+.mini-card {
+    padding: 18px;
+}
+
+.mini-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.mini-head h4 {
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(19, 29, 53, 0.88);
+}
+
+.mini-pill {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(50, 196, 141, 0.15);
+    border: 1px solid rgba(50, 196, 141, 0.25);
+    color: rgba(50, 196, 141, 0.95);
+    font-weight: 800;
+}
+
+.mini-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mini-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    box-shadow: 0 10px 22px rgba(40, 60, 120, 0.12);
+}
+
+.mini-name {
+    font-weight: 900;
+    font-size: 14px;
+}
+
+.mini-sub {
+    font-size: 12.5px;
+    color: rgba(60, 70, 90, 0.7);
+    margin-top: 2px;
+}
+
+/* 관심사 칩 */
+.chip-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.chip {
+    border: none;
+    cursor: pointer;
+    font-size: 12.5px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    color: rgba(40, 60, 120, 0.8);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(80, 100, 180, 0.18);
+}
+
+/* =========================
+   CONTENT
+========================= */
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* 오른쪽 큰 카드 공통 */
+.content-card {
+    padding: 22px;
+}
+
+.card-head {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.card-head h2 {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.4px;
+}
+
+.card-head p {
+    margin-top: 6px;
+    font-size: 13.5px;
+    color: rgba(60, 70, 90, 0.72);
+}
+
+/* 친구 추천 그리드 */
+.reco-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.reco {
+    padding: 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 18px 40px rgba(40, 60, 120, 0.12);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.reco:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 28px 60px rgba(40, 60, 120, 0.18);
+}
+
+.reco-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.reco-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+}
+
+.reco-name strong {
+    font-size: 16px;
+    font-weight: 900;
+}
+
+.reco-sub {
+    font-size: 12.5px;
+    color: rgba(60, 70, 90, 0.7);
+    margin-top: 2px;
+}
+
+.flag {
+    margin-left: 6px;
+    font-size: 14px;
+}
+
+.stars {
+    margin-left: auto;
+    font-size: 13px;
+    color: rgba(255, 170, 60, 0.95);
+}
+
+/* 추천 태그 */
+.reco-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.tag {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    color: rgba(60, 70, 90, 0.8);
+}
+
+.tag.blue {
+    background: rgba(74, 108, 255, 0.14);
+    border-color: rgba(74, 108, 255, 0.22);
+    color: rgba(74, 108, 255, 0.95);
+}
+
+.tag.green {
+    background: rgba(50, 196, 141, 0.14);
+    border-color: rgba(50, 196, 141, 0.22);
+    color: rgba(50, 196, 141, 0.95);
+}
+
+/* =========================
+   STATS (2 COL)
+========================= */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    height: 220px;
+}
+
+.stat-card {
+    padding: 18px;
+}
+
+.stat-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.stat-head h3 {
+    font-size: 16px;
+    font-weight: 900;
+}
+
+.stat-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.temp strong {
+    font-size: 34px;
+    font-weight: 900;
+    color: rgba(255, 111, 145, 0.95);
+}
+
+.temp span {
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(40, 60, 120, 0.75);
+    margin-left: 4px;
+}
+
+/* 간단 스파크라인 */
+.spark {
+    flex: 1;
+    height: 58px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    position: relative;
+    overflow: hidden;
+}
+
+.spark-line {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(140px 60px at 20% 70%, rgba(255, 111, 145, 0.35), transparent 70%),
+        radial-gradient(160px 70px at 70% 30%, rgba(74, 108, 255, 0.35), transparent 70%),
+        linear-gradient(90deg, rgba(120, 150, 255, 0.15), rgba(255, 160, 200, 0.15));
+}
+
+.stat-foot {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pill {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    color: rgba(60, 70, 90, 0.8);
+}
+
+/* 출석 */
+.att-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    font-size: 12px;
+    color: rgba(60, 70, 90, 0.7);
+    margin-bottom: 10px;
+    padding: 0 2px;
+}
+
+.att-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(180, 190, 210, 0.45);
+    border: 1px solid rgba(180, 190, 210, 0.55);
+}
+
+.dot.on {
+    background: rgba(255, 170, 60, 0.75);
+    border-color: rgba(255, 170, 60, 0.85);
+    box-shadow: 0 10px 18px rgba(255, 170, 60, 0.18);
+}
+
+/* =========================
+   ACCOUNT GRID
+========================= */
+.account-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.acc-item {
+    width: 100%;
+    text-align: left;
+    border: none;
+    cursor: pointer;
+
+    padding: 16px 16px;
+    border-radius: 18px;
+
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow: 0 18px 40px rgba(40, 60, 120, 0.12);
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.acc-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 28px 60px rgba(40, 60, 120, 0.18);
+}
+
+.acc-ico {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+}
+
+.acc-txt {
+    font-weight: 900;
+    color: rgba(19, 29, 53, 0.88);
+}
+
+.acc-go {
+    margin-left: auto;
+    font-size: 18px;
+    color: rgba(40, 60, 120, 0.55);
+}
+
+/* =========================
+   COLORS (optional hooks)
+========================= */
+.blue {
+    color: var(--blue);
+}
+
+.red {
+    color: var(--red);
+}
+
+.green {
+    color: var(--green);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 1000px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .topnav {
+        display: none;
+    }
+}
+
+@media (max-width: 700px) {
+
+    .reco-grid,
+    .stats,
+    .account-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .page-hero h1 {
+        font-size: 30px;
+    }
+}

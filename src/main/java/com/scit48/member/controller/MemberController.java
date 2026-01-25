@@ -107,7 +107,9 @@ public class MemberController {
                 member.getNation(),
                 member.getManner().doubleValue(),
                 member.getIntro(),
-                member.getProfileImagePath());
+                member.getProfileImagePath(),
+                member.getNativeLanguage(),
+                member.getLevelLanguage());
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
