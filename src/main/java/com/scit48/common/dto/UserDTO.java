@@ -1,5 +1,6 @@
 package com.scit48.common.dto;
 
+import com.scit48.common.enums.LanguageLevel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.scit48.common.enums.Gender;
 import com.scit48.common.domain.entity.UserEntity;
@@ -14,40 +15,40 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 public class UserDTO {
-	
+
 	private Long id; // PK
-	
-	private String email;
-	
+
+	private String memberId;
+
 	// 중요: 클라이언트 -> 서버 전송(입력) 시에는 동작하지만,
-// 서버 -> 클라이언트 응답(조회) 시에는 JSON에서 제외됩니다.
+	// 서버 -> 클라이언트 응답(조회) 시에는 JSON에서 제외됩니다.
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
-	
+
 	private String nickname;
-	
+
 	private Gender gender; // Enum
-	
+
 	private String intro;
-	
+
 	private Integer age;
-	
+
 	private String nation;
-	
+
 	private BigDecimal manner;
-	
+
 	private String profileImageName;
-	
+
 	private String profileImagePath;
-	
+
 	private String nativeLanguage;
-	
-	private String levelLanguage;
-	
+
+	private LanguageLevel levelLanguage;
+
 	private LocalDateTime createdAt;
 
-// --- DTO 변환 메서드 (편의성 제공) ---
-	
+	// --- DTO 변환 메서드 (편의성 제공) ---
+
 	/*
 	 * DTO -> Entity 변환
 	 * (비밀번호 암호화 처리는 Service 레이어에서 수행 후 별도로 주입하거나,
@@ -55,28 +56,29 @@ public class UserDTO {
 	 */
 	public UserEntity toEntity() {
 		return UserEntity.builder()
-				.email(this.email)
-				.password(this.password) // 암호화 전 평문 혹은 암호화된 값 (Service 로직에 따라 다름)
+				.id(this.id)
+				.memberId(this.memberId)
+				.password(this.password)
 				.nickname(this.nickname)
 				.gender(this.gender)
 				.intro(this.intro)
 				.age(this.age)
 				.nation(this.nation)
-				.manner(this.manner) // 값이 없으면 Entity Builder에서 36.5로 처리됨
+				.manner(this.manner)
 				.nativeLanguage(this.nativeLanguage)
 				.levelLanguage(this.levelLanguage)
 				.profileImageName(this.profileImageName)
 				.profileImagePath(this.profileImagePath)
 				.build();
 	}
-	
+
 	/*
 	 * Entity -> DTO 변환
 	 */
 	public static UserDTO fromEntity(UserEntity entity) {
 		return UserDTO.builder()
 				.id(entity.getId())
-				.email(entity.getEmail())
+				.memberId(entity.getMemberId())
 				// password는 보안상 Entity에서 가져오더라도 DTO에 담지 않거나,
 				// 담더라도 @JsonProperty 설정으로 인해 JSON 응답시 사라집니다.
 				.nickname(entity.getNickname())
@@ -92,6 +94,5 @@ public class UserDTO {
 				.createdAt(entity.getCreatedAt())
 				.build();
 	}
-	
-}
 
+}

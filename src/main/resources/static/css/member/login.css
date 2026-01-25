@@ -163,3 +163,9 @@ button:hover {
     margin: 0 8px;
     color: #aaa;
 }
+.logo a {
+    text-decoration: none;
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+}

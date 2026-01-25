@@ -103,8 +103,8 @@ background:
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 150px;
-    height: 150px;
+    width: 360px;
+    height: 360px;
     border-radius: 50%;
     background: #f2f2f2;
     cursor: pointer;
@@ -284,22 +284,21 @@ background: linear-gradient(135deg, #ff6f91, #ff9f7f);
      flex: 1;
  }
 
- #checkIdBtn {
+ .check-btn {
      margin-top: 0;
-     /* 기본 button margin 제거 */
      width: auto;
      height: 42px;
      font-size: 12px;
      font-weight: 600;
-margin-bottom: 10px;
+     margin-bottom: 10px;
      border-radius: 10px;
      border: 1px solid rgba(0, 0, 0, 0.15);
      background: #fff;
      color: #555;
-
      box-shadow: none;
+     cursor: pointer;
  }
 
- #checkIdBtn:hover {
+ .check-btn:hover {
      background: #f5f5f5;
  }

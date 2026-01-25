@@ -57,7 +57,9 @@ public class SecurityConfig {
 						.permitAll()
 
 						// 인증 관련 API 전부 허용
-						.requestMatchers("/auth/**").permitAll()
+						.requestMatchers(
+								"/api/**")
+						.permitAll()
 
 						// 나머지는 인증 필요
 						.anyRequest().authenticated())

@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const privacy = document.getElementById("privacy");
 
   let isMemberIdChecked = false;
+  let isNicknameChecked = false;
 
   /* =========================
      아이디 중복 확인
@@ -22,28 +23,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const res = await fetch(
-      `${CONTEXT_PATH}auth/check-member-id?memberId=${memberId}`
+      `${CONTEXT_PATH}api/members/exists?memberId=${encodeURIComponent(memberId)}`
     );
 
-    if (!res.ok) {
-      alert("아이디 확인 실패");
-      return;
-    }
+    const result = await res.json();
 
-    const data = await res.json();
-
-    if (data.available) {
+    if (result.status === "SUCCESS" && result.data.available) {
       alert("사용 가능한 아이디입니다");
       isMemberIdChecked = true;
     } else {
-      alert("이미 사용 중인 아이디입니다");
+      alert(result.message);
       isMemberIdChecked = false;
     }
   });
 
-  // 아이디 변경 시 다시 중복확인 필요
   form.memberId.addEventListener("input", () => {
     isMemberIdChecked = false;
+  });
+
+  /* =========================
+     닉네임 중복 확인
+  ========================= */
+  document.getElementById("checkNicknameBtn").addEventListener("click", async () => {
+    const nickname = form.nickname.value.trim();
+    if (!nickname) {
+      alert("닉네임을 입력하세요");
+      return;
+    }
+
+    const res = await fetch(
+      `${CONTEXT_PATH}api/members/exists?nickname=${encodeURIComponent(nickname)}`
+    );
+
+    const result = await res.json();
+
+    if (result.status === "SUCCESS" && result.data.available) {
+      alert("사용 가능한 닉네임입니다");
+      isNicknameChecked = true;
+    } else {
+      alert(result.message);
+      isNicknameChecked = false;
+    }
+  });
+
+  form.nickname.addEventListener("input", () => {
+    isNicknameChecked = false;
   });
 
   /* =========================
@@ -80,15 +104,15 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (!isMemberIdChecked) {
-      alert("아이디 중복 확인을 해주세요");
+    if (!isMemberIdChecked || !isNicknameChecked) {
+      alert("중복 확인을 완료해주세요.");
       return;
     }
 
     const signupData = {
       memberId: form.memberId.value.trim(),
       password: form.password.value,
-      nickname: form.nickname.value,
+      nickname: form.nickname.value.trim(),
       gender: form.gender.value,
       age: Number(form.age.value),
       nation: form.nation.value,
@@ -106,13 +130,15 @@ document.addEventListener("DOMContentLoaded", () => {
       formData.append("image", imageInput.files[0]);
     }
 
-    const res = await fetch(`${CONTEXT_PATH}auth/signup`, {
+    const res = await fetch(`${CONTEXT_PATH}api/members`, {
       method: "POST",
       body: formData
     });
 
-    if (!res.ok) {
-      alert("회원가입 실패");
+    const result = await res.json();
+
+    if (result.status !== "SUCCESS") {
+      alert(result.message);
       return;
     }
 

@@ -1,79 +1,66 @@
 package com.scit48.auth.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scit48.auth.dto.LoginRequestDto;
-import com.scit48.auth.dto.SignupRequestDto;
 import com.scit48.auth.jwt.JwtToken;
 import com.scit48.auth.service.AuthService;
-import com.scit48.member.repository.MemberRepository;
+import com.scit48.auth.repository.RefreshTokenRepository;
+import com.scit48.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class AuthController {
 
         private final AuthService authService;
-        private final MemberRepository memberRepository;
-
-        private final ObjectMapper objectMapper = new ObjectMapper();
-
-        /*
-         * =========================
-         * 회원가입
-         * =========================
-         */
-        @PostMapping(value = "/signup", consumes = "multipart/form-data")
-        public ResponseEntity<Void> signup(
-                        @RequestPart("data") String data,
-                        @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
-
-                SignupRequestDto request = objectMapper.readValue(data, SignupRequestDto.class);
-
-                authService.signup(request, image);
-                return ResponseEntity.ok().build();
-        }
+        private final RefreshTokenRepository refreshTokenRepository;
 
         /*
          * =========================
          * 로그인
          * =========================
+         * POST /api/login
          */
         @PostMapping("/login")
-        public ResponseEntity<JwtToken> login(
+        public ResponseEntity<ApiResponse<JwtToken>> login(
                         @RequestBody LoginRequestDto request) {
-                return ResponseEntity.ok(authService.login(request));
+
+                JwtToken token = authService.login(request);
+                return ResponseEntity.ok(ApiResponse.success(token));
         }
 
         /*
          * =========================
          * 토큰 재발급
          * =========================
+         * POST /api/reissue
          */
         @PostMapping("/reissue")
-        public ResponseEntity<JwtToken> reissue(
+        public ResponseEntity<ApiResponse<JwtToken>> reissue(
                         @RequestHeader("Authorization") String authorization) {
+
                 String refreshToken = authorization.startsWith("Bearer ")
                                 ? authorization.substring(7)
                                 : authorization;
 
-                return ResponseEntity.ok(authService.reissue(refreshToken));
+                JwtToken token = authService.reissue(refreshToken);
+                return ResponseEntity.ok(ApiResponse.success(token));
         }
 
-        /*
-         * =========================
-         * 아이디 중복 확인
-         * =========================
-         */
-        @GetMapping("/check-member-id")
-        public Map<String, Boolean> checkMemberId(
-                        @RequestParam String memberId) {
-                boolean exists = memberRepository.findByMemberId(memberId).isPresent();
+        @PostMapping("/logout")
+        public ResponseEntity<ApiResponse<Void>> logout(
+                        @AuthenticationPrincipal org.springframework.security.core.userdetails.User user) {
 
-                return Map.of("available", !exists);
+                long memberId = Long.parseLong(user.getUsername());
+
+                refreshTokenRepository.delete(memberId);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(null, "로그아웃 완료"));
         }
+
 }
