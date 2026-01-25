@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>LANG:MATE - 관심사 설정</title>
 
+    <!-- 공통 CSS -->
+<link rel="stylesheet" th:href="@{/css/layout.css}">
+
+    <!-- 페이지 전용 CSS -->
     <link rel="stylesheet" th:href="@{/css/member/interest.css}" />
 
     <script th:inline="javascript">
@@ -19,33 +23,42 @@
 
 <body>
 
-    <div class="panel interest-panel">
-        <div class="interest-inner">
+    <!-- HEADER -->
+    <div th:replace="fragments/header :: header"></div>
 
-            <!-- 타이틀 -->
-            <div class="interest-title">
-                <h2>관심사 설정</h2>
-                <p>관심 있는 주제를 최대 5개까지 선택해 주세요.</p>
+    <!-- MAIN -->
+    <main class="page">
+        <div class="panel interest-panel">
+            <div class="interest-inner">
+
+                <!-- 타이틀 -->
+                <div class="interest-title">
+                    <h2>관심사 설정</h2>
+                    <p>관심 있는 주제를 최대 5개까지 선택해 주세요.</p>
+                </div>
+
+                <!-- 관심사 -->
+                <div class="interest-grid">
+                    <button type="button" class="interest-item active">🎒 여행</button>
+                    <button type="button" class="interest-item">🎬 영화</button>
+                    <button type="button" class="interest-item">🎵 음악</button>
+                    <button type="button" class="interest-item">⚽ 스포츠</button>
+                    <button type="button" class="interest-item">💻 기술 / IT</button>
+                    <button type="button" class="interest-item">📚 독서 / 작문</button>
+                </div>
+
+                <!-- 액션 -->
+                <div class="actions">
+                    <button class="next-btn">다음</button>
+                    <span class="skip">건너뛰기 &gt;</span>
+                </div>
+
             </div>
-
-            <!-- 관심사 -->
-            <div class="interest-grid">
-                <button type="button" class="interest-item active">🎒 여행</button>
-                <button type="button" class="interest-item">🎬 영화</button>
-                <button type="button" class="interest-item">🎵 음악</button>
-                <button type="button" class="interest-item">⚽ 스포츠</button>
-                <button type="button" class="interest-item">💻 기술 / IT</button>
-                <button type="button" class="interest-item">📚 독서 / 작문</button>
-            </div>
-
-            <!-- 액션 -->
-            <div class="actions">
-                <button class="next-btn">다음</button>
-                <span class="skip">건너뛰기 &gt;</span>
-            </div>
-
         </div>
-    </div>
+    </main>
+
+    <!-- FOOTER -->
+    <div th:replace="fragments/footer :: footer"></div>
 
 </body>
 

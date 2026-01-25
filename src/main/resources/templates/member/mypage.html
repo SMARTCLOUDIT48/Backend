@@ -7,6 +7,7 @@
     <title>LANG:MATE - 마이페이지</title>
 
     <link rel="stylesheet" th:href="@{/css/member/mypage.css}" />
+<link rel="stylesheet" th:href="@{/css/layout.css}">
 
     <script th:inline="javascript">
         /*<![CDATA[*/
@@ -19,27 +20,8 @@
 
 <body>
 
-    <!-- 상단(선택) -->
-    <header class="topbar">
-        <div class="topbar-inner">
-            <div class="brand">
-                <span class="brand-a">LANG</span><span class="brand-dot">:</span><span class="brand-b">MATE</span>
-            </div>
-
-            <nav class="topnav">
-                <a href="#">커뮤니티</a>
-                <a href="#">파트너 찾기</a>
-                <a href="#">토론</a>
-                <a href="#">회원상담</a>
-            </nav>
-
-            <div class="top-actions">
-                <button class="icon-btn" aria-label="search">🔍</button>
-                <button class="icon-btn" aria-label="menu">☰</button>
-            </div>
-        </div>
-    </header>
-
+    <div th:replace="fragments/header :: header"></div>
+   
     <main class="page">
         <section class="shell">
 
@@ -257,8 +239,9 @@
                                     <span class="dot"></span><span class="dot on"></span><span class="dot"></span><span
                                         class="dot on"></span><span class="dot on"></span><span class="dot"></span><span
                                         class="dot"></span>
-                                        <span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot on"></span><span
-                                            class="dot on"></span><span class="dot"></span><span class="dot"></span>
+                                    <span class="dot"></span><span class="dot on"></span><span class="dot"></span><span
+                                        class="dot on"></span><span class="dot on"></span><span class="dot"></span><span
+                                        class="dot"></span>
                                 </div>
                             </div>
                         </div>
@@ -293,7 +276,7 @@
             </section>
         </section>
     </main>
-
+<div th:replace="fragments/footer :: footer"></div>
 </body>
 
 </html>
