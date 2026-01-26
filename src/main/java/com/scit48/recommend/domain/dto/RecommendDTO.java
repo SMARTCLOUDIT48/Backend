@@ -1,8 +1,10 @@
 package com.scit48.recommend.domain.dto;
 
+import com.scit48.common.enums.LanguageLevel;
 import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.dto.UserDTO;
 import com.scit48.common.enums.Gender;
+
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -14,31 +16,31 @@ import java.math.BigDecimal;
 @Builder
 @ToString
 public class RecommendDTO {
-	
+
 	private Long id; // PK
-	
+
 	private String nickname;
-	
+
 	private Gender gender; // Enum
-	
+
 	private Integer age;
-	
+
 	private String nation;
-	
+
 	private BigDecimal manner;
-	
+
 	private String profileImageName;
-	
+
 	private String profileImagePath;
-	
+
 	private String nativeLanguage;
-	
-	private String levelLanguage;
-	
+
+	private LanguageLevel levelLanguage;
+
 	private int matchPoint;
-	
+
 	// --- DTO 변환 메서드 (편의성 제공) ---
-	
+
 	/*
 	 * DTO -> Entity 변환
 	 * (비밀번호 암호화 처리는 Service 레이어에서 수행 후 별도로 주입하거나,
@@ -57,14 +59,14 @@ public class RecommendDTO {
 				.profileImagePath(this.profileImagePath)
 				.build();
 	}
-	
+
 	/*
 	 * Entity -> DTO 변환
 	 */
 	public static UserDTO fromEntity(UserEntity entity) {
 		return UserDTO.builder()
 				.id(entity.getId())
-				.email(entity.getEmail())
+				.memberId(entity.getMemberId())
 				// password는 보안상 Entity에서 가져오더라도 DTO에 담지 않거나,
 				// 담더라도 @JsonProperty 설정으로 인해 JSON 응답시 사라집니다.
 				.nickname(entity.getNickname())

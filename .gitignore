@@ -43,3 +43,5 @@ out/
 secrets.properties
 
 
+# Redis
+data/redis/dump.rdb
