@@ -13,18 +13,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository memberRepository;
+        private final UserRepository userRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String memberId)
-            throws UsernameNotFoundException {
+        @Override
+        public UserDetails loadUserByUsername(String memberId)
+                        throws UsernameNotFoundException {
 
-        UserEntity memberEntity = memberRepository.findById(Long.valueOf(memberId))
-                .orElseThrow(() -> new UsernameNotFoundException("회원 없음"));
+                UserEntity userEntity = userRepository.findById(Long.valueOf(memberId))
+                                .orElseThrow(() -> new UsernameNotFoundException("회원 없음"));
 
-        return new User(
-                memberEntity.getId().toString(),
-                memberEntity.getPassword(),
-                List.of(new SimpleGrantedAuthority(memberEntity.getRole())));
-    }
+                return new User(
+                                userEntity.getId().toString(),
+                                userEntity.getPassword(),
+                                List.of(new SimpleGrantedAuthority(userEntity.getRole())));
+        }
 }
