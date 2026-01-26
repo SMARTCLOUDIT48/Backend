@@ -15,15 +15,19 @@ import java.util.List;
 public class ChatService {
 	
 	private final ChatMessageRepository chatMessageRepository;
-	private final RedisService redisService; // 👈 [추가 1] RedisService 주입
+	private final RedisService redisService;
 	
 	@Transactional
 	public void saveMessage(ChatMessageDto messageDto) {
-		// 1. DB 저장용 엔티티 변환
+		// 1. DTO -> Entity 변환 (DB 저장용)
 		ChatMessage chatMessage = ChatMessage.builder()
 				.roomId(Long.parseLong(messageDto.getRoomId()))
-				.sender(messageDto.getSender())
-				.senderId(messageDto.getSenderId())
+				
+				// 🌟 [핵심 변경] 새로 추가된 필드 매핑
+				.senderId(messageDto.getSenderId())           // PK (user_id)
+				.senderMemberId(messageDto.getSenderMemberId()) // 로그인 ID (test01)
+				.senderNickname(messageDto.getSender())       // 닉네임 (화면 표시용)
+				
 				.content(messageDto.getMessage())
 				.msgType(ChatMessage.MessageType.valueOf(messageDto.getType().name()))
 				.build();
@@ -31,8 +35,7 @@ public class ChatService {
 		// 2. MySQL에 대화 내용 저장
 		chatMessageRepository.save(chatMessage);
 		
-		// 3. ✨ [추가 2] Redis에 "오늘 대화한 사람" 기록 ✨
-		// 메시지가 정상적으로 저장되면, 보낸 사람의 활동 이력에 받는 사람을 추가합니다.
+		// 3. Redis 활동량 기록
 		if (messageDto.getSenderId() != null && messageDto.getReceiverId() != null) {
 			redisService.recordInteraction(messageDto.getSenderId(), messageDto.getReceiverId());
 		}
@@ -41,16 +44,21 @@ public class ChatService {
 	@Transactional(readOnly = true)
 	public List<ChatMessageDto> getMessages(String roomId) {
 		
-		// 기존 로직 유지 (메시지 불러오기)
+		// DB에서 메시지 가져오기
 		List<ChatMessage> messages = chatMessageRepository.findByRoomIdOrderByMsgIdAsc(Long.parseLong(roomId));
 		
 		List<ChatMessageDto> dtos = new ArrayList<>();
 		
 		for (ChatMessage msg : messages) {
+			// Entity -> DTO 변환 (화면 출력용)
 			ChatMessageDto dto = ChatMessageDto.builder()
 					.roomId(String.valueOf(msg.getRoomId()))
-					.sender(msg.getSender())
+					
+					// 🌟 [핵심 변경] DB에서 꺼낸 정보 다시 DTO에 담기
 					.senderId(msg.getSenderId())
+					.senderMemberId(msg.getSenderMemberId()) // 로그인 ID
+					.sender(msg.getSenderNickname())         // 닉네임
+					
 					.message(msg.getContent())
 					.type(ChatMessageDto.MessageType.valueOf(msg.getMsgType().name()))
 					.build();

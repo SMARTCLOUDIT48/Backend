@@ -1,0 +1,139 @@
+:root {
+    --bg:
+        radial-gradient(1200px 800px at 10% 10%, rgba(255, 90, 150, 0.75), transparent 55%),
+        radial-gradient(1000px 700px at 90% 20%, rgba(120, 140, 255, 0.75), transparent 55%),
+        radial-gradient(900px 800px at 50% 90%, rgba(120, 220, 200, 0.75), transparent 55%),
+        linear-gradient(180deg, #eceeff 0%, #e6ebff 100%);
+
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --muted: #555;
+}
+
+/* Reset */
+* {
+    box-sizing: border-box;
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 🔥 BODY = 페이지 틀 (절대 가운데 정렬 X) */
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* 헤더 / 메인 / 푸터 분리 */
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* 배경 */
+body::before {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    background: var(--bg);
+    filter: blur(48px);
+    z-index: -2;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(130, 180, 255, 0.6), transparent 40%),
+        radial-gradient(circle at 70% 40%, rgba(255, 150, 200, 0.6), transparent 45%);
+    filter: blur(40px);
+    opacity: 0.6;
+    z-index: -1;
+}
+
+/* 🔥 MAIN만 가운데 정렬 */
+.page {
+    flex: 1;
+    /* footer 아래로 밀기 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 80px 24px;
+}
+
+/* Panel */
+.panel {
+    width: 100%;
+    max-width: 980px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(14px);
+    border-radius: var(--radius-lg);
+    padding: 48px 40px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12);
+}
+
+/* Title */
+.interest-title {
+    text-align: center;
+}
+
+.interest-title h2 {
+    font-size: 30px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.interest-title p {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+/* Grid */
+.interest-grid {
+    margin-top: 36px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
+}
+
+/* Item */
+.interest-item {
+    height: 54px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Active */
+.interest-item.active {
+    background: linear-gradient(135deg, #ffb36a, #ff8a00);
+    color: #fff;
+    font-weight: 800;
+}
+
+/* Actions */
+.actions {
+    margin-top: 42px;
+    text-align: center;
+}
+
+.next-btn {
+    width: 320px;
+    height: 48px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, #ff6f91, #ff9f7f);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.skip {
+    display: block;
+    margin-top: 14px;
+    font-size: 13px;
+    color: #777;
+}

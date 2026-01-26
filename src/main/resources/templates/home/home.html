@@ -30,8 +30,14 @@
             <a href="#">고객센터</a>
         </nav>
         <div class="auth-buttons">
-            <button class="login-btn">로그인</button>
-            <button class="signup-btn">회원가입</button>
+<button class="login-btn" th:onclick="|location.href='@{/login}'|">
+    로그인
+</button>
+
+<button class="signup-btn" th:onclick="|location.href='@{member/signup}'|">
+    회원가입
+</button>
+
         </div>
     </div>
 </header>
