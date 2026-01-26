@@ -1,215 +1,522 @@
-:root {
-    --primary-color: #FF7F50; /* 이미지의 주황색 포인트 */
-    --bg-gradient-start: #fdfbfb;
-    --bg-gradient-end: #ebedee;
-    /* 이미지와 유사한 배경 그라데이션 */
-    --bg-mesh: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%);
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+
+  /* 세로 길이를 기존보다 조금 더 늘림 (예: 85px) */
+  height: 85px;
+
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  transition:
+    background 0.35s ease,
+    backdrop-filter 0.35s ease,
+    box-shadow 0.35s ease;
+
+  z-index: 100;
+
+  /* 하단에 은은한 경계선 추가 (선택 사항) */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
 
-body {
-    font-family: 'Noto Sans KR', sans-serif;
-    background: #f3e7e9; /* Fallback */
-    background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%); /* 파스텔톤 배경 */
-    min-height: 100vh;
-    color: #333;
-}
 
-/* 헤더 스타일 */
-.site-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(10px);
+.header-inner {
+  max-width: 1200px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center; /* 요소들이 늘어난 높이의 중앙에 위치하게 함 */
+  justify-content: space-between;
 }
 
 .logo {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--primary-color);
-    letter-spacing: -1px;
+  font-weight: 800;
+  display: flex;
+  gap: 8px;
 }
 
-nav span {
-    margin: 0 15px;
-    font-weight: 500;
-    color: #666;
-    cursor: pointer;
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  /* ✅ 핵심: 메뉴 간격 */
 }
 
-nav span.active {
-    color: var(--primary-color);
-    font-weight: 700;
-    border-bottom: 2px solid var(--primary-color);
+.nav a {
+  position: relative;
+  padding: 8px 14px;
+  border-radius: 999px;
+
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
 }
 
-.header-profile {
-    width: 40px;
-    height: 40px;
-    background-color: #ddd;
-    border-radius: 50%;
+/* ✨ hover glass glow */
+.nav a:hover {
+  color: #222;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 6px 18px rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+
+  transform: translateY(-1px);
 }
 
-/* 메인 컨테이너 */
+
+.nav .divider {
+  color: #ddd;
+  font-size: 13px;
+  margin: 0 -6px;
+  /* divider는 살짝만 */
+}
+
+
+.nav a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ff8fb1, #4a6cff);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: width 0.25s ease;
+}
+
+.nav a:hover {
+  color: #222;
+}
+
+.nav a:hover::after {
+  width: 100%;
+}
+
+
+.login-btn {
+  background: linear-gradient(135deg, #ff6f91, #ff9f7f);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 12px 30px rgba(255, 120, 150, 0.45);
+  cursor: pointer;
+}
+
+.login-btn {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.05);
+
+}
+
+.login-btn:active {
+  transform: translateY(-1px) scale(0.97);
+  box-shadow:
+    0 10px 20px rgba(255, 120, 150, 0.35),
+    0 0 0 10px rgba(255, 120, 150, 0.25);
+}
+
+/* =========================
+   HEADER AUTH BUTTONS
+========================= */
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* 회원가입 버튼 (서브) */
+.signup-btn {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+
+  padding: 10px 18px;
+  border-radius: 999px;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(40, 60, 120, 0.8);
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 18px rgba(80, 100, 180, 0.15);
+
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.signup-btn:hover {
+  background: rgba(255, 255, 255, 0.75);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(80, 100, 180, 0.25);
+}
+
+
+
+/* 헤더 옆 CTA */
+.header-cta {
+  padding: 10px 22px;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  color: #4a6cff;
+  font-weight: 600;
+
+  box-shadow: 0 8px 20px rgba(80, 100, 180, 0.15);
+  cursor: pointer;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+
+.header-cta:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 12px 28px rgba(80, 100, 180, 0.25);
+}
+
+.header-cta {
+  position: relative;
+  overflow: hidden;
+}
+
+* =========================================================
+   🔥 HEADER CTA – ENHANCED PREMIUM EFFECT
+========================================================= */
+
+.header-cta {
+  isolation: isolate;
+}
+
+/* 🌈 오로라 흐름 레이어 */
+.header-cta::before {
+  opacity: 0;
+  background:
+    linear-gradient(120deg,
+      rgba(120, 150, 255, 0.35),
+      rgba(255, 160, 200, 0.35),
+      rgba(140, 220, 200, 0.35));
+  background-size: 200% 200%;
+  animation: ctaAurora 6s ease infinite;
+}
+
+/* ✨ 스윕 라이트 */
+.header-cta::after {
+  content: "";
+  position: absolute;
+  inset: -150%;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.45),
+      transparent);
+  transform: translateX(-100%);
+  transition: transform 0.8s ease;
+  pointer-events: none;
+}
+
+/* Hover */
+.header-cta:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow:
+    0 20px 40px rgba(90, 120, 220, 0.35),
+    0 0 0 6px rgba(120, 150, 255, 0.12);
+}
+
+.header-cta:hover::before {
+  opacity: 1;
+}
+
+.header-cta:hover::after {
+  transform: translateX(100%);
+}
+
+/* Active */
+.header-cta:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow:
+    0 10px 20px rgba(90, 120, 220, 0.25);
+}
+
+/* 🌈 오로라 애니메이션 */
+@keyframes ctaAurora {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
+/* 개별 탭 */
+.community-label-bar .label {
+  padding: 10px 22px;
+  border-radius: 999px;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(60, 70, 90, 0.65);
+
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* hover */
+.community-label-bar .label:hover {
+  background: rgba(255, 255, 255, 0.7);
+  color: rgba(40, 60, 120, 0.85);
+}
+
+.community-bg {
+  padding: 80px 0;
+  background:
+    radial-gradient(800px 400px at 20% 20%, rgba(180, 210, 255, 0.45), transparent 60%),
+    radial-gradient(800px 400px at 80% 30%, rgba(255, 200, 230, 0.45), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45));
+  backdrop-filter: blur(40px);
+}
+
+.community-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 48px;
+  color: rgba(30, 40, 60, 0.9);
+}
+
+
+
+/* 전반적인 배경 설정 (이미지의 퍼플/블루 그라데이션 반영) */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #444;
+
+  /* 배경색의 기본 베이스를 아주 연한 화이트/블루로 설정 */
+  background-color: #f8faff;
+  overflow-x: hidden;
+}
+
+/* 배경의 부드러운 빛 방울(Blobs) 효과 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+
+  /* 이미지의 색감(핑크, 보라, 하늘색)을 반영한 메쉬 그라데이션 */
+  background:
+    radial-gradient(circle at 15% 15%, rgba(255, 174, 214, 0.45) 0%, transparent 40%),
+    radial-gradient(circle at 85% 20%, rgba(182, 193, 255, 0.45) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(142, 211, 255, 0.45) 0%, transparent 45%),
+    radial-gradient(circle at 20% 85%, rgba(200, 160, 255, 0.45) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.6) 0%, transparent 50%);
+
+  /* 블러 수치를 높여서 훨씬 부드럽게 뭉개짐 효과를 줌 */
+  filter: blur(80px);
+  opacity: 0.8;
+  transform: scale(1.1); /* 끝부분이 잘리지 않게 살짝 확대 */
+}
+
 .container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 0 20px;
-}
-
-/* 히어로 섹션 */
-.hero-section {
+    max-width: 900px;
+    margin: 125px auto 60px; /* 헤더 높이(85px)를 고려한 상단 여백 */
+    padding: 20px;
     position: relative;
-    padding: 20px 0 40px;
-    text-align: left;
+    z-index: 1; /* 배경보다 위에 오도록 설정 */
 }
 
-.category-display {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+/* ==========================================
+   1. 히어로 섹션 (상단 카테고리 & 말풍선)
+   ========================================== */
+.hero-section {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 32px;
+    margin-bottom: 40px;
 }
 
 .hero-icon {
-    font-size: 40px;
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 15px;
 }
 
 .hero-text h2 {
-    font-size: 22px;
+    font-size: 28px;
     color: #333;
-    margin-bottom: 5px;
+    font-weight: 700;
+    margin-bottom: 20px;
 }
 
-.hero-text p {
-    color: #666;
-    font-size: 14px;
+.category-select {
+    padding: 12px 25px;
+    font-size: 16px;
+    border: none;
+    border-radius: 50px;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    color: #5e5ce6;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s;
 }
 
+.category-select:hover {
+    transform: scale(1.05);
+}
 
-/* 추가된 Select 박스 스타일 */
-        .category-select {
-            margin-top: 15px;
-            padding: 10px 15px;
-            font-size: 16px;
-            border: 2px solid #FF7F50; /* MUSUBI 주황색 */
-            border-radius: 12px;
-            background-color: white;
-            color: #333;
-            font-family: 'Noto Sans KR', sans-serif;
-            cursor: pointer;
-            outline: none;
-        }
-        .category-select:hover {
-            background-color: #fff8f0;
-        }
-
-
-/* 배경 말풍선 데코 */
+/* 떠다니는 말풍선 스타일 */
 .bubble {
     position: absolute;
-    background: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 12px;
-    color: #888;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 12px 20px;
+    background: #fff;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    animation: float 4s ease-in-out infinite;
 }
-.bubble-1 { top: 10px; right: 100px; transform: rotate(-5deg); }
-.bubble-2 { top: 40px; right: 20px; transform: rotate(5deg); }
-.bubble-3 { top: 70px; right: 120px; }
 
+.bubble-1 { top: 10%; left: 5%; color: #9c27b0; }
+.bubble-2 { bottom: 15%; right: 5%; color: #2196f3; animation-delay: 2s; }
 
-/* 작성 카드 스타일 */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+/* ==========================================
+   2. 글쓰기 카드 (메인 폼)
+   ========================================== */
 .write-card {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 40px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    /* 카드 배경을 이미지처럼 더 투명하고 입체감 있게 수정 (Glassmorphism) */
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+
+    border-radius: 32px;
+    padding: 45px;
+
+    /* 부드러운 그림자와 테두리 광택 효과 */
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.05),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+
+    border: none;
 }
 
 /* 작성자 정보 */
 .writer-info {
     display: flex;
     align-items: center;
-    gap: 12px;
     margin-bottom: 30px;
 }
 
 .avatar img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    object-fit: cover;
+    width: 55px;
+    height: 55px;
+    border-radius: 20px; /* 이미지처럼 약간 각진 둥근 형태 */
+    background: #fff;
+    padding: 3px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    margin-right: 15px;
 }
 
-.info-text {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
+.nickname {
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
 }
 
-.nickname { font-weight: 700; color: #333; }
-.temp {
-    color: #888;
-    background: #f5f5f5;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 12px;
+/* 입력 필드 설정 */
+.input-group {
+    margin-bottom: 10px;
 }
 
-/* 입력 필드 */
 .input-title {
     width: 100%;
     border: none;
-    font-size: 20px;
-    font-weight: 500;
-    padding: 10px 0;
     background: transparent;
+    font-size: 26px;
+    font-weight: 700;
+    padding: 15px 0;
     outline: none;
+    color: #111;
 }
-.input-title::placeholder { color: #ccc; }
+
+.input-title::placeholder { color: #bbb; }
 
 .divider {
     border: 0;
     height: 1px;
-    background: #eee;
-    margin: 10px 0 20px;
-}
-
-.content-area {
-    position: relative;
-    min-height: 250px;
-    display: flex;
-    flex-direction: column;
+    background: linear-gradient(to right, #eee, transparent);
+    margin: 10px 0 30px;
 }
 
 .input-content {
     width: 100%;
+    min-height: 350px;
     border: none;
-    resize: none;
-    font-size: 16px;
-    line-height: 1.6;
     background: transparent;
+    resize: none;
+    font-size: 18px;
+    line-height: 1.8;
     outline: none;
-    flex-grow: 1;
-    min-height: 200px;
+    color: #444;
 }
 
-/* 하단 날짜 (content 내부 좌측 하단) */
 .meta-info {
-    margin-top: auto;
-    color: #bbb;
-    font-size: 12px;
-    padding-bottom: 10px;
+    text-align: right;
+    color: #aaa;
+    font-size: 14px;
+    margin-top: 15px;
 }
 
 /* 하단 툴바 */
@@ -217,44 +524,119 @@ nav span.active {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #f5f5f5;
+    margin-top: 40px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(0,0,0,0.05);
 }
 
-.attach-buttons {
-    display: flex;
-    gap: 15px;
-}
-
+/* 파일 첨부 버튼 (이미지의 태그 스타일 반영) */
 .attach-btn {
-    background: #f9f9f9;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
+    background: #f0f2f5;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
     color: #666;
-    font-size: 13px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: background 0.2s;
+    transition: all 0.2s;
 }
-.attach-btn:hover { background: #eee; }
 
+.attach-btn:hover {
+    background: #e4e6e9;
+    color: #333;
+}
+
+/* 등록 버튼 (이미지의 '더보기' 버튼 스타일 반영) */
 .submit-btn {
-    background: linear-gradient(90deg, #FF7F50, #FF6B6B);
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
+    background: #fff;
+    color: #5e5ce6;
+    border: 1px solid #5e5ce6;
+    padding: 12px 40px;
+    border-radius: 15px;
+    font-size: 16px;
     font-weight: 700;
-    font-size: 15px;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(255, 127, 80, 0.3);
-    transition: transform 0.2s;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(94, 92, 230, 0.1);
 }
 
 .submit-btn:hover {
-    transform: translateY(-2px);
+    background: #5e5ce6;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(94, 92, 230, 0.2);
+    transform: translateY(-3px);
+}
+
+/* =========================
+   FOOTER
+========================= */
+.site-footer {
+  margin-top: 120px;
+  padding: 64px 0 40px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(30px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* 상단 링크 */
+.footer-links {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 48px;
+  margin-bottom: 48px;
+}
+
+.footer-col h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: rgba(30, 40, 60, 0.85);
+}
+
+.footer-col a {
+  display: block;
+  font-size: 13px;
+  color: rgba(60, 70, 90, 0.65);
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: color 0.2s ease;
+}
+
+.footer-col a:hover {
+  color: rgba(30, 40, 60, 0.9);
+}
+
+/* 하단 정보 */
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: rgba(60, 70, 90, 0.6);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 24px;
+}
+
+.footer-meta span {
+  margin-right: 6px;
+}
+
+/* 반응형 */
+@media (max-width: 900px) {
+  .footer-links {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
 }

@@ -7,17 +7,55 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<header class="site-header">
-    <div class="logo">MUSUBI</div>
-    <nav>
-        <span>커뮤니티</span>
-        <span>파트너 찾기</span>
-        <span class="active">Q&A</span>
-        <span>모임</span>
-    </nav>
-    <div class="user-menu">
-        <div class="header-profile"></div>
+<header th:fragment="header" xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="header">
+
+    <div class="header-inner">
+
+        <!-- 로고 -->
+        <div class="logo" th:onclick="|location.href='@{/}'|">
+            💬 MUSUBI
+        </div>
+
+        <!-- 네비게이션 -->
+        <nav class="nav">
+            <a th:href="@{/community}">커뮤니티</a>
+            <a th:href="@{/recommend}">파트너찾기</a>
+            <a th:href="@{/chat}">채팅</a>
+            <a th:href="@{/support}">고객센터</a>
+        </nav>
+
+        <!-- 인증 버튼 영역 -->
+        <div class="auth-buttons">
+
+            <!-- =========================
+                 비로그인 상태
+            ========================= -->
+            <div sec:authorize="isAnonymous()">
+                <button class="login-btn" type="button" th:onclick="|location.href='@{/login}'|">
+                    로그인
+                </button>
+
+                <button class="signup-btn" type="button" th:onclick="|location.href='@{/member/signup}'|">
+                    회원가입
+                </button>
+            </div>
+
+            <!-- =========================
+                 로그인 상태
+            ========================= -->
+            <div sec:authorize="isAuthenticated()">
+                <button class="login-btn" type="button" onclick="logout()">
+                    로그아웃
+                </button>
+            </div>
+
+        </div>
     </div>
+
+    <!-- 로그아웃 JS (공통) -->
+    <script th:src="@{/js/member/logout.js}"></script>
+
 </header>
 
 <main class="container">
@@ -40,7 +78,7 @@
         <div class="bubble bubble-2">안녕하세요!</div>
     </section>
 
-    <form action="/board/write" method="post" enctype="multipart/form-data" class="write-card">
+    <form th:action="@{board/write}" method="post" enctype="multipart/form-data" class="write-card">
 
         <input type="hidden" name="id" th:value="${boardDTO?.id}">
         <input type="hidden" name="userId" th:value="${session.loginUserId}">
@@ -81,6 +119,54 @@
         </div>
     </form>
 </main>
+
+<footer th:fragment="footer" class="site-footer">
+    <div class="footer-inner">
+
+        <div class="footer-links">
+            <div class="footer-col">
+                <h4>소개</h4>
+                <a href="#">서비스 소개</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>제품</h4>
+                <a href="#">커뮤니티</a>
+                <a href="#">파트너 찾기</a>
+                <a href="#">채팅</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>가이드</h4>
+                <a href="#">이용 안내</a>
+                <a href="#">자주 하는 질문</a>
+                <a href="#">이용 가이드</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>지원</h4>
+                <a href="#">공지사항</a>
+                <a href="#">1:1 문의</a>
+                <a href="#">고객센터</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-meta">
+                <span>이용약관</span>
+                <span>·</span>
+                <span>개인정보 처리방침</span>
+                <span>·</span>
+                <span>고객센터</span>
+            </div>
+
+            <div class="footer-copy">
+                © 2026 MUSUBI. All rights reserved.
+            </div>
+        </div>
+
+    </div>
+</footer>
 
 <script>
     // 날짜 설정

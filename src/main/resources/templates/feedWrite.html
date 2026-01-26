@@ -9,7 +9,7 @@
 <body>
 
 <main class="feed-container">
-    <form action="/board/daily/write" method="post" enctype="multipart/form-data" class="feed-card">
+    <form th:action="@{/board/feedWrite}" method="post" enctype="multipart/form-data" class="feed-card">
 
         <div class="card-header">
             <div class="user-profile">

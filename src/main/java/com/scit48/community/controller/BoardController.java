@@ -6,6 +6,7 @@ import com.scit48.community.domain.dto.BoardDTO;
 import com.scit48.community.domain.entity.CategoryEntity;
 import com.scit48.community.repository.CategoryRepository;
 import com.scit48.community.service.BoardService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -90,15 +91,24 @@ public class BoardController {
 	
 	
 	@GetMapping("feedWrite")
-	public String feedWrite(@AuthenticationPrincipal UserDetails user, Model model) {
+	public String feedWrite(//@AuthenticationPrincipal UserDetails user,
+							Model model) {
+		/*
+		// 1. 로그인이 되어있는지 명시적으로 확인
+		if (user == null) {
+			log.debug("비로그인 사용자의 접근 - 로그인 페이지로 리다이렉트");
+			return "redirect:/user/login"; // 로그인 페이지 경로로 수정하세요
+		}
 		
-		
-		// user.getUsername() 등이 null이 아닌지 확인
+		// 2. 로그인한 사용자 ID 추출 및 DB 조회
 		Long userId = Long.valueOf(user.getUsername());
-		UserEntity userEntity = ur.findById(userId).orElseThrow();
-		model.addAttribute("user", user);
+		UserEntity userEntity = ur.findById(userId).orElseThrow(
+				() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다. ID: " + userId)
+		);
 		
-		
+		// 3. 'UserDetails'가 아닌 'UserEntity'를 모델에 담기 (HTML 에러 방지)
+		model.addAttribute("user", userEntity);
+		*/
 		return "feedWrite"; // SNS 스타일 전용 템플릿
 	}
 	
