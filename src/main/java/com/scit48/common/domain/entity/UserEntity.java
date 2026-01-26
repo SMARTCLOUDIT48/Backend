@@ -1,6 +1,7 @@
 package com.scit48.common.domain.entity;
 
 import com.scit48.common.enums.Gender;
+import com.scit48.common.enums.LevelLanguage;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -46,15 +47,15 @@ public class UserEntity {
 	private String nation;
 	
 	// 초기값 36.5 설정
-	@Column(name = "manner", nullable = false, precision = 4, scale = 1)
-	@ColumnDefault("36.5")
-	private BigDecimal manner;
+	@Column(name = "manner", nullable = false)
+	private double manner = 36.5;
 	
 	@Column(name = "native_language")
 	private String nativeLanguage;
 	
+	@Enumerated(EnumType.STRING)
 	@Column(name = "level_language")
-	private String levelLanguage;
+	private LevelLanguage levelLanguage;
 	
 	@Column(name = "profile_image_name")
 	private String profileImageName;
@@ -69,8 +70,8 @@ public class UserEntity {
 	// --- Builder 생성자 ---
 	@Builder
 	public UserEntity(String email, String password, String nickname, Gender gender,
-					  String intro, Integer age, String nation, BigDecimal manner,
-					  String nativeLanguage, String levelLanguage,
+					  String intro, Integer age, String nation, Double manner,
+					  String nativeLanguage, LevelLanguage levelLanguage,
 					  String profileImageName, String profileImagePath) {
 		this.email = email;
 		this.password = password;
@@ -83,7 +84,7 @@ public class UserEntity {
 		this.levelLanguage = levelLanguage;
 		
 		// manner 값이 입력되지 않았다면(null) 기본값 36.5를 할당
-		this.manner = (manner != null) ? manner : BigDecimal.valueOf(36.5);
+		this.manner = (manner != null) ? manner :(36.5);
 		
 		this.profileImageName = profileImageName;
 		this.profileImagePath = profileImagePath;

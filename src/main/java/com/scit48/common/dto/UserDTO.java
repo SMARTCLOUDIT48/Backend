@@ -3,6 +3,7 @@ package com.scit48.common.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.scit48.common.enums.Gender;
 import com.scit48.common.domain.entity.UserEntity;
+import com.scit48.common.enums.LevelLanguage;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,7 +35,7 @@ public class UserDTO {
 	
 	private String nation;
 	
-	private BigDecimal manner;
+	private double manner;
 	
 	private String profileImageName;
 	
@@ -42,7 +43,7 @@ public class UserDTO {
 	
 	private String nativeLanguage;
 	
-	private String levelLanguage;
+	private LevelLanguage levelLanguage;
 	
 	private LocalDateTime createdAt;
 
