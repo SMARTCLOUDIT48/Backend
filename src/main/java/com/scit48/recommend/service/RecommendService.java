@@ -40,20 +40,20 @@ public class RecommendService {
 				() -> new EntityNotFoundException("회원을 찾을 수 없습니다.")
 		);
 		//로그인 되어 있는 유저의 관심사 리스트 받아오기
-		List<UserInterestEntity> loginUserInterestList = uir.findByuser_userId(user);
+		List<UserInterestEntity> loginUserInterestList = uir.findByUser_Id(user);
 		
 		Gender targetGender =getOppositeGender(loginUserEntity.getGender());
 		String targetCountry = getOppositeCountry(loginUserEntity.getNation());
 		
 		//성별, 한일 반전된
 		//회원 목록, 회원 관심사 전체 목록
-		List <UserEntity> allUserEntitylist = ur.findBygenderAndnation(targetGender,targetCountry);
+		List <UserEntity> allUserEntitylist = ur.findByGenderAndNation(targetGender,targetCountry);
 		
 		//allUsersEntitylist에 해당하는 id들의 리스트를 만들겠다.
 		List<Long> userIds = allUserEntitylist.stream().map(UserEntity::getId).toList();
 		
 		//userIds로 구현된 리스트를 활용해서 id에 해당하는 리스트
-		List<UserInterestEntity> userInterestEntityList= uir.findByuser_userIdIn(userIds);
+		List<UserInterestEntity> userInterestEntityList= uir.findByUser_IdIn(userIds);
 		
 		//userInterestEntityList를 각 id에 맞게 관심사 리스트를 분리
 		Map<Long, List<UserInterestEntity>> interestMap =

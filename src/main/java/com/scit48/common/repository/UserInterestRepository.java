@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface UserInterestRepository  extends JpaRepository <UserInterestEntity, Long> {
-	List<UserInterestEntity> findByuser_userId(Long user);
+	List<UserInterestEntity> findByUser_Id(Long user);
 	
-	List<UserInterestEntity> findByuser_userIdIn(List<Long> userIds);
+	List<UserInterestEntity> findByUser_IdIn(List<Long> userIds);
 }

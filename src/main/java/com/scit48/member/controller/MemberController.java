@@ -105,7 +105,7 @@ public class MemberController {
                 member.getGender(),
                 member.getAge(),
                 member.getNation(),
-                member.getManner().doubleValue(),
+                member.getManner(),
                 member.getIntro(),
                 member.getProfileImagePath(),
                 member.getNativeLanguage(),
