@@ -10,8 +10,9 @@ public class PageController {
 	 * 브라우저 주소창에 "localhost:8080/chat" 입력 시 실행
 	 * templates/chat.html 파일을 찾아서 보여줌
 	 */
-	@GetMapping("/chat")
+/**@GetMapping("/chat")
 	public String showChatPage() {
 		return "chat"; // chat.html의 .html을 뺀 이름
 	}
+ */
 }

@@ -1,6 +1,6 @@
 package com.scit48.auth.jwt;
 
-import com.scit48.member.service.CustomUserDetailsService;
+import com.scit48.auth.member.service.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
