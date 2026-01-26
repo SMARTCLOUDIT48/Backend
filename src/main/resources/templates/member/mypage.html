@@ -7,21 +7,19 @@
     <title>LANG:MATE - 마이페이지</title>
 
     <link rel="stylesheet" th:href="@{/css/member/mypage.css}" />
-<link rel="stylesheet" th:href="@{/css/layout.css}">
 
     <script th:inline="javascript">
         /*<![CDATA[*/
         const CONTEXT_PATH = /*[[@{/}]]*/ "/";
         /*]]>*/
     </script>
-
-    <script th:src="@{/js/member/mypage.js}" defer></script>
+<script type="module" th:src="@{/js/member/mypage.js}"></script>
 </head>
 
 <body>
 
-    <div th:replace="fragments/header :: header"></div>
-   
+    <div th:replace="~{fragments/header :: header}"></div>
+
     <main class="page">
         <section class="shell">
 
@@ -36,19 +34,34 @@
 
                 <!-- LEFT -->
                 <aside class="sidebar">
+
                     <!-- 프로필 카드 -->
                     <div class="glass card profile-card">
+
+                        <!-- 프로필 이미지 -->
                         <div class="avatar-wrap">
-                            <img id="profileImage" class="avatar" src="/images/profile/default.png" alt="profile" />
-                            <button class="avatar-btn" type="button" title="프로필 사진 변경">📷</button>
+                            <label>
+                                <input type="file" id="profileImageInput" accept="image/*" hidden />
+
+                        <img id="profileImage" class="avatar" src="/images/profile/default.png" alt="profile" />
+                            </label>
+
+                            <button class="avatar-btn" type="button" title="프로필 사진 변경"
+                                onclick="document.getElementById('profileImageInput').click()">
+                                📷
+                            </button>
                         </div>
 
+                        <!-- 프로필 메타 -->
                         <div class="profile-meta">
                             <h3 id="nickname" class="nickname">닉네임</h3>
-                            <p id="language" class="lang">KOREAN → JP</p>
+                            <p id="language" class="lang">KOREAN → BEGINNER</p>
                         </div>
 
-                        <button class="btn btn-glass" type="button">프로필 수정</button>
+                        <!-- 프로필 수정 버튼 -->
+                        <button id="openProfileModal" class="btn btn-glass" type="button">
+                            프로필 수정
+                        </button>
                     </div>
 
                     <!-- 메뉴 -->
@@ -69,7 +82,7 @@
                     <!-- 작은 카드 -->
                     <div class="glass card mini-card">
                         <div class="mini-head">
-                            <h4>휘친한 목록</h4>
+                            <h4>친한 목록</h4>
                             <span class="mini-pill">Active</span>
                         </div>
                         <div class="mini-row">
@@ -113,6 +126,7 @@
                         </div>
 
                         <div class="reco-grid">
+                            <!-- 샘플 카드들 -->
                             <article class="reco">
                                 <div class="reco-top">
                                     <div class="reco-avatar"></div>
@@ -123,76 +137,54 @@
                                     <div class="stars">★★★★☆</div>
                                 </div>
                                 <div class="reco-tags">
-                                    <span class="tag">대결</span><span class="tag">전역</span><span
-                                        class="tag blue">토론</span><span class="tag">음악</span>
+                                    <span class="tag">대결</span>
+                                    <span class="tag">토론</span>
+                                    <span class="tag blue">음악</span>
                                 </div>
                             </article>
-
                             <article class="reco">
                                 <div class="reco-top">
                                     <div class="reco-avatar"></div>
                                     <div class="reco-name">
-                                        <strong>Alex</strong> <span class="flag">🇺🇸</span>
-                                        <div class="reco-sub">영화 · 일상</div>
+                                        <strong>스라</strong> <span class="flag">🇯🇵</span>
+                                        <div class="reco-sub">여행 · 영화</div>
                                     </div>
                                     <div class="stars">★★★★☆</div>
                                 </div>
                                 <div class="reco-tags">
-                                    <span class="tag">매칭</span><span class="tag">일상</span><span class="tag">관략</span>
-                                </div>
-                            </article>
-
-                            <article class="reco">
-                                <div class="reco-top">
-                                    <div class="reco-avatar"></div>
-                                    <div class="reco-name">
-                                        <strong>윤지님</strong> <span class="flag">🇰🇷</span>
-                                        <div class="reco-sub">드라마 · 음악</div>
-                                    </div>
-                                    <div class="stars">★★★☆☆</div>
-                                </div>
-                                <div class="reco-tags">
-                                    <span class="tag green">영어</span><span class="tag">걸어</span>
-                                </div>
-                            </article>
-
-                            <article class="reco">
-                                <div class="reco-top">
-                                    <div class="reco-avatar"></div>
-                                    <div class="reco-name">
-                                        <strong>다케시</strong> <span class="flag">🇯🇵</span>
-                                        <div class="reco-sub">일상 · 게임</div>
-                                    </div>
-                                    <div class="stars">★★★☆☆</div>
-                                </div>
-                                <div class="reco-tags">
-                                    <span class="tag">일상</span><span class="tag">게임</span>
+                                    <span class="tag">대결</span>
+                                    <span class="tag">토론</span>
+                                    <span class="tag blue">음악</span>
                                 </div>
                             </article>
                             <article class="reco">
                                 <div class="reco-top">
                                     <div class="reco-avatar"></div>
                                     <div class="reco-name">
-                                        <strong>Alex</strong> <span class="flag">🇺🇸</span>
-                                        <div class="reco-sub">영화 · 일상</div>
+                                        <strong>스라</strong> <span class="flag">🇯🇵</span>
+                                        <div class="reco-sub">여행 · 영화</div>
                                     </div>
                                     <div class="stars">★★★★☆</div>
                                 </div>
                                 <div class="reco-tags">
-                                    <span class="tag">매칭</span><span class="tag">일상</span><span class="tag">관략</span>
+                                    <span class="tag">대결</span>
+                                    <span class="tag">토론</span>
+                                    <span class="tag blue">음악</span>
                                 </div>
                             </article>
                             <article class="reco">
                                 <div class="reco-top">
                                     <div class="reco-avatar"></div>
                                     <div class="reco-name">
-                                        <strong>Alex</strong> <span class="flag">🇺🇸</span>
-                                        <div class="reco-sub">영화 · 일상</div>
+                                        <strong>스라</strong> <span class="flag">🇯🇵</span>
+                                        <div class="reco-sub">여행 · 영화</div>
                                     </div>
                                     <div class="stars">★★★★☆</div>
                                 </div>
                                 <div class="reco-tags">
-                                    <span class="tag">매칭</span><span class="tag">일상</span><span class="tag">관략</span>
+                                    <span class="tag">대결</span>
+                                    <span class="tag">토론</span>
+                                    <span class="tag blue">음악</span>
                                 </div>
                             </article>
                         </div>
@@ -200,6 +192,7 @@
 
                     <!-- 중간 2단 카드 -->
                     <div class="stats">
+
                         <div class="glass card stat-card">
                             <div class="stat-head">
                                 <h3>매너 온도</h3>
@@ -227,24 +220,16 @@
                             </div>
                             <div class="attendance">
                                 <div class="att-row">
-                                    <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span>
+                                    <span>월</span><span>화</span><span>수</span><span>목</span>
+                                    <span>금</span><span>토</span><span>일</span>
                                 </div>
                                 <div class="att-grid">
-                                    <span class="dot on"></span><span class="dot on"></span><span
-                                        class="dot on"></span><span class="dot"></span><span class="dot"></span><span
-                                        class="dot on"></span><span class="dot"></span>
-                                    <span class="dot on"></span><span class="dot"></span><span
-                                        class="dot on"></span><span class="dot on"></span><span class="dot"></span><span
-                                        class="dot"></span><span class="dot"></span>
-                                    <span class="dot"></span><span class="dot on"></span><span class="dot"></span><span
-                                        class="dot on"></span><span class="dot on"></span><span class="dot"></span><span
-                                        class="dot"></span>
-                                    <span class="dot"></span><span class="dot on"></span><span class="dot"></span><span
-                                        class="dot on"></span><span class="dot on"></span><span class="dot"></span><span
-                                        class="dot"></span>
+                                    <span class="dot on"></span><span class="dot"></span><span class="dot on"></span>
+                                    <span class="dot"></span><span class="dot on"></span>
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
                     <!-- 하단 카드 -->
@@ -276,7 +261,40 @@
             </section>
         </section>
     </main>
-<div th:replace="fragments/footer :: footer"></div>
+
+    <!-- ================= 프로필 수정 모달 ================= -->
+    <div id="profileModal" class="modal hidden">
+        <div class="modal-content glass">
+
+            <h3>프로필 수정</h3>
+
+            <form id="profileForm">
+
+                <!-- 자기소개 -->
+            <textarea name="intro" placeholder="자기소개"></textarea>
+
+
+                <!-- 언어 레벨 -->
+            <select name="levelLanguage">
+                <option value="BEGINNER">Beginner</option>
+                <option value="INTERMEDIATE">Intermediate</option>
+                <option value="ADVANCED">Advanced</option>
+                <option value="NATIVE">Native</option>
+            </select>
+
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-glass">저장</button>
+                    <button type="button" id="closeProfileModal" class="btn btn-soft">취소</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <!-- ================================================== -->
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
 </body>
 
 </html>

@@ -1,6 +1,7 @@
 package com.scit48.recommend.controller;
 
 import com.scit48.common.dto.UserDTO;
+import com.scit48.recommend.domain.dto.RecommendDTO;
 import com.scit48.recommend.service.RecommendService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +22,8 @@ public class RecommendController {
 	
 	@GetMapping("recommend") //임시
 	public String Recommend(@AuthenticationPrincipal UserDetails user){
-		String user_id = user.getUsername();
-		List<UserDTO> userDTO= rs.firstRecommend(user_id);
+		Long user_id = Long.valueOf(user.getUsername());
+		List<RecommendDTO> userDTO= rs.firstRecommend(user_id);
 		
 		return "recommend";
 	}

@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,24 +23,25 @@ public class AuthService {
 
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final UserRepository memberRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileStorageService fileStorageService;
 
     // ===============================
     // 회원가입
     // ===============================
+    @Transactional
     public UserEntity signup(SignupRequestDto request, MultipartFile image) {
 
-        if (memberRepository.existsByMemberId(request.getMemberId())) {
+        if (userRepository.existsByMemberId(request.getMemberId())) {
             throw new BadRequestException("이미 존재하는 ID입니다.");
         }
 
-        if (memberRepository.existsByNickname(request.getNickname())) {
+        if (userRepository.existsByNickname(request.getNickname())) {
             throw new BadRequestException("이미 사용 중인 닉네임입니다.");
         }
 
-        UserEntity member = UserEntity.builder()
+        UserEntity user = UserEntity.builder()
                 .memberId(request.getMemberId())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
@@ -49,14 +51,18 @@ public class AuthService {
                 .nativeLanguage(request.getNativeLanguage())
                 .levelLanguage(request.getLevelLanguage())
                 .role("ROLE_MEMBER")
+                // 기본 이미지 세팅
+                .profileImageName("default.png")
+                .profileImagePath("/images/profile")
                 .build();
 
+        // 이미지 업로드한 경우만 덮어씀
         if (image != null && !image.isEmpty()) {
-            String savedName = fileStorageService.save(image);
-            member.updateProfileImage(savedName, "/images/" + savedName);
+            String savedName = fileStorageService.saveProfileImage(image);
+            user.updateProfileImage(savedName, "/images/profile");
         }
 
-        return memberRepository.save(member);
+        return userRepository.save(user);
     }
 
     // ===============================
@@ -64,19 +70,19 @@ public class AuthService {
     // ===============================
     public JwtToken login(LoginRequestDto request) {
 
-        UserEntity member = memberRepository.findByMemberId(request.getMemberId())
+        UserEntity user = userRepository.findByMemberId(request.getMemberId())
                 .orElseThrow(() -> new UnauthorizedException("ID 또는 비밀번호가 틀렸습니다."));
 
-        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new UnauthorizedException("ID 또는 비밀번호가 틀렸습니다.");
         }
 
         String accessToken = jwtProvider.createAccessToken(
-                member.getId(),
-                member.getRole());
+                user.getId(),
+                user.getRole());
 
-        String refreshToken = jwtProvider.createRefreshToken(member.getId());
-        refreshTokenRepository.save(member.getId(), refreshToken);
+        String refreshToken = jwtProvider.createRefreshToken(user.getId());
+        refreshTokenRepository.save(user.getId(), refreshToken);
 
         return new JwtToken(accessToken, refreshToken);
     }
@@ -100,12 +106,12 @@ public class AuthService {
 
         refreshTokenRepository.validate(memberId, refreshToken);
 
-        UserEntity member = memberRepository.findById(memberId)
+        UserEntity user = userRepository.findById(memberId)
                 .orElseThrow(() -> new UnauthorizedException("회원이 존재하지 않습니다."));
 
         String newAccessToken = jwtProvider.createAccessToken(
                 memberId,
-                member.getRole());
+                user.getRole());
 
         return new JwtToken(newAccessToken, refreshToken);
     }
