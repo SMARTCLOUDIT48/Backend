@@ -13,12 +13,14 @@ public class MemberPageController {
     public String myPage() {
         return "member/mypage";
     }
-    //회원가입
+
+    // 회원가입
     @GetMapping("/signup")
     public String signupPage() {
         return "member/signup";
     }
-    //관심사
+
+    // 관심사
     @GetMapping("/interest")
     public String interestPage() {
         return "member/interest";
