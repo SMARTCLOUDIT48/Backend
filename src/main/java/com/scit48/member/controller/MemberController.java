@@ -4,18 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scit48.auth.dto.SignupRequestDto;
 import com.scit48.auth.service.AuthService;
 import com.scit48.common.domain.entity.UserEntity;
+import com.scit48.common.dto.UserDTO;
+import com.scit48.common.exception.UnauthorizedException;
 import com.scit48.common.response.ApiResponse;
 import com.scit48.common.repository.UserRepository;
-import com.scit48.member.dto.MyPageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDateTime;
 import java.util.Map;
+import com.scit48.common.exception.BadRequestException;
 
 @RestController
 @RequestMapping("/api/members")
@@ -23,7 +23,7 @@ import java.util.Map;
 public class MemberController {
 
     private final AuthService authService;
-    private final UserRepository memberRepository;
+    private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
     /*
@@ -72,9 +72,9 @@ public class MemberController {
         boolean exists;
 
         if (memberId != null && !memberId.isBlank()) {
-            exists = memberRepository.existsByMemberId(memberId);
+            exists = userRepository.existsByMemberId(memberId);
         } else if (nickname != null && !nickname.isBlank()) {
-            exists = memberRepository.existsByNickname(nickname);
+            exists = userRepository.existsByNickname(nickname);
         } else {
             throw new IllegalArgumentException("memberId 또는 nickname 중 하나는 필요합니다.");
         }
@@ -91,26 +91,11 @@ public class MemberController {
      * GET /api/members/me
      */
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<MyPageResponse>> myPage(
-            @AuthenticationPrincipal User user) {
-
-        long userId = Long.parseLong(user.getUsername());
-
-        UserEntity member = memberRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
-
-        MyPageResponse response = new MyPageResponse(
-                member.getMemberId(),
-                member.getNickname(),
-                member.getGender(),
-                member.getAge(),
-                member.getNation(),
-                member.getManner().doubleValue(),
-                member.getIntro(),
-                member.getProfileImagePath(),
-                member.getNativeLanguage(),
-                member.getLevelLanguage());
-
-        return ResponseEntity.ok(ApiResponse.success(response));
+    public ApiResponse<UserDTO> me(@AuthenticationPrincipal User user) {
+        Long userId = Long.parseLong(user.getUsername());
+        UserEntity entity = userRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException("회원이 존재하지 않습니다."));
+        return ApiResponse.success(UserDTO.fromEntity(entity));
     }
+
 }

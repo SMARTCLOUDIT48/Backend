@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const res = await fetch(`${CONTEXT_PATH}api/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include", // ⭐ 쿠키 받기
+      credentials: "include", //  쿠키 받기
       body: JSON.stringify({ memberId, password })
     });
 
