@@ -6,7 +6,7 @@ import com.scit48.common.dto.UserDTO;
 import com.scit48.common.enums.Gender;
 import com.scit48.common.enums.InterestDetail;
 import com.scit48.common.enums.InterestType;
-import com.scit48.common.enums.LevelLanguage;
+import com.scit48.common.enums.LanguageLevel;
 import com.scit48.common.repository.UserInterestRepository;
 import com.scit48.common.repository.UserRepository;
 import com.scit48.recommend.domain.dto.RecommendDTO;
@@ -129,7 +129,7 @@ public class RecommendService {
 	 * @param partner 매칭 유저
 	 * @return 언어 점수 값 0~30
 	 */
-	private int calLangScore(LevelLanguage i, LevelLanguage partner){
+	private int calLangScore(LanguageLevel i, LanguageLevel partner){
 		
 		int diff = Math.abs(i.score() - partner.score()); //0~3 값
 		return Math.max(0, 30-diff*10); //0 ~ 30

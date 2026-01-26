@@ -1,14 +1,19 @@
 package com.scit48.chat.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
-@Builder                // ★ 이게 없어서 에러가 났던 겁니다!
-@NoArgsConstructor
-@AllArgsConstructor     // ★ @Builder를 쓰려면 이것도 꼭 필요합니다.
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "chat_message")
 public class ChatMessage {
 	
@@ -17,32 +22,47 @@ public class ChatMessage {
 	@Column(name = "msg_id")
 	private Long msgId;
 	
-	// Service에서 Long으로 변환해서 쓰므로 Long으로 통일
 	@Column(name = "room_id")
 	private Long roomId;
 	
-	private String sender; // 보낸 사람 이름
-	
+	// ==========================================
+	// 👇 [중요] 사용자 정보 컬럼 추가 (DB 저장용)
+	// ==========================================
 	@Column(name = "sender_id")
-	private Long senderId;
+	private Long senderId;         // 유저 PK (예: 1)
+	
+	@Column(name = "sender_member_id")
+	private String senderMemberId; // 로그인 ID (예: test01)
+	
+	@Column(name = "sender_nickname")
+	private String senderNickname; // 화면 표시 이름 (예: 홍길동)
+	// ==========================================
 	
 	@Column(columnDefinition = "TEXT")
 	private String content;
 	
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-	
-	public enum MessageType {
-		ENTER, TALK, QUIT, CORRECT, VOICE
-	}
-	
-	// DB 컬럼명 msg_type과 매핑
+	// 메시지 타입 (ENTER, TALK 등)
 	@Enumerated(EnumType.STRING)
 	@Column(name = "msg_type")
 	private MessageType msgType;
 	
-	@PrePersist
-	public void onCreate() {
-		this.createdAt = LocalDateTime.now();
+	@CreatedDate
+	@Column(name = "created_at", updatable = false)
+	private LocalDateTime createdAt;
+	
+	// Enum 정의 (DTO와 맞춰줌)
+	public enum MessageType {
+		ENTER, TALK, QUIT, CORRECT, VOICE
+	}
+	
+	// 빌더 패턴 (Service에서 저장할 때 사용)
+	@Builder
+	public ChatMessage(Long roomId, Long senderId, String senderMemberId, String senderNickname, String content, MessageType msgType) {
+		this.roomId = roomId;
+		this.senderId = senderId;
+		this.senderMemberId = senderMemberId;
+		this.senderNickname = senderNickname;
+		this.content = content;
+		this.msgType = msgType;
 	}
 }

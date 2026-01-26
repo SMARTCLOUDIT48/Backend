@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LANG:MATE - 회원가입</title>
+
+    <!-- 정적 CSS -->
+    <link rel="stylesheet" th:href="@{/css/member/signup.css}" />
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const CONTEXT_PATH = /*[[@{/}]]*/ "/";
+        /*]]>*/
+    </script>
+
+    <script th:src="@{/js/member/signup.js}" defer></script>
+</head>
+
+<body>
+    <form id="signupForm" class="panel" enctype="multipart/form-data">
+        <div class="split">
+
+            <!-- LEFT -->
+            <section class="left">
+                <label class="avatar">
+                    <input type="file" id="imageInput" name="image" />
+                    <img id="preview" />
+                    <span class="plus">+</span>
+                </label>
+
+                <div class="hint">
+                    상대에게 이렇게 보여요
+                    <span>나중에 언제든 변경 가능</span>
+                </div>
+
+                <select id="nativeLanguage" name="nativeLanguage" required>
+                    <option value="">학습 언어</option>
+                    <option value="KOREAN">한국어</option>
+                    <option value="JAPANESE">日本語</option>
+                </select>
+
+                <select name="levelLanguage" required>
+                    <option value="">언어 레벨</option>
+                    <option value="BEGINNER">Beginner</option>
+                    <option value="INTERMEDIATE">Intermediate</option>
+                    <option value="ADVANCED">Advanced</option>
+                    <option value="NATIVE">Native</option>
+                </select>
+            </section>
+
+            <!-- RIGHT -->
+            <section class="right">
+                <h2>회원가입</h2>
+
+                <!-- 아이디 + 중복확인 -->
+                <div class="id-check">
+                    <input type="text" name="memberId" placeholder="ID" required />
+                <button type="button" id="checkIdBtn" class="check-btn">중복확인</button>
+            
+
+                </div>
+                <input type="password" name="password" placeholder="비밀번호" required />
+                <input type="password" name="passwordConfirm" placeholder="비밀번호 확인" required />
+
+                <!--  닉네임 + 중복확인 (추가된 부분) -->
+                <div class="id-check">
+                    <input type="text" name="nickname" placeholder="닉네임" required />
+                    <button type="button" id="checkNicknameBtn" class="check-btn">중복확인</button>
+                </div>
+
+                <div class="two">
+                    <select name="nation" required>
+                        <option value="">국가</option>
+                        <option value="KOREA">대한민국</option>
+                        <option value="JAPAN">일본</option>
+                    </select>
+
+                    <select name="gender" required>
+                        <option value="">성별</option>
+                        <option value="MALE">남성</option>
+                        <option value="FEMALE">여성</option>
+                    </select>
+                </div>
+
+                <input type="number" name="age" placeholder="나이" required />
+
+                <div class="agree">
+                    <label>
+                        <input type="checkbox" id="tos" />
+                        서비스 이용약관 동의 <span>(필수)</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="privacy" />
+                        개인정보 처리방침 동의 <span>(필수)</span>
+                    </label>
+                </div>
+
+                <button type="submit">회원가입하기</button>
+
+                <div class="login-link">
+                    이미 가입하셨나요?
+                    <a th:href="@{/login}">로그인 ></a>
+                </div>
+            </section>
+
+        </div>
+    </form>
+</body>
+
+</html>

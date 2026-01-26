@@ -67,6 +67,19 @@ dependencies {
     // =========================================
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
+
+     // JWT API (토큰 생성/파싱 인터페이스)
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+
+    // JWT 실제 구현체 (서명, 검증 로직)
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+
+    // JWT JSON 직렬화/역직렬화 (Claims 처리)
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+      implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+
 }
 
 tasks.named('test') {

@@ -1,9 +1,10 @@
 package com.scit48.common.dto;
 
+import com.scit48.common.enums.LanguageLevel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.scit48.common.enums.Gender;
 import com.scit48.common.domain.entity.UserEntity;
-import com.scit48.common.enums.LevelLanguage;
+import com.scit48.common.enums.LanguageLevel;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,9 +18,9 @@ import java.time.LocalDateTime;
 public class UserDTO {
 	
 	private Long id; // PK
-	
-	private String email;
-	
+
+	private String memberId;
+
 	// 중요: 클라이언트 -> 서버 전송(입력) 시에는 동작하지만,
 // 서버 -> 클라이언트 응답(조회) 시에는 JSON에서 제외됩니다.
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -42,9 +43,9 @@ public class UserDTO {
 	private String profileImagePath;
 	
 	private String nativeLanguage;
-	
-	private LevelLanguage levelLanguage;
-	
+
+	private LanguageLevel levelLanguage;
+
 	private LocalDateTime createdAt;
 
 // --- DTO 변환 메서드 (편의성 제공) ---
@@ -56,8 +57,9 @@ public class UserDTO {
 	 */
 	public UserEntity toEntity() {
 		return UserEntity.builder()
-				.email(this.email)
-				.password(this.password) // 암호화 전 평문 혹은 암호화된 값 (Service 로직에 따라 다름)
+				.id(this.id)
+				.memberId(this.memberId)
+				.password(this.password)
 				.nickname(this.nickname)
 				.gender(this.gender)
 				.intro(this.intro)
@@ -77,7 +79,7 @@ public class UserDTO {
 	public static UserDTO fromEntity(UserEntity entity) {
 		return UserDTO.builder()
 				.id(entity.getId())
-				.email(entity.getEmail())
+				.memberId(entity.getMemberId())
 				// password는 보안상 Entity에서 가져오더라도 DTO에 담지 않거나,
 				// 담더라도 @JsonProperty 설정으로 인해 JSON 응답시 사라집니다.
 				.nickname(entity.getNickname())

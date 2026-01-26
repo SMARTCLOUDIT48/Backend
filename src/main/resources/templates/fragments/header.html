@@ -1,0 +1,50 @@
+<header th:fragment="header" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="header">
+
+    <div class="header-inner">
+
+        <!-- 로고 -->
+        <div class="logo" th:onclick="|location.href='@{/}'|">
+            💬 TalkTribe
+        </div>
+
+        <!-- 네비게이션 -->
+        <nav class="nav">
+            <a th:href="@{/community}">커뮤니티</a>
+            <a th:href="@{/recommend}">파트너찾기</a>
+            <a th:href="@{/chat}">채팅</a>
+            <a th:href="@{/support}">고객센터</a>
+        </nav>
+
+        <!-- 인증 버튼 영역 -->
+        <div class="auth-buttons">
+
+            <!-- =========================
+                 비로그인 상태
+            ========================= -->
+            <div sec:authorize="isAnonymous()">
+                <button class="login-btn" type="button" th:onclick="|location.href='@{/login}'|">
+                    로그인
+                </button>
+
+                <button class="signup-btn" type="button" th:onclick="|location.href='@{/member/signup}'|">
+                    회원가입
+                </button>
+            </div>
+
+            <!-- =========================
+                 로그인 상태
+            ========================= -->
+            <div sec:authorize="isAuthenticated()">
+                <button class="login-btn" type="button" onclick="logout()">
+                    로그아웃
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 로그아웃 JS (공통) -->
+    <script th:src="@{/js/member/logout.js}"></script>
+
+</header>

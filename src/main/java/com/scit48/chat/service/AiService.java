@@ -1,99 +1,202 @@
 package com.scit48.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Service // 스프링에게 "이건 핵심 로직을 담당하는 서비스야"라고 알려줌
+@Service
 @RequiredArgsConstructor
 public class AiService {
 	
 	private final RestTemplate restTemplate;
-	private final ObjectMapper objectMapper; // JSON 변환기
+	private final ObjectMapper objectMapper;
 	
 	@Value("${google.ai.key}")
 	private String apiKey;
 	
 	@Value("${google.ai.url}")
-	private String url;
+	private String chatUrl; // 채팅용 (Llama)
 	
-	// =================================================================
-	// 1. 문법 교정 기능 (JSON 포맷 리턴)
-	// =================================================================
+	// STT용 주소 (Groq Whisper)
+	private final String STT_URL = "https://api.groq.com/openai/v1/audio/transcriptions";
+	
+	// 1. 문법 교정 (기존)
 	public Map<String, Object> checkGrammar(String message) {
-		// 프롬프트 작성
 		String prompt = """
                 Check grammar for the following sentence.
-                Return ONLY JSON format. Do not include any other text.
-                
-                JSON Schema:
-                {
-                    "corrected": "Corrected English sentence",
-                    "explanation_kr": "Explanation in Korean",
-                    "explanation_jp": "Explanation in Japanese"
-                }
-                
-                Input sentence: """ + message;
+                Return ONLY JSON format.
+                JSON Schema: { "corrected": "...", "explanation_kr": "...", "explanation_jp": "..." }
+                Input: """ + message;
 		
-		// API 호출 (JSON 모드 켜기: true)
-		String jsonResponse = callGroqApi(prompt, true);
-		
-		// 결과 파싱 (String -> Map)
+		// JSON 모드 켜기 (true)
+		String jsonResponse = callGroqChatApi(prompt, true);
 		try {
 			return objectMapper.readValue(jsonResponse, Map.class);
 		} catch (JsonProcessingException e) {
-			log.error("AI 응답 파싱 실패", e);
-			return Map.of("error", "AI 응답을 해석할 수 없습니다.");
+			return Map.of("error", "Parsing Error");
 		}
 	}
 	
-	// =================================================================
-	// 2. 실시간 번역 기능 (텍스트 리턴)
-	// =================================================================
-	public String translate(String message, String targetLangCode) {
-		// 타겟 언어 설정
-		String targetLanguage = "Korean"; // 기본값
-		if ("JA".equalsIgnoreCase(targetLangCode)) targetLanguage = "Japanese";
-		else if ("EN".equalsIgnoreCase(targetLangCode)) targetLanguage = "English";
-		
-		// 프롬프트 작성
+	// 2. 스마트 번역 (기존)
+	public String translate(String message) {
 		String prompt = String.format(
-				"Translate the following text to %s. " +
-						"Do not add any explanations or quotes. Just provide the translated text.\n\n" +
-						"Text: %s",
-				targetLanguage, message
+				"Translate smoothly.\n" +
+						"Rule: Korean -> Japanese, Japanese -> Korean.\n" +
+						"Return ONLY the translated text.\nText: %s", message
 		);
-		
-		// API 호출 (JSON 모드 끄기: false)
-		return callGroqApi(prompt, false);
+		// JSON 모드 끄기 (false) -> 텍스트만 받음
+		return callGroqChatApi(prompt, false);
 	}
 	
-	// =================================================================
-	// 🛠️ 내부 공통 메서드: 실제 API 통신 담당
-	// =================================================================
-	private String callGroqApi(String prompt, boolean isJsonMode) {
+	// 3. 음성 -> 텍스트 변환 (STT)
+	public String stt(MultipartFile file) {
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setBearerAuth(apiKey);
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+			
+			ByteArrayResource fileResource = new ByteArrayResource(file.getBytes()) {
+				@Override
+				public String getFilename() {
+					return "audio.webm";
+				}
+			};
+			
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("file", fileResource);
+			body.add("model", "whisper-large-v3");
+			body.add("response_format", "json");
+			
+			HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
+			
+			ResponseEntity<String> response = restTemplate.postForEntity(STT_URL, entity, String.class);
+			
+			JsonNode root = objectMapper.readTree(response.getBody());
+			return root.path("text").asText().trim();
+			
+		} catch (Exception e) {
+			log.error("STT 상세 에러: ", e);
+			return "오류 발생: " + e.getMessage();
+		}
+	}
+	
+	// 💘 4. [수정됨] 호감도 분석 (Strict Mode)
+	public Map<String, Object> analyzeSentiment(String chatHistory) {
+		String prompt = """
+            Role: You are a sharp-witted 'Dating Coach'.
+            Task: Analyze the dialogue and provide feedback in JSON format.
+            
+            [STRICT Language Rules]
+            1. First, identify the DOMINANT language of the dialogue.
+            2. IF Korean (한국어):
+               - Output MUST be 100% Korean.
+               - Do NOT use Chinese characters (e.g., '関係', '是什么').
+               - Do NOT use English.
+            3. IF Japanese (日本語):
+               - Output MUST be 100% Japanese.
+            
+            [JSON Output Schema]
+            {
+              "score": (Integer 0-100),
+              "comment": "One-line assessment (Keep it witty and cynical)",
+              "advice": "Actionable advice for the user"
+            }
+
+            [Dialogue to Analyze]
+            """ + chatHistory;
+		
+		// JSON 모드로 호출
+		String jsonResponse = callGroqChatApi(prompt, true);
+		
+		try {
+			return objectMapper.readValue(jsonResponse, Map.class);
+		} catch (Exception e) {
+			log.error("JSON 파싱 오류", e);
+			return Map.of("score", 0, "comment", "분석 실패 (Analysis Failed)", "advice", "Try again.");
+		}
+	}
+	
+	// ✨ 5. [수정됨] 멘트 체크 (Strict JSON Mode)
+	public Map<String, Object> analyzeMessage(String message) {
+		String prompt = """
+            Role: You are a 'Dating Consultant' checking a user's draft message.
+            Task: Evaluate the message and suggest a better version in JSON.
+
+            [STRICT Language Rules]
+            1. Identify the language of the [User's Draft Message].
+            2. IF Korean:
+               - 'feedback' and 'better_version' MUST be in natural Korean.
+               - NEVER use Chinese characters.
+            3. IF Japanese:
+               - Output MUST be in Japanese.
+
+            [JSON Output Schema] - USE THESE EXACT KEYS:
+            {
+              "score": (Integer 0-100),
+              "risk": "Safe" or "Caution" or "Danger",
+              "feedback": "1-2 sentences explaining why this score was given",
+              "better_version": "A revised, more attractive message (keep it empty string if perfect)"
+            }
+
+            [User's Draft Message]
+            """ + message;
+		
+		try {
+			// Groq API 호출
+			String jsonResponse = callGroqChatApi(prompt, true);
+			
+			// JSON 파싱
+			Map<String, Object> result = objectMapper.readValue(jsonResponse, Map.class);
+			
+			// 🚨 안전장치: 혹시 AI가 키를 빼먹었을 경우를 대비한 기본값 설정
+			result.putIfAbsent("score", 50);
+			result.putIfAbsent("risk", "Caution");
+			result.putIfAbsent("feedback", "AI가 피드백을 생성하지 못했습니다.");
+			result.putIfAbsent("better_version", "");
+			
+			return result;
+			
+		} catch (Exception e) {
+			log.error("AI Analysis Error: ", e);
+			// 에러 발생 시 클라이언트가 멈추지 않도록 기본값 반환
+			return Map.of(
+					"score", 0,
+					"risk", "Error",
+					"feedback", "분석 중 오류가 발생했습니다. 다시 시도해주세요.",
+					"better_version", ""
+			);
+		}
+	}
+	
+	// (공통 메서드) Groq API 호출 로직
+	private String callGroqChatApi(String prompt, boolean isJsonMode) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setBearerAuth(apiKey);
 		
 		Map<String, Object> body = new HashMap<>();
-		body.put("model", "llama-3.3-70b-versatile");
+		body.put("model", "llama-3.3-70b-versatile"); // 모델명 확인
 		
-		// 메시지 구성
 		List<Map<String, String>> messages = new ArrayList<>();
 		Map<String, String> userMessage = new HashMap<>();
 		userMessage.put("role", "user");
@@ -101,28 +204,19 @@ public class AiService {
 		messages.add(userMessage);
 		body.put("messages", messages);
 		
-		// JSON 모드가 필요하면 설정 추가
+		// JSON 모드일 때만 포맷 지정
 		if (isJsonMode) {
 			body.put("response_format", Map.of("type", "json_object"));
 		}
 		
 		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-		
 		try {
-			ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
-			Map<String, Object> responseBody = response.getBody();
-			
-			if (responseBody == null) return "Error: Empty Body";
-			
-			List<Map<String, Object>> choices = (List<Map<String, Object>>) responseBody.get("choices");
-			Map<String, Object> firstChoice = choices.get(0);
-			Map<String, Object> messageContent = (Map<String, Object>) firstChoice.get("message");
-			
-			return (String) messageContent.get("content");
-			
+			ResponseEntity<Map> response = restTemplate.postForEntity(chatUrl, entity, Map.class);
+			Map<String, Object> firstChoice = (Map) ((List) response.getBody().get("choices")).get(0);
+			return (String) ((Map) firstChoice.get("message")).get("content");
 		} catch (Exception e) {
-			log.error("Groq API 호출 중 오류 발생", e);
-			return "Error: " + e.getMessage();
+			log.error("API 호출 중 오류 발생", e);
+			return "Error";
 		}
 	}
 }

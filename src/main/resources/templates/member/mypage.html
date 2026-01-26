@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LANG:MATE - 마이페이지</title>
+
+    <link rel="stylesheet" th:href="@{/css/member/mypage.css}" />
+<link rel="stylesheet" th:href="@{/css/layout.css}">
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const CONTEXT_PATH = /*[[@{/}]]*/ "/";
+        /*]]>*/
+    </script>
+
+    <script th:src="@{/js/member/mypage.js}" defer></script>
+</head>
+
+<body>
+
+    <div th:replace="fragments/header :: header"></div>
+   
+    <main class="page">
+        <section class="shell">
+
+            <!-- 타이틀 영역 -->
+            <div class="page-hero glass">
+                <h1>마이페이지</h1>
+                <p>나의 프로필 · 학습 정보 · 매너 온도 · 출석을 한눈에 관리하세요.</p>
+            </div>
+
+            <!-- 메인 그리드 -->
+            <section class="grid">
+
+                <!-- LEFT -->
+                <aside class="sidebar">
+                    <!-- 프로필 카드 -->
+                    <div class="glass card profile-card">
+                        <div class="avatar-wrap">
+                            <img id="profileImage" class="avatar" src="/images/profile/default.png" alt="profile" />
+                            <button class="avatar-btn" type="button" title="프로필 사진 변경">📷</button>
+                        </div>
+
+                        <div class="profile-meta">
+                            <h3 id="nickname" class="nickname">닉네임</h3>
+                            <p id="language" class="lang">KOREAN → JP</p>
+                        </div>
+
+                        <button class="btn btn-glass" type="button">프로필 수정</button>
+                    </div>
+
+                    <!-- 메뉴 -->
+                    <nav class="glass card menu">
+                        <a class="menu-item active" href="#">
+                            <span class="mi-ico">👤</span><span>프로필</span>
+                        </a>
+                        <a class="menu-item" href="#">
+                            <span class="mi-ico">📘</span><span>학습 정보</span>
+                            <span class="badge">3</span>
+                        </a>
+                        <a class="menu-item" href="#"><span class="mi-ico">🌡️</span><span>매너 온도</span></a>
+                        <a class="menu-item" href="#"><span class="mi-ico">🗓️</span><span>출석</span></a>
+                        <a class="menu-item" href="#"><span class="mi-ico">🧾</span><span>출석 기록</span></a>
+                        <a class="menu-item" href="#"><span class="mi-ico">⚙️</span><span>계정 관리</span></a>
+                    </nav>
+
+                    <!-- 작은 카드 -->
+                    <div class="glass card mini-card">
+                        <div class="mini-head">
+                            <h4>휘친한 목록</h4>
+                            <span class="mini-pill">Active</span>
+                        </div>
+                        <div class="mini-row">
+                            <div class="mini-avatar"></div>
+                            <div class="mini-text">
+                                <div class="mini-name">스라</div>
+                                <div class="mini-sub">여행 · 영화</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 관심사 -->
+                    <div class="glass card mini-card">
+                        <div class="mini-head">
+                            <h4>관심사 설정</h4>
+                        </div>
+                        <div class="chip-wrap">
+                            <button class="chip">여행</button>
+                            <button class="chip">영화</button>
+                            <button class="chip">드라마</button>
+                            <button class="chip">음악</button>
+                            <button class="chip">힙합</button>
+                            <button class="chip">게임</button>
+                            <button class="chip">요리</button>
+                            <button class="chip">기타</button>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- RIGHT -->
+                <section class="content">
+
+                    <!-- 추천 카드 -->
+                    <div class="glass card content-card">
+                        <div class="card-head">
+                            <div>
+                                <h2>관심사에 맞는 친구 추천</h2>
+                                <p>내 관심사에 맞는 친구를 추천해드려요.</p>
+                            </div>
+                            <button class="btn btn-soft" type="button">더보기</button>
+                        </div>
+
+                        <div class="reco-grid">
+                            <article class="reco">
+                                <div class="reco-top">
+                                    <div class="reco-avatar"></div>
+                                    <div class="reco-name">
+                                        <strong>스라</strong> <span class="flag">🇯🇵</span>
+                                        <div class="reco-sub">여행 · 영화</div>
+                                    </div>
+                                    <div class="stars">★★★★☆</div>
+                                </div>
+                                <div class="reco-tags">
+                                    <span class="tag">대결</span><span class="tag">전역</span><span
+                                        class="tag blue">토론</span><span class="tag">음악</span>
+                                </div>
+                            </article>
+
+                            <article class="reco">
+                                <div class="reco-top">
+                                    <div class="reco-avatar"></div>
+                                    <div class="reco-name">
+                                        <strong>Alex</strong> <span class="flag">🇺🇸</span>
+                                        <div class="reco-sub">영화 · 일상</div>
+                                    </div>
+                                    <div class="stars">★★★★☆</div>
+                                </div>
+                                <div class="reco-tags">
+                                    <span class="tag">매칭</span><span class="tag">일상</span><span class="tag">관략</span>
+                                </div>
+                            </article>
+
+                            <article class="reco">
+                                <div class="reco-top">
+                                    <div class="reco-avatar"></div>
+                                    <div class="reco-name">
+                                        <strong>윤지님</strong> <span class="flag">🇰🇷</span>
+                                        <div class="reco-sub">드라마 · 음악</div>
+                                    </div>
+                                    <div class="stars">★★★☆☆</div>
+                                </div>
+                                <div class="reco-tags">
+                                    <span class="tag green">영어</span><span class="tag">걸어</span>
+                                </div>
+                            </article>
+
+                            <article class="reco">
+                                <div class="reco-top">
+                                    <div class="reco-avatar"></div>
+                                    <div class="reco-name">
+                                        <strong>다케시</strong> <span class="flag">🇯🇵</span>
+                                        <div class="reco-sub">일상 · 게임</div>
+                                    </div>
+                                    <div class="stars">★★★☆☆</div>
+                                </div>
+                                <div class="reco-tags">
+                                    <span class="tag">일상</span><span class="tag">게임</span>
+                                </div>
+                            </article>
+                            <article class="reco">
+                                <div class="reco-top">
+                                    <div class="reco-avatar"></div>
+                                    <div class="reco-name">
+                                        <strong>Alex</strong> <span class="flag">🇺🇸</span>
+                                        <div class="reco-sub">영화 · 일상</div>
+                                    </div>
+                                    <div class="stars">★★★★☆</div>
+                                </div>
+                                <div class="reco-tags">
+                                    <span class="tag">매칭</span><span class="tag">일상</span><span class="tag">관략</span>
+                                </div>
+                            </article>
+                            <article class="reco">
+                                <div class="reco-top">
+                                    <div class="reco-avatar"></div>
+                                    <div class="reco-name">
+                                        <strong>Alex</strong> <span class="flag">🇺🇸</span>
+                                        <div class="reco-sub">영화 · 일상</div>
+                                    </div>
+                                    <div class="stars">★★★★☆</div>
+                                </div>
+                                <div class="reco-tags">
+                                    <span class="tag">매칭</span><span class="tag">일상</span><span class="tag">관략</span>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+
+                    <!-- 중간 2단 카드 -->
+                    <div class="stats">
+                        <div class="glass card stat-card">
+                            <div class="stat-head">
+                                <h3>매너 온도</h3>
+                                <span class="muted">최근 30일</span>
+                            </div>
+                            <div class="stat-main">
+                                <div class="temp">
+                                    <strong id="manner">36.5</strong><span>°C</span>
+                                </div>
+                                <div class="spark">
+                                    <div class="spark-line"></div>
+                                </div>
+                            </div>
+                            <div class="stat-foot">
+                                <span class="pill">친절함</span>
+                                <span class="pill">응답 빠름</span>
+                                <span class="pill">매칭 성실</span>
+                            </div>
+                        </div>
+
+                        <div class="glass card stat-card">
+                            <div class="stat-head">
+                                <h3>출석 현황</h3>
+                                <span class="muted">이번 달</span>
+                            </div>
+                            <div class="attendance">
+                                <div class="att-row">
+                                    <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span>
+                                </div>
+                                <div class="att-grid">
+                                    <span class="dot on"></span><span class="dot on"></span><span
+                                        class="dot on"></span><span class="dot"></span><span class="dot"></span><span
+                                        class="dot on"></span><span class="dot"></span>
+                                    <span class="dot on"></span><span class="dot"></span><span
+                                        class="dot on"></span><span class="dot on"></span><span class="dot"></span><span
+                                        class="dot"></span><span class="dot"></span>
+                                    <span class="dot"></span><span class="dot on"></span><span class="dot"></span><span
+                                        class="dot on"></span><span class="dot on"></span><span class="dot"></span><span
+                                        class="dot"></span>
+                                    <span class="dot"></span><span class="dot on"></span><span class="dot"></span><span
+                                        class="dot on"></span><span class="dot on"></span><span class="dot"></span><span
+                                        class="dot"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 하단 카드 -->
+                    <div class="glass card content-card">
+                        <div class="card-head">
+                            <div>
+                                <h2>계정 관리</h2>
+                                <p>알림/설정/로그아웃 등을 관리할 수 있어요.</p>
+                            </div>
+                            <button class="btn btn-soft" type="button">설정</button>
+                        </div>
+
+                        <div class="account-grid">
+                            <button class="acc-item">
+                                <span class="acc-ico">🔔</span>
+                                <span class="acc-txt">알림 및 설정 변경</span>
+                                <span class="acc-go">›</span>
+                            </button>
+
+                            <button class="acc-item">
+                                <span class="acc-ico">🚪</span>
+                                <span class="acc-txt">로그아웃</span>
+                                <span class="acc-go">›</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </section>
+            </section>
+        </section>
+    </main>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+
+</html>
