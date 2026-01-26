@@ -83,21 +83,42 @@ function enterRoom(roomId, roomName, element) {
     connect(roomId);
 }
 
-// --- 5. 소켓 연결 ---
+// --- 5. 소켓 연결 (수정됨) ---
 function connect(roomId) {
     if (stompClient && stompClient.connected) {
         subscribeToRoom(roomId);
         return;
     }
 
-    var socket = new WebSocket('ws://localhost:8080/ws/chat');
+    // 1. 로그인할 때 저장해둔 토큰 꺼내기 (키 이름이 'accessToken'인지 확인하세요!)
+    var token = localStorage.getItem("accessToken");
+
+    if (!token) {
+        alert("로그인이 필요합니다!");
+        window.location.href = "/login"; // 로그인 페이지로 튕겨내기
+        return;
+    }
+
+    // 2. SockJS 사용 + URL 뒤에 토큰 붙이기 (?token=eyJ...)
+    // 백엔드에서 .withSockJS()를 켰으므로 new SockJS()를 써야 합니다.
+    var socket = new SockJS('/ws/chat?token=' + token);
+
     stompClient = Stomp.over(socket);
 
-    stompClient.connect({}, function (frame) {
+    // 3. 연결 시 헤더에도 토큰 담기 (이중 보안)
+    var headers = {
+        'Authorization': 'Bearer ' + token
+    };
+
+    stompClient.connect(headers, function (frame) {
         console.log('Connected: ' + frame);
         document.getElementById("connectionStatus").innerText = "🟢 실시간 연결됨";
         document.getElementById("connectionStatus").style.color = "green";
         subscribeToRoom(roomId);
+    }, function(error) {
+        // 연결 실패 시 에러 처리
+        console.error("연결 실패:", error);
+        alert("서버 연결에 실패했습니다. 토큰이 만료되었거나 서버 오류입니다.");
     });
 }
 
