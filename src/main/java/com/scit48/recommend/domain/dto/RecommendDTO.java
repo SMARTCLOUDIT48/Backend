@@ -4,7 +4,6 @@ import com.scit48.common.enums.LanguageLevel;
 import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.dto.UserDTO;
 import com.scit48.common.enums.Gender;
-
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -16,23 +15,23 @@ import java.math.BigDecimal;
 @Builder
 @ToString
 public class RecommendDTO {
-
+	
 	private Long id; // PK
-
+	
 	private String nickname;
-
+	
 	private Gender gender; // Enum
-
+	
 	private Integer age;
-
+	
 	private String nation;
-
-	private BigDecimal manner;
-
+	
+	private double manner;
+	
 	private String profileImageName;
-
+	
 	private String profileImagePath;
-
+	
 	private String nativeLanguage;
 
 	private LanguageLevel levelLanguage;
