@@ -69,6 +69,9 @@ public class UserEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "level_language", nullable = false, length = 20)
 	private LanguageLevel levelLanguage;
+	
+	@Column(name = "study_language", nullable = false, length = 20)
+	private String studyLanguage;
 
 	@Column(name = "profile_image_name")
 	private String profileImageName;
