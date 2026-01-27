@@ -9,35 +9,38 @@
  * ✔ 재발급 실패 시 로그인 페이지 이동
  */
 export async function authFetch(url, options = {}) {
+  console.log("authFetch 요청:", url);
 
-    // 1차 요청
-    let response = await fetch(url, {
-        ...options,
-        credentials: "include"
-    });
+  let response = await fetch(url, {
+    ...options,
+    credentials: "include"
+  });
 
-    // 정상 응답이면 그대로 반환
-    if (response.status !== 401) {
-        return response;
-    }
+  if (response.status !== 401) {
+    return response;
+  }
 
-    // 401 → accessToken 만료 가능성
-    //  refreshToken으로 재발급 시도
-    const reissueResponse = await fetch(`${CONTEXT_PATH}api/reissue`, {
-        method: "POST",
-        credentials: "include"
-    });
+  //  reissue 요청 자체에는 재발급 로직 적용 금지
+  if (url.includes("/api/reissue")) {
+    return response;
+  }
 
-    // 재발급 성공 → 원래 요청 다시 시도
-    if (reissueResponse.ok) {
-        return fetch(url, {
-            ...options,
-            credentials: "include"
-        });
-    }
+  console.warn("401 발생 → accessToken 재발급 시도");
 
-    // 재발급도 실패 → 진짜 로그아웃 상태
+  const reissueResponse = await fetch(`${CONTEXT_PATH}api/reissue`, {
+    method: "POST",
+    credentials: "include"
+  });
+
+  if (!reissueResponse.ok) {
     alert("로그인이 필요합니다.");
     location.href = `${CONTEXT_PATH}login`;
     return;
+  }
+
+  //  재발급 성공 → 원래 요청 딱 1번만 재시도
+  return fetch(url, {
+    ...options,
+    credentials: "include"
+  });
 }
