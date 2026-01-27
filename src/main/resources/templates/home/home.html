@@ -7,36 +7,13 @@
     <title>TalkTribe</title>
     <link rel="stylesheet" th:href="@{/home/css/style.css}" />
     <script th:src="@{/home/js/home.js}" defer></script>
-
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
 </head>
 
 <body>
 <!-- ===== HEADER ===== -->
-<header class="header">
-    <div class="header-inner">
-        <div class="logo">💬 TalkTribe</div>
+    <div th:replace="~{fragments/header :: header}"></div>
 
-        <nav class="nav">
-            <a href="#">커뮤니티</a>
-            <span class="divider">|</span>
-            <a href="#">파트너찾기</a>
-            <span class="divider">|</span>
-            <a href="#">채팅</a>
-            <span class="divider">|</span>
-            <a href="#">고객센터</a>
-        </nav>
-        <div class="auth-buttons">
-<button class="login-btn" th:onclick="|location.href='@{/login}'|">
-    로그인
-</button>
-
-<button class="signup-btn" th:onclick="|location.href='@{member/signup}'|">
-    회원가입
-</button>
-
-        </div>
-    </div>
-</header>
 
 <!-- ===== HERO ===== -->
 <section class="hero" aria-label="Hero">

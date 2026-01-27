@@ -1,19 +1,18 @@
 import { authFetch } from "/js/common/authFetch.js";
-
-/**
- * mypage.js
- * ----------------------------------------
- * - 마이페이지 데이터 로딩
- * - 프로필 이미지 변경
- * - 프로필 수정 모달 (자기소개, 언어레벨)
- */
+console.log("[mypage.js] loaded");
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  // ===== DOM =====
+  // ===============================
+  // DOM
+  // ===============================
   const nicknameEl = document.getElementById("nickname");
-  const languageEl = document.getElementById("language");
-  const mannerEl = document.getElementById("manner");
+  const ageEl = document.getElementById("age");
+  const introEl = document.getElementById("intro");
+  const nationFlagEl = document.getElementById("nationFlag");
+  const nationTextEl = document.getElementById("nationText");
+  const levelSpanEl = document.getElementById("levelLanguage"); 
+
   const profileImageEl = document.getElementById("profileImage");
   const imageInput = document.getElementById("profileImageInput");
 
@@ -38,15 +37,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const user = result.data;
+    console.log("API user =", user);
 
+    // ===== 프로필 =====
     nicknameEl.textContent = user.nickname;
-    languageEl.textContent = `${user.nativeLanguage} → ${user.levelLanguage}`;
-    mannerEl.textContent = user.manner;
+    ageEl.textContent = `(${user.age})`;
+    introEl.textContent = user.intro ?? "자기소개를 작성해 주세요.";
 
-    profileImageEl.src =
-      user.profileImagePath || "/images/profile/default.png";
+    // ===== 일본어 레벨 표시 (🔥 핵심) =====
+    levelSpanEl.textContent = user.levelLanguage ?? "BEGINNER";
 
-    // 모달 초기값 세팅
+    // ===== 국적 =====
+    if (user.nation === "KOREA") {
+      nationFlagEl.textContent = "🇰🇷";
+      nationTextEl.textContent = "Korea";
+    } else if (user.nation === "JAPAN") {
+      nationFlagEl.textContent = "🇯🇵";
+      nationTextEl.textContent = "Japan";
+    }
+
+    // ===== 이미지 =====
+    const imagePath =
+      user.profileImagePath && user.profileImageName
+        ? `${user.profileImagePath}/${user.profileImageName}`
+        : "/images/profile/default.png";
+
+    profileImageEl.src = imagePath;
+
+    // ===== 모달 초기값 =====
     introTextarea.value = user.intro ?? "";
     levelSelect.value = user.levelLanguage;
 
@@ -108,8 +126,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
     if (res.ok) {
+      // 🔥 reload 없이 즉시 반영
+      introEl.textContent = introTextarea.value || "자기소개를 작성해 주세요.";
+      levelSpanEl.textContent = levelSelect.value;
+
+      modal.classList.add("hidden");
       alert("프로필 수정 완료");
-      location.reload();
     } else {
       alert("프로필 수정 실패");
     }

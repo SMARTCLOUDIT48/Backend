@@ -108,4 +108,16 @@ public class UserEntity {
 		this.profileImagePath = path;
 	}
 
+	// 프로필 정보 수정
+	public void updateProfile(String intro, LanguageLevel levelLanguage) {
+
+		if (intro != null) {
+			this.intro = intro;
+		}
+
+		if (levelLanguage != null) {
+			this.levelLanguage = levelLanguage;
+		}
+	}
+
 }
