@@ -1,4 +1,4 @@
-package com.scit48.member.controller;
+package com.scit48.auth.member.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,11 +14,13 @@ public class MemberPageController {
         return "member/mypage";
     }
 
+    // 회원가입
     @GetMapping("/signup")
     public String signupPage() {
         return "member/signup";
     }
 
+    // 관심사
     @GetMapping("/interest")
     public String interestPage() {
         return "member/interest";

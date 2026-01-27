@@ -6,14 +6,17 @@
 const myNativeLanguage = 'KO'; // 나의 모국어 (KO: 한국어)
 var stompClient = null;
 var currentRoomId = null;
-var mySenderId = Math.floor(Math.random() * 1000) + 1; // 내 ID (임시 랜덤)
-var mySenderName = "익명" + mySenderId;
+
+// 🚨 [수정 1] 랜덤 ID 삭제하고, HTML에 숨겨둔 진짜 내 정보 가져오기
+var mySenderId = document.getElementById("myUserId").value;
+var mySenderName = document.getElementById("myNickname").value;
+
 var subscription = null;
 var aiData = {};
 
 // --- 2. 페이지 로드 시 실행 ---
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Chat Init...");
+    console.log(`✅ 채팅 초기화 완료 (내 ID: ${mySenderId}, 닉네임: ${mySenderName})`);
     loadChatRooms();
     createLoadingOverlay(); // 로딩 오버레이 DOM 생성
 });
@@ -39,22 +42,26 @@ function createLoadingOverlay() {
     }
 }
 
-// --- 3. 채팅방 목록 불러오기 ---
 function loadChatRooms() {
     fetch('/api/chat/rooms')
         .then(res => res.json())
         .then(rooms => {
+            console.log("📌 서버에서 온 방 데이터:", rooms);
+
             const listArea = document.getElementById("roomListArea");
             listArea.innerHTML = "";
             rooms.forEach(room => {
+                const realId = room.roomId || room.id || room.chatRoomId;
+
                 const li = document.createElement("li");
                 li.className = "room-item";
-                li.onclick = () => enterRoom(room.id, room.name, li);
+                li.onclick = () => enterRoom(realId, room.name, li);
+
                 li.innerHTML = `
                     <div class="room-avatar">💬</div>
                     <div class="room-info">
                         <div class="room-name">${room.name}</div>
-                        <div class="room-last-msg">ID: ${room.id}</div>
+                        <div class="room-last-msg">ID: ${realId}</div> 
                     </div>`;
                 listArea.appendChild(li);
             });
@@ -68,10 +75,8 @@ function enterRoom(roomId, roomName, element) {
 
     currentRoomId = roomId;
 
-    // 헤더 정보 업데이트
     document.getElementById("roomTitle").innerText = roomName;
 
-    // 배지 초기화 (일단 숨김)
     const badge = document.getElementById('activityBadge');
     if (badge) badge.style.display = 'none';
 
@@ -90,7 +95,7 @@ function connect(roomId) {
         return;
     }
 
-    var socket = new WebSocket('ws://localhost:8080/ws/chat');
+    var socket = new SockJS('/ws/chat');
     stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function (frame) {
@@ -98,21 +103,24 @@ function connect(roomId) {
         document.getElementById("connectionStatus").innerText = "🟢 실시간 연결됨";
         document.getElementById("connectionStatus").style.color = "green";
         subscribeToRoom(roomId);
+    }, function(error) {
+        console.error("연결 실패:", error);
+        alert("로그인 정보가 없습니다. 다시 로그인 해주세요.");
+        window.location.href = "/login";
     });
 }
 
-// --- 6. 방 구독 (핵심 로직 수정됨) ---
+// --- 6. 방 구독 ---
 function subscribeToRoom(roomId) {
     if (subscription) subscription.unsubscribe();
 
     subscription = stompClient.subscribe('/sub/chat/room/' + roomId, function (message) {
         const msgObj = JSON.parse(message.body);
 
-        // 1. UI 그리기
         showUi(msgObj);
 
-        // 2. ✨ [추가] 상대방이 메시지를 보냈다면 활동량 배지 즉시 갱신
-        if (msgObj.senderId != mySenderId) {
+        // 🚨 [수정 2] ID 비교 시 문자열로 변환하여 안전하게 비교
+        if (String(msgObj.senderId) !== String(mySenderId)) {
             checkPartnerActivity(msgObj.senderId);
         }
     });
@@ -133,15 +141,13 @@ function loadChatHistory(roomId) {
             if (messages && messages.length > 0) {
                 messages.forEach(msg => {
                     showUi(msg);
-                    // 상대방 ID 찾기 (마지막 메시지 기준)
-                    if(msg.senderId != mySenderId) {
+                    if(String(msg.senderId) !== String(mySenderId)) {
                         lastPartnerId = msg.senderId;
                     }
                 });
                 showSystemMessage("--- 이전 대화 내역 ---");
             }
 
-            // ✨ [추가] 과거 대화 내역을 불러온 후, 상대방의 활동량 체크 실행
             if (lastPartnerId) {
                 checkPartnerActivity(lastPartnerId);
             }
@@ -155,7 +161,10 @@ function showUi(message) {
     var ul = document.getElementById("messageList");
     var li = document.createElement("li");
 
-    var isMe = (message.senderId == mySenderId);
+    // 🚨 [수정 3] 가장 중요한 비교 로직 수정 (문자열로 변환하여 비교)
+    // 숫자 101과 문자 "101"을 같다고 인식하게 만듦
+    var isMe = (String(message.senderId) === String(mySenderId));
+
     li.className = isMe ? "message-li me right" : "message-li other left";
 
     // --- 1. 프로필 이미지 (상대방일 때만) ---
@@ -166,14 +175,12 @@ function showUi(message) {
         li.appendChild(profileImg);
     }
 
-    // --- 2. 메인 컨테이너 (이름 + 내용래퍼) ---
-    // 이름은 말풍선 위에, 말풍선과 시간은 옆에 와야 하므로 별도 컨테이너가 필요
+    // --- 2. 메인 컨테이너 ---
     const mainContainer = document.createElement("div");
     mainContainer.style.display = "flex";
     mainContainer.style.flexDirection = "column";
     mainContainer.style.maxWidth = "70%";
 
-    // (1) 이름 표시 (상대방일 때만 메인 컨테이너 맨 위에)
     if (!isMe) {
         const senderDiv = document.createElement("div");
         senderDiv.className = "sender-name";
@@ -181,15 +188,13 @@ function showUi(message) {
         mainContainer.appendChild(senderDiv);
     }
 
-    // (2) 내용 래퍼 (말풍선 + 시간 + 읽음숫자) -> 여기가 CSS flex-row 적용됨
     const contentWrapper = document.createElement("div");
     contentWrapper.className = "msg-content-wrapper";
 
-    // --- A. 말풍선 영역 (툴바 포함) ---
+    // --- A. 말풍선 영역 ---
     const bubbleArea = document.createElement("div");
-    bubbleArea.style.position = "relative"; // 툴바 위치 기준
+    bubbleArea.style.position = "relative";
 
-    // 말풍선 내용 처리
     let bubbleContent = "";
     let cleanText = "";
 
@@ -203,19 +208,18 @@ function showUi(message) {
         cleanText = tempDiv.innerText.replace("🎤", "").replace("[음성 메시지]", "").trim();
     }
 
-    // 툴바 (TTS, 번역)
+    // 툴바
     const actionToolbar = document.createElement("div");
     actionToolbar.className = "msg-actions";
 
     if (cleanText.length > 0) {
         const ttsBtn = document.createElement("button");
         ttsBtn.className = "action-btn";
-        ttsBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> 🔊'; // 아이콘 텍스트 대체 가능
+        ttsBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> 🔊';
         ttsBtn.onclick = () => speakText(cleanText);
         actionToolbar.appendChild(ttsBtn);
     }
 
-    // 번역 버튼
     const transResultBox = document.createElement("div");
     transResultBox.className = "trans-box";
     transResultBox.innerText = "번역 중...";
@@ -235,7 +239,6 @@ function showUi(message) {
         actionToolbar.appendChild(transBtn);
     }
 
-    // 말풍선 DOM 조립
     const bubbleDiv = document.createElement("div");
     bubbleDiv.className = "bubble";
     bubbleDiv.innerHTML = bubbleContent;
@@ -244,11 +247,10 @@ function showUi(message) {
     bubbleArea.appendChild(bubbleDiv);
     bubbleArea.appendChild(transResultBox);
 
-    // --- B. 메타 정보 (읽음 숫자 + 시간) ---
+    // --- B. 메타 정보 ---
     const metaDiv = document.createElement("div");
     metaDiv.className = "msg-meta";
 
-    // 1. 읽음 숫자 (데이터가 없으면 0 처리)
     const unReadCount = message.unReadCount || 0;
     if (unReadCount > 0) {
         const readSpan = document.createElement("span");
@@ -257,16 +259,13 @@ function showUi(message) {
         metaDiv.appendChild(readSpan);
     }
 
-    // 2. 시간 (데이터가 없으면 현재 시간 포맷팅)
     const timeSpan = document.createElement("span");
     timeSpan.className = "send-time";
-    // message.time이 서버에서 오면 그대로 쓰고, 없으면 JS에서 만듦
     timeSpan.innerText = message.time ? message.time : formatTime(new Date());
     metaDiv.appendChild(timeSpan);
 
-    // --- 최종 조립 ---
     contentWrapper.appendChild(bubbleArea);
-    contentWrapper.appendChild(metaDiv); // 말풍선 옆에 메타정보 붙이기
+    contentWrapper.appendChild(metaDiv);
 
     mainContainer.appendChild(contentWrapper);
     li.appendChild(mainContainer);
@@ -274,22 +273,17 @@ function showUi(message) {
     ul.scrollTop = ul.scrollHeight;
 }
 
-// 8 - 2
-// 현재 시간을 '오후 3:04' 형식으로 반환하는 함수
 function formatTime(date) {
     const d = new Date(date);
     let hour = d.getHours();
     let min = d.getMinutes();
     const ampm = hour >= 12 ? '오후' : '오전';
-
     hour = hour % 12;
-    hour = hour ? hour : 12; // 0시는 12시로 표시
+    hour = hour ? hour : 12;
     min = min < 10 ? '0' + min : min;
-
     return `${ampm} ${hour}:${min}`;
 }
 
-// --- 9. 시스템 메시지 ---
 function showSystemMessage(text) {
     var ul = document.getElementById("messageList");
     var li = document.createElement("li");
@@ -313,8 +307,8 @@ function sendMessage() {
         var chatMessage = {
             type: 'TALK',
             roomId: currentRoomId,
-            sender: mySenderName,
-            senderId: mySenderId,
+            sender: mySenderName, // ✅ 이제 진짜 닉네임으로 보냅니다
+            senderId: mySenderId, // ✅ 이제 진짜 ID로 보냅니다
             message: content
         };
         stompClient.send("/pub/chat/message", {}, JSON.stringify(chatMessage));
@@ -342,7 +336,7 @@ function requestTranslation(text, resultBox) {
         });
 }
 
-// --- 12. AI 문법 검사 (모달) ---
+// --- 12. AI 문법 검사 ---
 function checkGrammar() {
     var msgInput = document.getElementById("msg");
     var text = msgInput.value.trim();
@@ -452,19 +446,14 @@ function speakText(text, lang) {
     window.speechSynthesis.speak(utterance);
 }
 
-
-/* ==========================================================
-   💘 1. 전체 호감도 분석
-   ========================================================== */
+// --- 15. 호감도 체크 함수들 (생략 없이 그대로 유지) ---
 function checkLoveSignal() {
     if (!currentRoomId) { alert("대화방에 먼저 입장해주세요!"); return; }
-
     const messages = document.querySelectorAll(".message-li .bubble");
     if (messages.length === 0) { alert("분석할 대화 내용이 없어요!"); return; }
 
     let chatLog = "";
-    const recentMessages = Array.from(messages).slice(-15);
-    recentMessages.forEach(msg => {
+    Array.from(messages).slice(-15).forEach(msg => {
         let text = msg.innerText.replace("🔊", "").replace("🔄", "").replace("번역", "").trim();
         chatLog += text + "\n";
     });
@@ -472,10 +461,8 @@ function checkLoveSignal() {
     const btn = document.querySelector(".love-btn-header");
     const btnSpan = btn.querySelector("span");
     const originalText = btnSpan.innerText;
-
     btnSpan.innerText = "분석중...";
     btn.disabled = true;
-
     const overlay = document.getElementById("loadingOverlay");
     if(overlay) overlay.style.display = "flex";
 
@@ -483,20 +470,9 @@ function checkLoveSignal() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chatHistory: chatLog })
-    })
-        .then(res => res.json())
-        .then(data => {
-            showLoveModal(data);
-        })
-        .catch(err => {
-            console.error(err);
-            alert("분석 실패!");
-        })
-        .finally(() => {
-            btnSpan.innerText = originalText;
-            btn.disabled = false;
-            if(overlay) overlay.style.display = "none";
-        });
+    }).then(res => res.json()).then(data => showLoveModal(data))
+        .catch(err => { console.error(err); alert("분석 실패!"); })
+        .finally(() => { btnSpan.innerText = originalText; btn.disabled = false; if(overlay) overlay.style.display = "none"; });
 }
 
 function showLoveModal(data) {
@@ -504,63 +480,30 @@ function showLoveModal(data) {
     const title = document.getElementById("loveModalTitle");
     const scoreDiv = document.getElementById("loveScore");
     const feedbackDiv = document.getElementById("loveFeedback");
-
     document.getElementById("loveRiskBadge").style.display = "none";
     document.getElementById("loveRecommendationBox").style.display = "none";
-
     title.innerText = "💘 호감도 전체 분석";
-
     let emoji = "😐";
-    if (data.score >= 90) emoji = "😍";
-    else if (data.score >= 70) emoji = "😘";
-    else if (data.score <= 30) emoji = "😱";
-
+    if (data.score >= 90) emoji = "😍"; else if (data.score >= 70) emoji = "😘"; else if (data.score <= 30) emoji = "😱";
     scoreDiv.innerHTML = `${data.score}점 <span style="font-size:2rem">${emoji}</span>`;
     feedbackDiv.innerHTML = `<b>[평가]</b> ${data.comment}<br><br><b>[💡 조언]</b> ${data.advice}`;
-
     modal.style.display = "block";
 }
+function closeLoveModal() { document.getElementById("loveModal").style.display = "none"; }
 
-function closeLoveModal() {
-    document.getElementById("loveModal").style.display = "none";
-}
-
-
-/* ==========================================================
-   💌 2. 보내기 전 멘트 체크
-   ========================================================== */
 function checkMessageScore() {
     var msgInput = document.getElementById("msg");
     var content = msgInput.value.trim();
-
-    if (!content) {
-        alert("내용을 입력해주세요!");
-        msgInput.focus();
-        return;
-    }
-
+    if (!content) { alert("내용을 입력해주세요!"); msgInput.focus(); return; }
     var btn = document.getElementById("btn-love-check");
     var originalHTML = btn.innerHTML;
-    btn.innerText = "⏳";
-    btn.disabled = true;
-
+    btn.innerText = "⏳"; btn.disabled = true;
     fetch('/api/ai/pre-check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ "message": content })
-    })
-        .then(res => res.json())
-        .then(data => {
-            showLoveTooltip(data);
-        })
-        .catch(err => {
-            console.error(err);
-            alert("오류 발생!");
-        })
-        .finally(() => {
-            btn.innerHTML = originalHTML;
-            btn.disabled = false;
-        });
+    }).then(res => res.json()).then(data => showLoveTooltip(data))
+        .catch(err => { console.error(err); alert("오류 발생!"); })
+        .finally(() => { btn.innerHTML = originalHTML; btn.disabled = false; });
 }
 
 function showLoveTooltip(data) {
@@ -568,27 +511,15 @@ function showLoveTooltip(data) {
     const scoreSpan = document.getElementById("tooltipScore");
     const feedbackDiv = document.getElementById("tooltipFeedback");
     const recommendBox = document.getElementById("tooltipRecommendBox");
-
     let emoji = "😐";
-    if (data.score >= 90) emoji = "😍";
-    else if (data.score >= 70) emoji = "😘";
-    else if (data.score <= 30) emoji = "😱";
-
+    if (data.score >= 90) emoji = "😍"; else if (data.score >= 70) emoji = "😘"; else if (data.score <= 30) emoji = "😱";
     scoreSpan.innerHTML = `${data.score}점 ${emoji} <span style="font-size:0.8rem; color:#666;">(${data.risk})</span>`;
     feedbackDiv.innerText = data.feedback;
-
     if (data.better_version && data.better_version.trim() !== "") {
         recommendBox.style.display = "block";
-        recommendBox.innerHTML = `
-            <span class="recommend-label">✨ 추천 멘트 (클릭하여 적용)</span>
-            <div class="recommend-text">"${data.better_version}"</div>
-            <span class="click-hint">Click!</span>
-        `;
+        recommendBox.innerHTML = `<span class="recommend-label">✨ 추천 멘트 (클릭하여 적용)</span><div class="recommend-text">"${data.better_version}"</div><span class="click-hint">Click!</span>`;
         recommendBox.dataset.text = data.better_version;
-    } else {
-        recommendBox.style.display = "none";
-    }
-
+    } else { recommendBox.style.display = "none"; }
     tooltip.style.display = "block";
 }
 
@@ -596,52 +527,19 @@ function applyTooltipCorrection() {
     const recommendBox = document.getElementById("tooltipRecommendBox");
     const newText = recommendBox.dataset.text;
     const msgInput = document.getElementById("msg");
-
-    if (newText) {
-        msgInput.value = newText;
-        closeLoveTooltip();
-        msgInput.focus();
-    }
+    if (newText) { msgInput.value = newText; closeLoveTooltip(); msgInput.focus(); }
 }
-
-function closeLoveTooltip() {
-    document.getElementById("loveTooltip").style.display = "none";
-}
-
-
-/* ==========================================================
-   🖼️ 3. 유틸리티 (프로필 이미지 & 활동량 체크)
-   ========================================================== */
-
-// 사용자 ID와 이름을 받아서, 보여줄 프로필 이미지 URL을 반환
-function getProfileImage(userId, userName) {
-    // 임시 아바타 생성 (나중에 실제 DB 연동 시 변경)
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&color=fff&rounded=true`;
-}
-
-// ✨ 상대방의 활동량(인기도) 체크 및 배지 표시
+function closeLoveTooltip() { document.getElementById("loveTooltip").style.display = "none"; }
+function getProfileImage(userId, userName) { return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&color=fff&rounded=true`; }
 function checkPartnerActivity(partnerId) {
     if (!partnerId) return;
-
-    fetch(`/chat/activity/${partnerId}`)
-        .then(res => res.json())
-        .then(count => {
-            const badge = document.getElementById('activityBadge');
-            if (!badge) return; // HTML에 배지가 없으면 패스
-
-            badge.style.display = 'inline-block';
-            badge.className = 'activity-badge'; // 클래스 초기화
-
-            if (count >= 10) {
-                badge.classList.add('badge-hot');
-                badge.innerHTML = `🔥 ${count}명과 대화 중! (인기)`;
-            } else if (count > 0) {
-                badge.classList.add('badge-normal');
-                badge.innerHTML = `💬 오늘 ${count}명과 대화함`;
-            } else {
-                badge.classList.add('badge-normal');
-                badge.innerHTML = `✨ 지금 대화하면 칼답 가능성!`;
-            }
-        })
-        .catch(err => console.error("활동량 조회 실패:", err));
+    fetch(`/chat/activity/${partnerId}`).then(res => res.json()).then(count => {
+        const badge = document.getElementById('activityBadge');
+        if (!badge) return;
+        badge.style.display = 'inline-block';
+        badge.className = 'activity-badge';
+        if (count >= 10) { badge.classList.add('badge-hot'); badge.innerHTML = `🔥 ${count}명과 대화 중! (인기)`; }
+        else if (count > 0) { badge.classList.add('badge-normal'); badge.innerHTML = `💬 오늘 ${count}명과 대화함`; }
+        else { badge.classList.add('badge-normal'); badge.innerHTML = `✨ 지금 대화하면 칼답 가능성!`; }
+    }).catch(err => console.error("활동량 조회 실패:", err));
 }

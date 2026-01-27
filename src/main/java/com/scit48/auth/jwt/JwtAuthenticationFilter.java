@@ -1,6 +1,6 @@
 package com.scit48.auth.jwt;
 
-import com.scit48.member.service.CustomUserDetailsService;
+import com.scit48.auth.member.service.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,9 +30,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-
+        System.out.println("[JWT] METHOD = " + request.getMethod()
+                + ", URI = " + request.getRequestURI());
         String token = extractAccessToken(request);
-
+        System.out.println("[JWT] accessToken = " + token);
         // 토큰 없으면 비로그인 상태로 통과
         if (!StringUtils.hasText(token)) {
             filterChain.doFilter(request, response);
@@ -41,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             Claims claims = jwtProvider.parseClaims(token);
-
+            System.out.println("[JWT] claims = " + claims);
             // ACCESS 토큰만 인증에 사용
             if (!"ACCESS".equals(claims.get("type"))) {
                 filterChain.doFilter(request, response);
@@ -57,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     userDetails.getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
+            System.out.println("[JWT] 인증 성공, userId = " + memberId);
         } catch (Exception e) {
             // 토큰 문제 있어도 강제 차단 ❌
             // 그냥 비로그인 상태로 통과

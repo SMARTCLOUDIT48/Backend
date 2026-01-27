@@ -8,54 +8,59 @@
     font-family: Pretendard, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 
+/* =========================
+   THEME VARIABLES
+========================= */
 :root {
+    /* 🔥 강한 컬러 배경 (3번째 레퍼런스 급) */
     --bg:
         radial-gradient(1200px 800px at 10% 10%, rgba(255, 90, 150, 0.75), transparent 55%),
         radial-gradient(1000px 700px at 90% 20%, rgba(120, 140, 255, 0.75), transparent 55%),
         radial-gradient(900px 800px at 50% 90%, rgba(120, 220, 200, 0.75), transparent 55%),
         linear-gradient(180deg, #eceeff 0%, #e6ebff 100%);
 
-    --text: rgba(19, 29, 53, 0.88);
-    --muted: rgba(60, 70, 90, 0.65);
+
+    --hero-text: rgba(19, 29, 53, 0.88);
+    --section-title: rgba(19, 29, 53, 0.88);
+    --muted: #555;
+    --header-h: 72px;
 
     --blue: #4a6cff;
     --red: #ff6f91;
-    --green: #32c48d;
 
-    --glass-bg: rgba(255, 255, 255, 0.55);
-    --glass-border: rgba(255, 255, 255, 0.65);
-    --glass-shadow: 0 30px 80px rgba(40, 60, 120, 0.18);
-
+    /* 💎 Glass */
+    --glass-bg: rgba(255, 255, 255, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
     --radius-lg: 28px;
     --radius-md: 20px;
 }
 
 /* =========================
-   BODY BG (MAIN MATCH)
+   BODY
 ========================= */
-html,
-body {
-    height: 100%;
-}
-
-body {
-    background: var(--bg);
-    color: var(--text);
-}
-
 body::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: -1;
+
     background:
         radial-gradient(circle at 20% 30%, rgba(130, 180, 255, 0.6), transparent 40%),
         radial-gradient(circle at 70% 40%, rgba(255, 150, 200, 0.6), transparent 45%),
         radial-gradient(circle at 50% 80%, rgba(180, 255, 220, 0.6), transparent 50%);
+
     filter: blur(40px);
     opacity: 0.6;
 }
 
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    padding-top: var(--header-h);
+    min-height: 100vh;
+}
 /* =========================
    TOPBAR
 ========================= */
@@ -173,30 +178,34 @@ body::before {
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.btn-glass {
+.level-pill {
+    padding: 5px 10px;
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+
+    background: rgba(74, 108, 255, 0.15);
+    border: 1px solid rgba(74, 108, 255, 0.25);
+    color: rgba(74, 108, 255, 0.95);
+}
+.btn-profile {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+
+    border-radius: 999px;
     background: rgba(255, 255, 255, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.75);
-    color: rgba(40, 60, 120, 0.85);
-    box-shadow: 0 10px 24px rgba(80, 100, 180, 0.18);
-}
+    border: 1px solid rgba(255, 255, 255, 0.8);
 
-.btn-glass:hover {
-    background: rgba(255, 255, 255, 0.8);
+    color: rgba(40, 60, 120, 0.75);
+    box-shadow: 0 4px 10px rgba(80, 100, 180, 0.12);
+}
+.btn-profile:hover {
+    background: rgba(255, 255, 255, 0.9);
     transform: translateY(-1px);
 }
-
-.btn-soft {
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.75);
-    color: rgba(40, 60, 120, 0.85);
-    padding: 10px 16px;
-}
-
-.btn-soft:hover {
-    background: rgba(255, 255, 255, 0.78);
-    transform: translateY(-1px);
-}
-
 /* =========================
    PAGE LAYOUT
 ========================= */
@@ -230,149 +239,241 @@ body::before {
 /* 메인 그리드 */
 .grid {
     display: grid;
-    grid-template-columns: 320px 1fr;
-    /* 이미지처럼 왼쪽 넓게 */
+    grid-template-columns: 340px 1fr;
     gap: 28px;
-    align-items: start;
+align-items: stretch;
 }
 
 /* =========================
-   SIDEBAR
+   SIDEBAR (개선됨)
 ========================= */
 .sidebar {
     display: flex;
     flex-direction: column;
     gap: 18px;
+    min-height: 100%;
+}
+
+.sidebar::after {
+    content: "";
+    flex: 1;
 }
 
 /* 프로필 카드 */
 .profile-card {
-    padding: 22px;
+    padding: 28px 24px;
     text-align: center;
 }
 
 .avatar-wrap {
     position: relative;
-    width: 180px;
-    height: 180px;
-    margin: 0 auto 12px;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 18px;
+}
+
+.avatar-wrap {
+    width: 190px;
+    height: 190px;
+    margin: 0 auto 22px;
+    position: relative;
 }
 
 .avatar {
-    width: 180px;
-    height: 180px;
+    width: 190px;
+    height: 190px;
     border-radius: 50%;
     object-fit: cover;
-    box-shadow: 0 14px 30px rgba(40, 60, 120, 0.28);
+
+    border: 4px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+        0 20px 40px rgba(40, 60, 120, 0.25),
+        0 0 0 6px rgba(255, 255, 255, 0.35);
 }
+
 
 .avatar-btn {
     position: absolute;
     right: 4px;
     bottom: 4px;
+
     width: 34px;
     height: 34px;
     border-radius: 50%;
+
     border: 1px solid rgba(255, 255, 255, 0.75);
     background: rgba(255, 255, 255, 0.75);
+
+    font-size: 14px;
     cursor: pointer;
+
+    box-shadow: 0 4px 10px rgba(40, 60, 120, 0.18);
+    transition: transform 0.2s ease;
 }
 
-.profile-meta .nickname {
-    font-size: 18px;
+.avatar-btn:hover {
+    transform: scale(1.05);
+}
+
+/* 프로필 상세 정보 */
+.profile-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+.nickname {
+    font-size: 21px;
+    font-weight: 900;
+}
+
+.age {
+    font-size: 14px;
+    color: rgba(60, 70, 90, 0.65);
+}
+
+.profile-meta .nation {
+    font-size: 13.5px;
+    color: rgba(60, 70, 90, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    margin: 0 auto;
+    width: fit-content;
+}
+
+.lang {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 8px 14px;
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+}
+.level-pill {
+    font-size: 11px;
     font-weight: 800;
-    margin-bottom: 6px;
-}
 
-.profile-meta .lang {
-    color: rgba(60, 70, 90, 0.7);
-    font-size: 13px;
-    margin-bottom: 14px;
+    padding: 5px 10px;
+    border-radius: 999px;
+
+    background: rgba(74, 108, 255, 0.15);
+    border: 1px solid rgba(74, 108, 255, 0.25);
+    color: rgba(74, 108, 255, 0.95);
+}
+.profile-meta .intro {
+    width: 100%;
+    margin-top: 14px;
+
+    height: 120px;
+    /* 고정 */
+    overflow-y: auto;
+
+    padding: 14px 16px;
+    border-radius: 16px;
+
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: rgba(40, 60, 120, 0.85);
 }
 
 /* 메뉴 */
 .menu {
-    padding: 12px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
+        margin-bottom: auto;
     gap: 6px;
 }
 
 .menu-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-
-    padding: 12px 12px;
-    border-radius: 14px;
+    gap: 12px;
+    padding: 13px 14px;
+    border-radius: 16px;
     text-decoration: none;
-
     color: rgba(40, 60, 120, 0.85);
     font-size: 14px;
-
+    font-weight: 600;
     transition: background 0.2s ease, transform 0.2s ease;
+    position: relative;
 }
 
 .menu-item:hover {
     background: rgba(255, 255, 255, 0.65);
-    transform: translateY(-1px);
+    transform: translateX(3px);
 }
 
 .menu-item.active {
-    background: rgba(255, 255, 255, 0.75);
-    box-shadow: 0 10px 24px rgba(80, 100, 180, 0.18);
-    position: relative;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 10px 24px rgba(80, 100, 180, 0.15);
+    font-weight: 800;
 }
 
 .menu-item.active::before {
     content: "";
     position: absolute;
-    left: -12px;
-    top: 10px;
-    bottom: 10px;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
     width: 4px;
-    border-radius: 4px;
+    height: 60%;
+    border-radius: 0 4px 4px 0;
     background: linear-gradient(180deg, rgba(255, 111, 145, 0.9), rgba(74, 108, 255, 0.9));
 }
 
 .mi-ico {
-    width: 26px;
+    width: 24px;
     text-align: center;
     opacity: 0.9;
+    font-size: 16px;
 }
 
 .badge {
     margin-left: auto;
-    font-size: 12px;
-    padding: 4px 10px;
+    font-size: 11px;
+    padding: 4px 9px;
     border-radius: 999px;
-    background: rgba(255, 111, 145, 0.18);
-    border: 1px solid rgba(255, 111, 145, 0.28);
+    background: rgba(255, 111, 145, 0.16);
+    border: 1px solid rgba(255, 111, 145, 0.25);
     color: rgba(255, 111, 145, 0.95);
     font-weight: 800;
 }
 
 /* 왼쪽 작은 카드 */
 .mini-card {
-    padding: 18px;
+    padding: 20px;
 }
 
 .mini-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
 }
 
 .mini-head h4 {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 800;
     color: rgba(19, 29, 53, 0.88);
 }
 
 .mini-pill {
-    font-size: 12px;
-    padding: 6px 10px;
+    font-size: 11px;
+    padding: 5px 10px;
     border-radius: 999px;
     background: rgba(50, 196, 141, 0.15);
     border: 1px solid rgba(50, 196, 141, 0.25);
@@ -387,8 +488,8 @@ body::before {
 }
 
 .mini-avatar {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.75);
@@ -401,32 +502,34 @@ body::before {
 }
 
 .mini-sub {
-    font-size: 12.5px;
+    font-size: 12px;
     color: rgba(60, 70, 90, 0.7);
-    margin-top: 2px;
+    margin-top: 3px;
 }
 
 /* 관심사 칩 */
 .chip-wrap {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
 }
 
 .chip {
     border: none;
     cursor: pointer;
-    font-size: 12.5px;
-    padding: 8px 12px;
+    font-size: 12px;
+    padding: 8px 13px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.75);
     color: rgba(40, 60, 120, 0.8);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .chip:hover {
     transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.8);
     box-shadow: 0 10px 22px rgba(80, 100, 180, 0.18);
 }
 
@@ -437,11 +540,16 @@ body::before {
     display: flex;
     flex-direction: column;
     gap: 18px;
+
+    min-height: 100%;
+
 }
 
 /* 오른쪽 큰 카드 공통 */
 .content-card {
-    padding: 22px;
+    padding: 26px;
+    flex:1;
+    margin-bottom: 20px;
 }
 
 .card-head {
@@ -449,7 +557,7 @@ body::before {
     align-items: start;
     justify-content: space-between;
     gap: 14px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .card-head h2 {
@@ -468,20 +576,21 @@ body::before {
 .reco-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    gap: 16px;
 }
 
 .reco {
-    padding: 16px;
-    border-radius: 18px;
+    padding: 18px;
+    border-radius: 20px;
     background: rgba(255, 255, 255, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.7);
     box-shadow: 0 18px 40px rgba(40, 60, 120, 0.12);
     transition: transform 0.22s ease, box-shadow 0.22s ease;
+    height: 200px;
 }
 
 .reco:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     box-shadow: 0 28px 60px rgba(40, 60, 120, 0.18);
 }
 
@@ -492,8 +601,8 @@ body::before {
 }
 
 .reco-avatar {
-    width: 56px;
-    height: 56px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.75);
@@ -549,57 +658,59 @@ body::before {
     border-color: rgba(50, 196, 141, 0.22);
     color: rgba(50, 196, 141, 0.95);
 }
-
 /* =========================
    STATS (2 COL)
 ========================= */
 .stats {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    height: 220px;
+    gap: 18px;
+    height: 300px;
 }
 
 .stat-card {
-    padding: 18px;
+    padding: 22px;
 }
 
 .stat-head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
 }
 
 .stat-head h3 {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 900;
 }
 
+/* 메인 영역 (다른 카드에서 사용 중이면 유지) */
 .stat-main {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
+    gap: 16px;
+    margin-bottom: 18px;
 }
 
+/* 숫자 강조용 (다른 카드에서 쓰이면 유지) */
 .temp strong {
-    font-size: 34px;
+    font-size: 36px;
     font-weight: 900;
     color: rgba(255, 111, 145, 0.95);
 }
 
 .temp span {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 800;
     color: rgba(40, 60, 120, 0.75);
     margin-left: 4px;
 }
 
-/* 간단 스파크라인 */
+/* 스파크라인 (다른 카드에서 쓰이면 유지) */
 .spark {
     flex: 1;
-    height: 58px;
+    height: 62px;
     border-radius: 18px;
     background: rgba(255, 255, 255, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.7);
@@ -616,51 +727,144 @@ body::before {
         linear-gradient(90deg, rgba(120, 150, 255, 0.15), rgba(255, 160, 200, 0.15));
 }
 
+/* 하단 태그 */
 .stat-foot {
-    margin-top: 12px;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
 .pill {
-    font-size: 12px;
-    padding: 6px 10px;
+    font-size: 11px;
+    padding: 6px 11px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.75);
     color: rgba(60, 70, 90, 0.8);
+    font-weight: 600;
 }
 
-/* 출석 */
-.att-row {
+/* =========================
+   POST STATS (ENHANCED)
+========================= */
+
+/* 통계 본문 */
+.stat-body {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+/* 개별 카드 */
+.stat-item {
+    position: relative;
+    padding: 18px 12px;
+    border-radius: 18px;
+    text-align: center;
+
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.75),
+            rgba(255, 255, 255, 0.55));
+
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* hover */
+.stat-item:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* 라벨 */
+.stat-label {
+    display: block;
     font-size: 12px;
-    color: rgba(60, 70, 90, 0.7);
-    margin-bottom: 10px;
-    padding: 0 2px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: rgba(60, 70, 90, 0.75);
+    margin-bottom: 8px;
 }
 
-.att-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
+/* 숫자 */
+.stat-value {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: rgba(40, 60, 120, 0.95);
 }
 
-.dot {
-    width: 12px;
-    height: 12px;
+/* 타입별 컬러 포인트 */
+.stat-item.posts .stat-value {
+    color: rgba(40, 60, 120, 0.95);
+}
+
+.stat-item.likes .stat-value {
+    color: rgba(255, 111, 145, 0.95);
+}
+
+.stat-item.comments .stat-value {
+    color: rgba(74, 108, 255, 0.95);
+}
+
+/* 상단 장식 점 */
+.stat-item::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
     border-radius: 999px;
-    background: rgba(180, 190, 210, 0.45);
-    border: 1px solid rgba(180, 190, 210, 0.55);
+    background: rgba(120, 150, 255, 0.35);
 }
 
-.dot.on {
-    background: rgba(255, 170, 60, 0.75);
-    border-color: rgba(255, 170, 60, 0.85);
-    box-shadow: 0 10px 18px rgba(255, 170, 60, 0.18);
+/* =========================
+   POST STAT EXTRA
+========================= */
+.stat-extra {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 18px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.7),
+            rgba(255, 255, 255, 0.55));
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.85),
+        0 8px 18px rgba(0, 0, 0, 0.04);
+}
+
+/* 텍스트 */
+.extra-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(60, 70, 90, 0.8);
+}
+
+.extra-value {
+    font-size: 22px;
+    font-weight: 900;
+    color: rgba(70, 200, 120, 0.95);
+    margin-left: auto;
+    /* 오른쪽 정렬 */
+}
+
+.extra-unit {
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(60, 70, 90, 0.75);
 }
 
 /* =========================
@@ -669,7 +873,7 @@ body::before {
 .account-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    gap: 14px;
     margin-top: 10px;
 }
 
@@ -679,8 +883,8 @@ body::before {
     border: none;
     cursor: pointer;
 
-    padding: 16px 16px;
-    border-radius: 18px;
+    padding: 18px 18px;
+    border-radius: 20px;
 
     background: rgba(255, 255, 255, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.72);
@@ -688,7 +892,7 @@ body::before {
 
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
 
     transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
@@ -699,23 +903,25 @@ body::before {
 }
 
 .acc-ico {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
     display: grid;
     place-items: center;
+    font-size: 18px;
     background: rgba(255, 255, 255, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.75);
 }
 
 .acc-txt {
     font-weight: 900;
+    font-size: 14px;
     color: rgba(19, 29, 53, 0.88);
 }
 
 .acc-go {
     margin-left: auto;
-    font-size: 18px;
+    font-size: 20px;
     color: rgba(40, 60, 120, 0.55);
 }
 
@@ -742,6 +948,10 @@ body::before {
         grid-template-columns: 1fr;
     }
 
+    .sidebar {
+        position: static;
+    }
+
     .topnav {
         display: none;
     }
@@ -757,5 +967,240 @@ body::before {
 
     .page-hero h1 {
         font-size: 30px;
+    }
+
+    .grid {
+        gap: 20px;
+    }
+}
+/* =========================
+   MODAL (개선됨)
+========================= */
+
+/* 모달 배경 */
+.modal {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(19, 29, 53, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+}
+
+/* 숨김 처리 */
+.modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 모달 카드 */
+.modal-content {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 20px;
+
+    padding: 32px 30px 28px;
+    border-radius: var(--radius-lg);
+
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.8),
+            rgba(255, 255, 255, 0.5));
+
+    backdrop-filter: blur(26px) saturate(170%);
+    -webkit-backdrop-filter: blur(26px) saturate(170%);
+
+    border: 1px solid rgba(255, 255, 255, 0.75);
+
+    box-shadow:
+        0 50px 100px rgba(40, 60, 120, 0.35),
+        inset 0 1px 1px rgba(255, 255, 255, 0.5);
+
+    animation: modal-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 타이틀 */
+.modal-content h3 {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 22px;
+    color: rgba(19, 29, 53, 0.92);
+    text-align: center;
+    position: relative;
+    padding-bottom: 14px;
+}
+
+.modal-content h3::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, rgba(255, 111, 145, 0.8), rgba(74, 108, 255, 0.8));
+}
+
+/* =========================
+   MODAL FORM (개선됨)
+========================= */
+
+#profileForm {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* textarea */
+#profileForm textarea {
+    width: 100%;
+    min-height: 130px;
+    resize: vertical;
+
+    padding: 16px 18px;
+    border-radius: 18px;
+
+    font-size: 14px;
+    line-height: 1.6;
+
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.75);
+
+    color: rgba(19, 29, 53, 0.9);
+    box-shadow:
+        inset 0 2px 6px rgba(40, 60, 120, 0.08),
+        0 1px 2px rgba(255, 255, 255, 0.5);
+
+    transition: all 0.25s ease;
+}
+
+#profileForm textarea::placeholder {
+    color: rgba(60, 70, 90, 0.5);
+}
+
+/* select */
+#profileForm select {
+    padding: 14px 18px;
+    border-radius: 14px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.75);
+
+    color: rgba(40, 60, 120, 0.85);
+
+    box-shadow:
+        inset 0 2px 6px rgba(40, 60, 120, 0.08),
+        0 1px 2px rgba(255, 255, 255, 0.5);
+
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+/* 포커스 공통 */
+#profileForm textarea:focus,
+#profileForm select:focus {
+    outline: none;
+    border-color: rgba(74, 108, 255, 0.65);
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow:
+        0 0 0 4px rgba(74, 108, 255, 0.12),
+        0 4px 12px rgba(74, 108, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+#profileForm textarea:hover,
+#profileForm select:hover {
+    border-color: rgba(74, 108, 255, 0.4);
+    background: rgba(255, 255, 255, 0.82);
+}
+
+/* =========================
+   MODAL ACTIONS (개선됨)
+========================= */
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.modal-actions .btn {
+    flex: 1;
+    padding: 13px 20px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+}
+
+.modal-actions .btn-glass {
+    background: linear-gradient(135deg, rgba(74, 108, 255, 0.85), rgba(255, 111, 145, 0.85));
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 12px 28px rgba(74, 108, 255, 0.25);
+}
+
+.modal-actions .btn-glass:hover {
+    background: linear-gradient(135deg, rgba(74, 108, 255, 0.95), rgba(255, 111, 145, 0.95));
+    box-shadow: 0 16px 36px rgba(74, 108, 255, 0.35);
+    transform: translateY(-2px);
+}
+
+.modal-actions .btn-soft {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    color: rgba(60, 70, 90, 0.85);
+}
+
+.modal-actions .btn-soft:hover {
+    background: rgba(255, 255, 255, 0.85);
+    transform: translateY(-2px);
+}
+
+/* =========================
+   MODAL ANIMATION (개선됨)
+========================= */
+@keyframes modal-pop {
+    from {
+        transform: translateY(20px) scale(0.94);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 480px) {
+    .modal-content {
+        margin: 0 16px;
+        padding: 26px 22px;
+    }
+
+    .modal-content h3 {
+        font-size: 20px;
+        margin-bottom: 18px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .modal-actions .btn {
+        width: 100%;
     }
 }

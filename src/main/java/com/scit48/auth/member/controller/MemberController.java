@@ -1,21 +1,27 @@
-package com.scit48.member.controller;
+package com.scit48.auth.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scit48.auth.dto.SignupRequestDto;
+import com.scit48.auth.member.service.CustomUserDetails;
 import com.scit48.auth.service.AuthService;
 import com.scit48.common.domain.entity.UserEntity;
+import com.scit48.common.dto.UserDTO;
+import com.scit48.common.exception.UnauthorizedException;
 import com.scit48.common.response.ApiResponse;
 import com.scit48.common.repository.UserRepository;
-import com.scit48.member.dto.MyPageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDateTime;
 import java.util.Map;
+import com.scit48.common.exception.BadRequestException;
+import com.scit48.auth.member.controller.MemberController;
+
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/members")
@@ -23,7 +29,7 @@ import java.util.Map;
 public class MemberController {
 
     private final AuthService authService;
-    private final UserRepository memberRepository;
+    private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
     /*
@@ -72,9 +78,9 @@ public class MemberController {
         boolean exists;
 
         if (memberId != null && !memberId.isBlank()) {
-            exists = memberRepository.existsByMemberId(memberId);
+            exists = userRepository.existsByMemberId(memberId);
         } else if (nickname != null && !nickname.isBlank()) {
-            exists = memberRepository.existsByNickname(nickname);
+            exists = userRepository.existsByNickname(nickname);
         } else {
             throw new IllegalArgumentException("memberId 또는 nickname 중 하나는 필요합니다.");
         }
@@ -91,26 +97,46 @@ public class MemberController {
      * GET /api/members/me
      */
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<MyPageResponse>> myPage(
-            @AuthenticationPrincipal User user) {
+    public ApiResponse<UserDTO> me(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            throw new UnauthorizedException("로그인이 필요합니다.");
+        }
 
-        long userId = Long.parseLong(user.getUsername());
-
-        UserEntity member = memberRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
-
-        MyPageResponse response = new MyPageResponse(
-                member.getMemberId(),
-                member.getNickname(),
-                member.getGender(),
-                member.getAge(),
-                member.getNation(),
-                member.getManner().doubleValue(),
-                member.getIntro(),
-                member.getProfileImagePath(),
-                member.getNativeLanguage(),
-                member.getLevelLanguage());
-
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ApiResponse.success(
+                UserDTO.fromEntity(userDetails.getUser()));
     }
+
+    @PutMapping(value = "/me/profile-image", consumes = "multipart/form-data")
+    public ApiResponse<Void> updateProfileImage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("image") MultipartFile image) {
+        if (userDetails == null) {
+            throw new UnauthorizedException("로그인이 필요합니다.");
+        }
+
+        authService.updateProfileImage(
+                userDetails.getUser().getId(),
+                image);
+
+        return ApiResponse.success(null, "프로필 이미지 변경 완료");
+    }
+
+    @PutMapping("/me/profile")
+    public ApiResponse<Void> updateProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(required = false) String intro,
+            @RequestParam(required = false) String levelLanguage) {
+        if (userDetails == null) {
+            throw new UnauthorizedException("로그인이 필요합니다.");
+        }
+
+        authService.updateProfile(
+                userDetails.getUser().getId(),
+                intro,
+                levelLanguage);
+
+        return ApiResponse.success(null, "프로필 수정 완료");
+    }
+
 }
