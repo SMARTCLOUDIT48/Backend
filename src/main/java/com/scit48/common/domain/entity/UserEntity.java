@@ -59,6 +59,7 @@ public class UserEntity {
 	private String nation;
 
 	// 초기값 36.5 설정
+	@Builder.Default
 	@Column(name = "manner", nullable = false)
 	private double manner = 36.5;
 
@@ -119,5 +120,4 @@ public class UserEntity {
 			this.levelLanguage = levelLanguage;
 		}
 	}
-
 }
