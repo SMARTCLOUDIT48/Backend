@@ -1,6 +1,7 @@
 package com.scit48.community.service;
 
 import com.scit48.common.domain.entity.UserEntity;
+import com.scit48.common.dto.UserDTO;
 import com.scit48.common.repository.UserRepository;
 import com.scit48.community.domain.dto.BoardDTO;
 import com.scit48.community.domain.entity.BoardEntity;
@@ -8,9 +9,16 @@ import com.scit48.community.domain.entity.CategoryEntity;
 import com.scit48.community.repository.BoardRepository;
 import com.scit48.community.repository.CategoryRepository;
 import com.scit48.community.util.FileManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,15 +35,18 @@ public class BoardService {
 	private final UserRepository ur;
 	private final FileManager fm;
 	
-	@Transactional(rollbackOn = IOException.class)
+	@Value("${board.uploadPath}")
+	private String uploadPath;
+	
+	
 	public void write(BoardDTO boardDTO, String uploadPath, MultipartFile upload) throws IOException {
 		// 1. 작성자(User) 조회
 		UserEntity userEntity = ur.findById(boardDTO.getId())
-				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다. id=" + boardDTO.getId()));
+				.orElseThrow(() -> new EntityNotFoundException("사용자가 존재하지 않습니다. id=" + boardDTO.getId()));
 		
 		// 2. 카테고리 조회 (DTO에서 ID를 받아옴)
 		CategoryEntity categoryEntity = ctr.findByName(boardDTO.getCategoryName())
-				.orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 없습니다. name=" + boardDTO.getCategoryName()));
+				.orElseThrow(() -> new EntityNotFoundException("해당 카테고리가 없습니다. name=" + boardDTO.getCategoryName()));
 		
 		
 		// 4. Entity 변환 및 저장 (Builder 패턴 사용)
@@ -63,19 +74,20 @@ public class BoardService {
 		
 		// 1. 작성자(User) 조회
 		UserEntity userEntity = ur.findById(boardDTO.getId())
-				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다. id=" + boardDTO.getId()));
+				.orElseThrow(() -> new EntityNotFoundException("사용자가 존재하지 않습니다. id=" + boardDTO.getId()));
 		
-		// 2. 카테고리 조회 (DTO에서 ID를 받아옴)
-		CategoryEntity categoryEntity = ctr.findByName(boardDTO.getCategoryName())
-				.orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 없습니다. name=" + boardDTO.getCategoryName()));
+		// '일상' 카테고리 자동 지정 (DB에 'DAILY' 또는 '일상'이라는 이름의 카테고리가 있다고 가정)
+		CategoryEntity dailyCategory = ctr.findByName("일상") // 혹은 "DAILY"
+				.orElseThrow(() -> new EntityNotFoundException("일상 카테고리가 DB에 없습니다."));
 		
+		boardDTO.setCategoryId(dailyCategory.getCategoryId());
 		
 		// 4. Entity 변환 및 저장 (Builder 패턴 사용)
 		BoardEntity boardEntity = BoardEntity.builder()
 				.title(boardDTO.getTitle())
 				.content(boardDTO.getContent())
 				.viewCount(0)
-				.category(categoryEntity) // 연관관계 설정
+				.category(dailyCategory) // 연관관계 설정
 				.user(userEntity)         // 연관관계 설정
 				.build();
 		
@@ -88,4 +100,109 @@ public class BoardService {
 		
 		br.save(boardEntity);
 	}
+	
+	
+	/**
+	 * 로그인한 사용자의 정보를 가져와 DTO로 반환하는 메소드
+	 * @param user 시큐리티 인증 객체
+	 * @return UserDTO (로그인 안 된 경우 null 반환)
+	 */
+	public UserDTO getUserInfo(UserDetails user) {
+		
+		// 1. 로그인 여부 확인
+		if (user == null) {
+			return null; // 컨트롤러에서 null이면 리다이렉트 처리
+		}
+		
+		// 2. ID 추출
+		Long userId = Long.valueOf(user.getUsername());
+		
+		// 3. DB 조회 (없으면 에러 발생)
+		UserEntity userEntity = ur.findById(userId)
+				.orElseThrow(() -> new EntityNotFoundException("사용자 정보를 찾을 수 없습니다. ID: " + userId));
+		
+		// 4. Entity -> DTO 변환 후 반환
+		UserDTO userDTO = UserDTO.fromEntity(userEntity);
+		
+		return userDTO;
+	}
+	
+	/**
+	 * 페이징된 게시글 목록 조회
+	 */
+	public Page<BoardDTO> getBoardList(Pageable pageable) {
+		// 실제 페이지 번호 보정 (사용자는 1페이지를 요청하지만 DB는 0페이지부터 시작)
+		int page = pageable.getPageNumber() - 1;
+		PageRequest pageRequest = PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "id"));
+		
+		Page<BoardEntity> boardEntityList = br.findAll(pageRequest);
+		
+		// Entity -> DTO 변환 (Java 8 Stream 활용)
+		// 목록에는 '내용' 전체가 필요 없으므로 필요한 필드만 빌더로 넣습니다.
+		Page<BoardDTO> boardDTOS = boardEntityList.map(board -> BoardDTO.builder()
+				.id(board.getUser().getId())
+				.title(board.getTitle())
+				.viewCount(board.getViewCount())
+				.createdDate(board.getCreatedAt()) // BaseTimeEntity 사용 시
+				.categoryId(board.getCategory().getCategoryId())
+				.categoryName(board.getCategory().getName()) // 카테고리 명
+				.writerNickname(board.getUser().getNickname()) // 작성자 닉네임
+				.build());
+		
+		return boardDTOS;
+	}
+	
+	public Page<BoardDTO> searchPosts(Pageable pageable, Long cateId, String searchType, String keyword) {
+		
+		int page = pageable.getPageNumber() - 1;
+		PageRequest pageRequest = PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "id"));
+		
+		String excludeName = "일상"; // 제외할 카테고리명
+		Page<BoardEntity> entities;
+		
+		// 1. 카테고리 필터가 있는 경우 (예: '질문'만 보기)
+		if (cateId != null) {
+			CategoryEntity category = ctr.findById(cateId).orElse(null);
+			if (category != null) {
+				// 특정 카테고리 내에서만 조회 (이때도 혹시 몰라 '일상' 제외 조건을 걸 수 있지만, ID로 조회하므로 안전)
+				// 하지만 검색어까지 있다면 복잡해지므로 여기서는 단순 필터링만 구현하거나
+				// QueryDSL 없이 완벽한 동적 쿼리는 복잡하므로, '카테고리 필터'와 '검색'을 분리하거나 조합해야 합니다.
+				// 여기서는 [카테고리 선택]이 우선순위가 높다고 가정하고 해당 카테고리 글만 가져옵니다.
+				entities = br.findByCategoryNameAndCategoryNameNot(category.getName(), excludeName, pageRequest);
+			} else {
+				entities = br.findByCategoryNameNot(excludeName, pageRequest);
+			}
+		}
+		// 2. 검색어가 있는 경우 (전체 카테고리 중 검색)
+		else if (keyword != null && !keyword.isBlank()) {
+			switch (searchType) {
+				case "title":
+					entities = br.findByTitleContainingAndCategoryNameNot(keyword, excludeName, pageRequest);
+					break;
+				case "content":
+					entities = br.findByContentContainingAndCategoryNameNot(keyword, excludeName, pageRequest);
+					break;
+				case "writer":
+					entities = br.findByUserNicknameContainingAndCategoryNameNot(keyword, excludeName, pageRequest);
+					break;
+				default:
+					entities = br.findByCategoryNameNot(excludeName, pageRequest);
+			}
+		}
+		// 3. 아무 조건 없음 (기본 목록)
+		else {
+			entities = br.findByCategoryNameNot(excludeName, pageRequest);
+		}
+		
+		// Entity -> DTO 변환
+		return entities.map(board -> BoardDTO.builder()
+				.id(board.getUser().getId())
+				.title(board.getTitle())
+				.viewCount(board.getViewCount())
+				.createdDate(board.getCreatedAt())
+				.categoryName(board.getCategory().getName())
+				.writerNickname(board.getUser().getNickname())
+				.build());
+	}
 }
+

@@ -67,7 +67,8 @@
 
                 <select id="viewSelect" class="category-select" onchange="syncCategory()">
                     <option th:each="cate : ${categories}"
-                            th:value="${cate.categoryId}"
+                            th:if="${cate.name != '일상'}"
+                            th:value="${cate.name}"
                             th:text="${cate.name}">카테고리명</option>
                 </select>
 
@@ -78,19 +79,21 @@
         <div class="bubble bubble-2">안녕하세요!</div>
     </section>
 
-    <form th:action="@{board/write}" method="post" enctype="multipart/form-data" class="write-card">
-
-        <input type="hidden" name="id" th:value="${boardDTO?.id}">
+    <form th:action="@{/board/write}" method="post" enctype="multipart/form-data" class="write-card">
+        <!--
+        <input type="hidden" name="id" th:value="${userDTO.id}">
         <input type="hidden" name="userId" th:value="${session.loginUserId}">
-
-        <input type="hidden" id="realCategoryId" name="categoryId" value="">
+        -->
+        <input type="hidden" id="realCategoryId" name="categoryName" value="">
 
         <div class="writer-info">
             <div class="avatar">
-                <img src="/images/default_profile.png" alt="Profile">
+                <img th:src="${userDTO.profileImagePath != null ? userDTO.profileImagePath : '/images/default_profile.png'}"
+                     alt="Profile">
             </div>
             <div class="info-text">
-                <span class="nickname">최동욱</span> <span class="flag">🇰🇷</span>
+                <span class="nickname" th:text="${userDTO.nickname}"></span>
+                <span class="flag" th:text="${userDTO.nation}"></span>
             </div>
         </div>
 
@@ -112,7 +115,7 @@
                 <label for="file-upload" class="attach-btn">
                     <span>📎</span> 파일 첨부
                 </label>
-                <input type="file" id="file-upload" name="file" style="display: none;">
+                <input type="file" id="file-upload" name="upload" style="display: none;">
             </div>
 
             <button type="submit" class="submit-btn">등록하기</button>

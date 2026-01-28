@@ -38,6 +38,7 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/api/ai/**").permitAll()
 						.requestMatchers("/api/**").permitAll()
+						.requestMatchers("/css/**", "/js/**", "/images/**", "/files/**").permitAll()
 						.anyRequest().permitAll())
 
 				// ⭐ JWT 필터 등록 (추가)

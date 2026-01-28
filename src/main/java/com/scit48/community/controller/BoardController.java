@@ -1,16 +1,19 @@
 package com.scit48.community.controller;
 
-import com.scit48.common.domain.entity.UserEntity;
+import com.scit48.common.dto.UserDTO;
 import com.scit48.common.repository.UserRepository;
 import com.scit48.community.domain.dto.BoardDTO;
 import com.scit48.community.domain.entity.CategoryEntity;
 import com.scit48.community.repository.CategoryRepository;
 import com.scit48.community.service.BoardService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -42,12 +45,21 @@ public class BoardController {
 	String uploadPath;
 	
 	@GetMapping("write")
-	public String write (Model model) {
+	public String write (@AuthenticationPrincipal UserDetails user, Model model) {
+		
+		// 1. 서비스 호출 (비즈니스 로직 위임)
+		UserDTO userDTO = bs.getUserInfo(user);
+		
+		// 2. 결과에 따른 분기 처리
+		if (userDTO == null) {
+			// 로그인이 안 된 경우
+			return "redirect:/login"; // 임시이므로 제대로 된 로그인 화면 경로로 수정할 것
+		}
 		
 		// 카테고리 선택창을 위해 DB에서 카테고리 목록을 가져와서 뷰로 전달
 		List<CategoryEntity> categories = cr.findAll();
 		model.addAttribute("categories", categories);
-		model.addAttribute("boardDTO", new BoardDTO());
+		model.addAttribute("userDTO", userDTO);
 		
 		return "boardWrite";
 	}
@@ -76,40 +88,40 @@ public class BoardController {
 		try {
 			bs.write(boardDTO, uploadPath, upload);
 		} catch (Exception e) {
-			log.debug("[예외 발생] {}", e.getMessage());
+			log.debug("예외 발생: {}", e.getMessage());
+			
 			
 			// 에러 발생 시 카테고리 목록을 다시 담아줘야 페이지가 정상 출력됨
 			List<CategoryEntity> categories = cr.findAll();
 			model.addAttribute("categories", categories);
 			model.addAttribute("error", "글 저장 중 오류가 발생했습니다.");
 			
-			return "boardWrite";
+			
+			return "redirect:/board/write";
 		}
 		
-		return "redirect:/board/list";	//추후 구현
+		return "redirect:/community";	//추후 구현
 	}
 	
 	
 	@GetMapping("feedWrite")
-	public String feedWrite(//@AuthenticationPrincipal UserDetails user,
+	public String feedWrite(@AuthenticationPrincipal UserDetails user,
 							Model model) {
-		/*
-		// 1. 로그인이 되어있는지 명시적으로 확인
-		if (user == null) {
-			log.debug("비로그인 사용자의 접근 - 로그인 페이지로 리다이렉트");
-			return "redirect:/user/login"; // 로그인 페이지 경로로 수정하세요
+		
+		// 1. 서비스 호출 (비즈니스 로직 위임)
+		UserDTO userDTO = bs.getUserInfo(user);
+		
+		// 2. 결과에 따른 분기 처리
+		if (userDTO == null) {
+			// 로그인이 안 된 경우
+			return "redirect:/login"; // 임시이므로 제대로 된 로그인 화면 경로로 수정할 것
 		}
 		
-		// 2. 로그인한 사용자 ID 추출 및 DB 조회
-		Long userId = Long.valueOf(user.getUsername());
-		UserEntity userEntity = ur.findById(userId).orElseThrow(
-				() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다. ID: " + userId)
-		);
+		// 3. 모델에 DTO 담기
+		model.addAttribute("user", userDTO);
 		
-		// 3. 'UserDetails'가 아닌 'UserEntity'를 모델에 담기 (HTML 에러 방지)
-		model.addAttribute("user", userEntity);
-		*/
-		return "feedWrite"; // SNS 스타일 전용 템플릿
+		// 4. 뷰 반환
+		return "feedWrite";
 	}
 	
 	
@@ -134,24 +146,50 @@ public class BoardController {
 			log.debug("파일종류: {}"		, upload.getContentType());
 		}
 		try {
-			// '일상' 카테고리 자동 지정 (DB에 'DAILY' 또는 '일상'이라는 이름의 카테고리가 있다고 가정)
-			CategoryEntity dailyCategory = cr.findByName("일상") // 혹은 "DAILY"
-					.orElseThrow(() -> new IllegalArgumentException("일상 카테고리가 DB에 없습니다."));
-			
-			boardDTO.setCategoryId(dailyCategory.getCategoryId());
 			bs.feedWrite(boardDTO, uploadPath, upload);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.debug("예외 발생: {}", e.getMessage());
-			return "feedWrite";
+			return "redirect:/board/feedWrite";
 		}
 		
-		return "redirect:/board/feedView"; // 피드 목록으로 이동 (추후 구현)
+		return "redirect:/community"; // 피드 목록으로 이동 (추후 구현)
 	}
 	
 	
 	
 	@GetMapping("list")
-	public String list() {
+	public String list(
+			Model model,
+			@PageableDefault(page = 1, size = 10, sort = "id", direction = Sort.Direction.DESC)
+			Pageable pageable,
+			@RequestParam(required = false) Long cateId,       // 카테고리 필터
+			@RequestParam(required = false) String searchType, // title, content, writer
+			@RequestParam(required = false) String keyword) {  // 검색어
+		
+		
+		
+		// 카테고리 목록 (필터 선택용, '일상' 제외하고 가져오기)
+		List<CategoryEntity> categories = cr.findByNameNot("일상");
+		model.addAttribute("categories", categories);
+		
+		// 검색 로직 수행
+		Page<BoardDTO> boardList = bs.searchPosts(pageable, cateId, searchType, keyword);
+		
+		
+		// 페이징 블록 계산
+		int blockLimit = 5;
+		int startPage = (((int)(Math.ceil((double)pageable.getPageNumber() / blockLimit))) - 1) * blockLimit + 1;
+		int endPage = ((startPage + blockLimit - 1) < boardList.getTotalPages()) ? startPage + blockLimit - 1 : boardList.getTotalPages();
+		
+		model.addAttribute("boardList", boardList);
+		model.addAttribute("startPage", startPage);
+		model.addAttribute("endPage", endPage);
+		
+		// 검색 상태 유지를 위해 모델에 추가
+		model.addAttribute("cateId", cateId);
+		model.addAttribute("searchType", searchType);
+		model.addAttribute("keyword", keyword);
+		
 		return "boardList";
 	}
 	

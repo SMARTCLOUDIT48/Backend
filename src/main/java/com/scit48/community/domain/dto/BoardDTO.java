@@ -26,10 +26,12 @@ public class BoardDTO {
 	private Long categoryId;   // 작성 시 전달용
 	private String categoryName; // 조회 시 반환용
 	
+	
 	// 3. 작성자 정보 (User 연동)
 	private String writerNickname;     //
 	private String writerProfileImage; //
 	private BigDecimal manner;   //
+	
 	
 	
 	
