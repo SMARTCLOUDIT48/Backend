@@ -5,15 +5,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TalkTribe</title>
-    <link rel="stylesheet" th:href="@{/home/css/style.css}" />
-    <script th:src="@{/home/js/home.js}" defer></script>
+
+    <link rel="stylesheet" th:href="@{/css/home/style.css}" />
     <link rel="stylesheet" th:href="@{/css/layout.css}">
+
+
+    <script th:src="@{/js/home.js}" defer></script>
+
 </head>
 
 <body>
 <!-- ===== HEADER ===== -->
-    <div th:replace="~{fragments/header :: header}"></div>
-
+<div th:replace="~{fragments/header :: header}"></div>
 
 <!-- ===== HERO ===== -->
 <section class="hero" aria-label="Hero">
@@ -54,10 +57,10 @@
 
             <!-- 오른쪽 프로필 SVG 4개 -->
             <div class="profile-grid">
-                <img src="/home/img/Group 11.svg" alt="profile 1" />
-                <img src="/home/img/Group 12.svg" alt="profile 2" />
-                <img src="/home/img/Group 13.svg" alt="profile 3" />
-                <img src="/home/img/Group 14.svg" alt="profile 4" />
+                <img th:src="@{/images/homeimgs/Group 11.svg}" alt="profile 1" />
+                <img th:src="@{/images/homeimgs/Group 12.svg}" alt="profile 2" />
+                <img th:src="@{/images/homeimgs/Group 13.svg}" alt="profile 3" />
+                <img th:src="@{/images/homeimgs/Group 14.svg}" alt="profile 4" />
             </div>
         </div>
     </div>
@@ -82,7 +85,7 @@
 
                     <!-- 카드 1 -->
                     <article class="community-card">
-                        <img src="/home/img/community_1.png" alt="community 1" />
+                        <img th:src="@{/images/homeimgs/community_1.png}" alt="community 1" />
                         <div class="card-content">
                             <h3>커뮤니티 공간</h3>
                             <p>
@@ -95,7 +98,7 @@
 
                     <!-- 카드 2 (기본 활성) -->
                     <article class="community-card active">
-                        <img src="/home/img/community_2.jpg" alt="community 2" />
+                        <img th:src="@{/images/homeimgs/community_2.jpg}" alt="community 2" />
                         <div class="card-content">
                             <h3>오늘의 인기글</h3>
                             <p>
@@ -108,7 +111,7 @@
 
                     <!-- 카드 3 -->
                     <article class="community-card">
-                        <img src="/home/img/community_3.png" alt="community 3" />
+                        <img th:src="@{/images/homeimgs/community_3.png}" alt="community 3" />
                         <div class="card-content">
                             <h3>내 활동 보기</h3>
                             <p>
@@ -138,57 +141,7 @@
 </section>
 
 
-<footer class="site-footer">
-    <div class="footer-inner">
-
-        <!-- 상단 링크 영역 -->
-        <div class="footer-links">
-
-            <div class="footer-col">
-                <h4>소개</h4>
-                <a href="#">서비스 소개</a>
-            </div>
-
-            <div class="footer-col">
-                <h4>제품</h4>
-                <a href="#">커뮤니티</a>
-                <a href="#">파트너 찾기</a>
-                <a href="#">채팅</a>
-            </div>
-
-            <div class="footer-col">
-                <h4>가이드</h4>
-                <a href="#">이용 안내</a>
-                <a href="#">자주 하는 질문</a>
-                <a href="#">이용 가이드</a>
-            </div>
-
-            <div class="footer-col">
-                <h4>지원</h4>
-                <a href="#">공지사항</a>
-                <a href="#">1:1 문의</a>
-                <a href="#">고객센터</a>
-            </div>
-
-        </div>
-
-        <!-- 하단 정보 영역 -->
-        <div class="footer-bottom">
-            <div class="footer-meta">
-                <span>이용약관</span>
-                <span>·</span>
-                <span>개인정보 처리방침</span>
-                <span>·</span>
-                <span>고객센터</span>
-            </div>
-
-            <div class="footer-copy">
-                © 2026 TalkTribe. All rights reserved.
-            </div>
-        </div>
-
-    </div>
-</footer>
+<div th:replace="~{fragments/footer :: footer}"></div>
 
 </body>
 

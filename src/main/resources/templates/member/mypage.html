@@ -36,53 +36,72 @@
                 <!-- LEFT -->
             <aside class="sidebar">
             
-                <!-- 1 프로필 카드 -->
-                <div class="glass card profile-card">
+            <!-- 국적 + 언어 한 줄 -->
+        <!-- 프로필 카드 -->
+<div class="glass card profile-card">
 
+    <!-- 프로필 이미지 -->
     <div class="avatar-wrap">
         <label>
             <input type="file" id="profileImageInput" accept="image/*" hidden />
-            <img id="profileImage" class="avatar"
-                 src="/images/profile/default.png"
-                 alt="profile" />
+            <img id="profileImage" class="avatar" src="/images/profile/default.png" alt="profile" />
         </label>
 
-        <button class="avatar-btn" type="button"
-            title="프로필 사진 변경"
+        <button class="avatar-btn" type="button" title="프로필 사진 변경"
             onclick="document.getElementById('profileImageInput').click()">
             📷
         </button>
     </div>
 
+    <!-- 프로필 메타 -->
     <div class="profile-meta">
 
+        <!-- 닉네임 + 나이 + 국적 -->
         <h3 class="nickname">
             <span id="nickname">닉네임</span>
             <span id="age" class="age">(24)</span>
+            <span id="nationFlag">🇰🇷</span>
         </h3>
 
         <button id="openProfileModal" class="btn btn-profile" type="button">
             프로필 수정
         </button>
 
-        <div class="nation">
-            <span id="nationFlag" class="flag">🇰🇷</span>
-            <span id="nationText">Korea</span>
+        <!-- 🔥 언어 라인 (핵심 구조) -->
+    <div class="profile-lang-block">
+    
+        <!-- 1줄: 언어 흐름 + 레벨 -->
+        <div class="lang-line">
+            <span id="nativeLang" class="lang-flag">🇰🇷</span>
+            <span class="arrow">→</span>
+            <span id="studyLang" class="lang-flag">🇯🇵</span>
+            <span id="levelLanguage" class="level-text">Intermediate</span>
         </div>
+    
+        <!-- 2줄: 매너 온도 -->
+<div class="manner-line" data-value="36.5">
+    <div class="manner-fill"></div>
+    <span id="manner" class="manner">36.5°C</span>
+</div>
 
-    <div class="lang">
-        <span class="lang-pill">KR</span>
-        →
-        <span class="lang-pill">JP</span>
-        <span id="levelLanguage" class="level-pill">Intermediate</span>
+</div>
+
+
     </div>
 
-        <p id="intro" class="intro">
-            자기소개가 여기에 표시됩니다.
-        </p>
+        <!-- 자기소개 -->
+    <!-- 자기소개 -->
+<div class="glass card profile-card">
+    <div class="profile-intro">
+        <p id="intro"></p>
+    </div>
+</div>
+
 
     </div>
 </div>
+
+
 
                 <!-- 2 메뉴 -->
                 <nav class="glass card menu">
@@ -217,25 +236,45 @@
                     <!-- 중간 2단 카드 -->
                     <div class="stats">
 
-                        <div class="glass card stat-card">
-                            <div class="stat-head">
-                                <h3>매너 온도</h3>
-                                <span class="muted">최근 30일</span>
-                            </div>
-                            <div class="stat-main">
-                                <div class="temp">
-                                    <strong id="manner">36.5</strong><span>°C</span>
-                                </div>
-                                <div class="spark">
-                                    <div class="spark-line"></div>
-                                </div>
-                            </div>
-                            <div class="stat-foot">
-                                <span class="pill">친절함</span>
-                                <span class="pill">응답 빠름</span>
-                                <span class="pill">매칭 성실</span>
-                            </div>
+                    <div class="glass card stat-card">
+                        <div class="stat-head">
+                            <h3>내 프로필을 본 사람</h3>
+                            <span class="muted">최근 방문</span>
                         </div>
+                    
+                        <div class="profile-view-list">
+                            <!-- 1명 -->
+                            <div class="viewer-item">
+                                <div class="viewer-avatar">👤</div>
+                                <div class="viewer-info">
+                                    <strong>스라</strong>
+                                    <span class="viewer-time">10분 전</span>
+                                </div>
+                                <button class="btn-view">프로필</button>
+                            </div>
+                    
+                            <!-- 2명 -->
+                            <div class="viewer-item">
+                                <div class="viewer-avatar">👤</div>
+                                <div class="viewer-info">
+                                    <strong>유키</strong>
+                                    <span class="viewer-time">어제</span>
+                                </div>
+                                <button class="btn-view">프로필</button>
+                            </div>
+                                <div class="viewer-item">
+                                    <div class="viewer-avatar">👤</div>
+                                    <div class="viewer-info">
+                                        <strong>민석</strong>
+                                        <span class="viewer-time">어제</span>
+                                    </div>
+                                    <button class="btn-view">프로필</button>
+                                </div>
+                        </div>
+                    
+                   
+                    </div>
+
 <div class="glass card stat-card">
     <div class="stat-head">
         <h3>내 게시글 통계</h3>
@@ -279,7 +318,7 @@
                                 <h2>계정 관리</h2>
                                 <p>알림/설정/로그아웃 등을 관리할 수 있어요.</p>
                             </div>
-                            <button class="btn btn-soft" type="button">설정</button>
+                       
                         </div>
 
                         <div class="account-grid">

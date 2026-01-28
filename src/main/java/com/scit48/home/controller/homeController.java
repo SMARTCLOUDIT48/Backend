@@ -1,4 +1,4 @@
-package com.scit48.chat.home.controller;
+package com.scit48.home.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
