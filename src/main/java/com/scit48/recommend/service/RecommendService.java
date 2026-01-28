@@ -45,9 +45,17 @@ public class RecommendService {
 		Gender targetGender =getOppositeGender(loginUserEntity.getGender());
 		String targetCountry = getOppositeCountry(loginUserEntity.getNation());
 		
+		
+		//List <UserEntity> allUserEntitylist = ur.findByGenderAndNation(targetGender,targetCountry);
+		
 		//성별, 한일 반전된
-		//회원 목록, 회원 관심사 전체 목록
-		List <UserEntity> allUserEntitylist = ur.findByGenderAndNation(targetGender,targetCountry);
+		//회원 목록, 회원 관심사 전체 목록 로그인한 회원 제외
+		List<UserEntity> allUserEntitylist =
+				ur.findByGenderAndNationAndIdNot(
+						targetGender,
+						targetCountry,
+						user
+				);
 		
 		//allUsersEntitylist에 해당하는 id들의 리스트를 만들겠다.
 		List<Long> userIds = allUserEntitylist.stream().map(UserEntity::getId).toList();
@@ -110,6 +118,9 @@ public class RecommendService {
 				).reversed())
 				.limit(10)
 				.toList();
+		
+		//로그인 한 계정을 제외하는 기능
+		
 	}
 	
 	
@@ -120,7 +131,7 @@ public class RecommendService {
 	}
 	// 처음 찾을 때 한일 반전 찾기
 	private String getOppositeCountry(String country){
-		return country.equals("KOR") ? "JPN" : "KOR";
+		return country.equals("KOREA") ? "JAPAN" : "KOREA";
 	}
 	
 	/**
