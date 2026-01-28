@@ -7,7 +7,7 @@ const myNativeLanguage = 'KO'; // 나의 모국어 (KO: 한국어)
 var stompClient = null;
 var currentRoomId = null;
 
-// 🚨 [수정 1] 랜덤 ID 삭제하고, HTML에 숨겨둔 진짜 내 정보 가져오기
+// 내 정보 가져오기
 var mySenderId = document.getElementById("myUserId").value;
 var mySenderName = document.getElementById("myNickname").value;
 
@@ -18,7 +18,7 @@ var aiData = {};
 document.addEventListener('DOMContentLoaded', () => {
     console.log(`✅ 채팅 초기화 완료 (내 ID: ${mySenderId}, 닉네임: ${mySenderName})`);
     loadChatRooms();
-    createLoadingOverlay(); // 로딩 오버레이 DOM 생성
+    createLoadingOverlay();
 });
 
 // 로딩 오버레이 동적 생성
@@ -42,6 +42,7 @@ function createLoadingOverlay() {
     }
 }
 
+// --- 3. 채팅방 목록 로드 ---
 function loadChatRooms() {
     fetch('/api/chat/rooms')
         .then(res => res.json())
@@ -52,7 +53,6 @@ function loadChatRooms() {
             listArea.innerHTML = "";
             rooms.forEach(room => {
                 const realId = room.roomId || room.id || room.chatRoomId;
-
                 const li = document.createElement("li");
                 li.className = "room-item";
                 li.onclick = () => enterRoom(realId, room.name, li);
@@ -69,7 +69,7 @@ function loadChatRooms() {
         .catch(err => console.error("방 목록 로딩 실패:", err));
 }
 
-// --- 4. 방 입장 ---
+// --- 4. 방 입장 (핵심 수정 부분) ---
 function enterRoom(roomId, roomName, element) {
     if (currentRoomId === roomId) return;
 
@@ -77,15 +77,22 @@ function enterRoom(roomId, roomName, element) {
 
     document.getElementById("roomTitle").innerText = roomName;
 
+    // 활동 배지 숨김
     const badge = document.getElementById('activityBadge');
     if (badge) badge.style.display = 'none';
 
+    // 메시지 영역 초기화
     document.getElementById("messageList").innerHTML = "";
 
+    // 활성화 스타일 변경
     document.querySelectorAll(".room-item").forEach(item => item.classList.remove("active"));
     if(element) element.classList.add("active");
 
+    // 소켓 연결
     connect(roomId);
+
+    // ✅ [NEW] 오른쪽 사이드바에 상대방 프로필 불러오기
+    loadPartnerInfo(roomId);
 }
 
 // --- 5. 소켓 연결 ---
@@ -105,8 +112,6 @@ function connect(roomId) {
         subscribeToRoom(roomId);
     }, function(error) {
         console.error("연결 실패:", error);
-        alert("로그인 정보가 없습니다. 다시 로그인 해주세요.");
-        window.location.href = "/login";
     });
 }
 
@@ -116,10 +121,9 @@ function subscribeToRoom(roomId) {
 
     subscription = stompClient.subscribe('/sub/chat/room/' + roomId, function (message) {
         const msgObj = JSON.parse(message.body);
-
         showUi(msgObj);
 
-        // 🚨 [수정 2] ID 비교 시 문자열로 변환하여 안전하게 비교
+        // 내가 아닌 경우 활동량 체크
         if (String(msgObj.senderId) !== String(mySenderId)) {
             checkPartnerActivity(msgObj.senderId);
         }
@@ -135,7 +139,6 @@ function loadChatHistory(roomId) {
         .then(messages => {
             const ul = document.getElementById("messageList");
             ul.innerHTML = "";
-
             let lastPartnerId = null;
 
             if (messages && messages.length > 0) {
@@ -155,19 +158,16 @@ function loadChatHistory(roomId) {
 }
 
 // ==========================================================
-// ✨ 8. UI 그리기 (프로필 사진 + 카톡 스타일 레이아웃)
+// ✨ 8. UI 그리기
 // ==========================================================
 function showUi(message) {
     var ul = document.getElementById("messageList");
     var li = document.createElement("li");
 
-    // 🚨 [수정 3] 가장 중요한 비교 로직 수정 (문자열로 변환하여 비교)
-    // 숫자 101과 문자 "101"을 같다고 인식하게 만듦
     var isMe = (String(message.senderId) === String(mySenderId));
-
     li.className = isMe ? "message-li me right" : "message-li other left";
 
-    // --- 1. 프로필 이미지 (상대방일 때만) ---
+    // 프로필 이미지 (상대방만)
     if (!isMe) {
         const profileImg = document.createElement("img");
         profileImg.src = getProfileImage(message.senderId, message.sender);
@@ -175,12 +175,13 @@ function showUi(message) {
         li.appendChild(profileImg);
     }
 
-    // --- 2. 메인 컨테이너 ---
+    // 메인 컨테이너
     const mainContainer = document.createElement("div");
     mainContainer.style.display = "flex";
     mainContainer.style.flexDirection = "column";
     mainContainer.style.maxWidth = "70%";
 
+    // 이름 표시 (상대방만)
     if (!isMe) {
         const senderDiv = document.createElement("div");
         senderDiv.className = "sender-name";
@@ -191,7 +192,7 @@ function showUi(message) {
     const contentWrapper = document.createElement("div");
     contentWrapper.className = "msg-content-wrapper";
 
-    // --- A. 말풍선 영역 ---
+    // 말풍선 처리
     const bubbleArea = document.createElement("div");
     bubbleArea.style.position = "relative";
 
@@ -208,7 +209,7 @@ function showUi(message) {
         cleanText = tempDiv.innerText.replace("🎤", "").replace("[음성 메시지]", "").trim();
     }
 
-    // 툴바
+    // 툴바 (TTS, 번역)
     const actionToolbar = document.createElement("div");
     actionToolbar.className = "msg-actions";
 
@@ -247,7 +248,7 @@ function showUi(message) {
     bubbleArea.appendChild(bubbleDiv);
     bubbleArea.appendChild(transResultBox);
 
-    // --- B. 메타 정보 ---
+    // 시간 및 읽음 카운트
     const metaDiv = document.createElement("div");
     metaDiv.className = "msg-meta";
 
@@ -273,6 +274,7 @@ function showUi(message) {
     ul.scrollTop = ul.scrollHeight;
 }
 
+// --- 유틸리티 함수 ---
 function formatTime(date) {
     const d = new Date(date);
     let hour = d.getHours();
@@ -307,8 +309,8 @@ function sendMessage() {
         var chatMessage = {
             type: 'TALK',
             roomId: currentRoomId,
-            sender: mySenderName, // ✅ 이제 진짜 닉네임으로 보냅니다
-            senderId: mySenderId, // ✅ 이제 진짜 ID로 보냅니다
+            sender: mySenderName,
+            senderId: mySenderId,
             message: content
         };
         stompClient.send("/pub/chat/message", {}, JSON.stringify(chatMessage));
@@ -331,9 +333,7 @@ function requestTranslation(text, resultBox) {
             resultBox.innerText = "✅ " + data.translated;
             resultBox.dataset.translated = "true";
         })
-        .catch(err => {
-            resultBox.innerText = "❌ 번역 실패";
-        });
+        .catch(err => { resultBox.innerText = "❌ 번역 실패"; });
 }
 
 // --- 12. AI 문법 검사 ---
@@ -358,7 +358,6 @@ function checkGrammar() {
             switchTab('kr');
         });
 }
-
 function switchTab(lang) {
     if (!aiData.corrected) return;
     document.getElementById("tabKr").className = (lang === 'kr') ? "ai-tab active" : "ai-tab";
@@ -436,7 +435,7 @@ function uploadAndSendVoice() {
         });
 }
 
-// --- 14. TTS (말하기) ---
+// --- 14. TTS ---
 function speakText(text, lang) {
     if (!window.speechSynthesis) { alert("TTS 미지원 브라우저"); return; }
     window.speechSynthesis.cancel();
@@ -446,7 +445,7 @@ function speakText(text, lang) {
     window.speechSynthesis.speak(utterance);
 }
 
-// --- 15. 호감도 체크 함수들 (생략 없이 그대로 유지) ---
+// --- 15. 호감도 체크 ---
 function checkLoveSignal() {
     if (!currentRoomId) { alert("대화방에 먼저 입장해주세요!"); return; }
     const messages = document.querySelectorAll(".message-li .bubble");
@@ -474,15 +473,13 @@ function checkLoveSignal() {
         .catch(err => { console.error(err); alert("분석 실패!"); })
         .finally(() => { btnSpan.innerText = originalText; btn.disabled = false; if(overlay) overlay.style.display = "none"; });
 }
-
 function showLoveModal(data) {
     const modal = document.getElementById("loveModal");
-    const title = document.getElementById("loveModalTitle");
     const scoreDiv = document.getElementById("loveScore");
     const feedbackDiv = document.getElementById("loveFeedback");
     document.getElementById("loveRiskBadge").style.display = "none";
     document.getElementById("loveRecommendationBox").style.display = "none";
-    title.innerText = "💘 호감도 전체 분석";
+
     let emoji = "😐";
     if (data.score >= 90) emoji = "😍"; else if (data.score >= 70) emoji = "😘"; else if (data.score <= 30) emoji = "😱";
     scoreDiv.innerHTML = `${data.score}점 <span style="font-size:2rem">${emoji}</span>`;
@@ -505,7 +502,6 @@ function checkMessageScore() {
         .catch(err => { console.error(err); alert("오류 발생!"); })
         .finally(() => { btn.innerHTML = originalHTML; btn.disabled = false; });
 }
-
 function showLoveTooltip(data) {
     const tooltip = document.getElementById("loveTooltip");
     const scoreSpan = document.getElementById("tooltipScore");
@@ -517,12 +513,11 @@ function showLoveTooltip(data) {
     feedbackDiv.innerText = data.feedback;
     if (data.better_version && data.better_version.trim() !== "") {
         recommendBox.style.display = "block";
-        recommendBox.innerHTML = `<span class="recommend-label">✨ 추천 멘트 (클릭하여 적용)</span><div class="recommend-text">"${data.better_version}"</div><span class="click-hint">Click!</span>`;
+        recommendBox.innerHTML = `<span class="recommend-label">✨ 추천 멘트</span><div class="recommend-text">"${data.better_version}"</div>`;
         recommendBox.dataset.text = data.better_version;
     } else { recommendBox.style.display = "none"; }
     tooltip.style.display = "block";
 }
-
 function applyTooltipCorrection() {
     const recommendBox = document.getElementById("tooltipRecommendBox");
     const newText = recommendBox.dataset.text;
@@ -542,4 +537,66 @@ function checkPartnerActivity(partnerId) {
         else if (count > 0) { badge.classList.add('badge-normal'); badge.innerHTML = `💬 오늘 ${count}명과 대화함`; }
         else { badge.classList.add('badge-normal'); badge.innerHTML = `✨ 지금 대화하면 칼답 가능성!`; }
     }).catch(err => console.error("활동량 조회 실패:", err));
+}
+
+
+// ==========================================================
+// ✅ [NEW] 16. 상대방 프로필 정보 로드 (사이드바용)
+// ==========================================================
+function loadPartnerInfo(roomId) {
+    const sidebar = document.getElementById("partnerProfileArea");
+    if (!sidebar) return;
+
+    // 초기화 (로딩 중 표시)
+    document.getElementById("partnerName").innerText = "Loading...";
+    document.getElementById("partnerIntro").innerText = "상대방 정보를 불러오고 있습니다...";
+
+    // API 호출: (서버 구현에 맞춰 엔드포인트 수정 필요)
+    // 예시: GET /api/chat/room/{roomId}/partner
+    fetch(`/api/chat/room/${roomId}/partner`)
+        .then(res => {
+            if (!res.ok) throw new Error("API 호출 실패");
+            return res.json();
+        })
+        .then(data => {
+            updatePartnerProfileUI(data);
+        })
+        .catch(err => {
+            console.warn("파트너 정보 로드 실패 (테스트 데이터로 대체합니다):", err);
+
+            // 🚨 백엔드 API가 없을 경우를 대비한 [테스트용 가짜 데이터]
+            // 나중에 서버 API가 준비되면 이 부분을 제거하세요.
+            updatePartnerProfileUI({
+                nickname: "Global Friend",
+                profileImage: null, // null이면 기본값
+                nation: "USA",
+                flag: "🇺🇸",
+                languageMain: "EN",
+                languageLearn: "KR",
+                level: "Intermediate",
+                intro: "Hello! I am interested in K-Pop and Korean culture. Let's be friends!"
+            });
+        });
+}
+
+// UI 업데이트 함수
+function updatePartnerProfileUI(data) {
+    const sidebar = document.getElementById("partnerProfileArea");
+    if(sidebar) sidebar.style.display = "flex";
+
+    document.getElementById("partnerName").innerText = data.nickname || "Unknown";
+    document.getElementById("partnerImg").src = data.profileImage || "/images/profile/default.png";
+
+    document.getElementById("partnerNationText").innerText = data.nation || "Unknown";
+    document.getElementById("partnerNationFlag").innerText = data.flag || "🏳️";
+
+    document.getElementById("partnerLangMain").innerText = data.languageMain || "EN";
+    document.getElementById("partnerLangLearn").innerText = data.languageLearn || "KR";
+    document.getElementById("partnerLevel").innerText = data.level || "Beginner";
+
+    document.getElementById("partnerIntro").innerText = data.intro || "자기소개가 없습니다.";
+
+    // 나이가 있다면 표시, 없으면 공백
+    const ageSpan = document.getElementById("partnerAge");
+    if (ageSpan) ageSpan.innerText = data.age ? `(${data.age})` : "";
 }
