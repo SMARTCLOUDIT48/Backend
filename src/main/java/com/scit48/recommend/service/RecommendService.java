@@ -131,7 +131,7 @@ public class RecommendService {
 	}
 	// 처음 찾을 때 한일 반전 찾기
 	private String getOppositeCountry(String country){
-		return country.equals("KOR") ? "JPN" : "KOR";
+		return country.equals("KOREA") ? "JAPAN" : "KOREA";
 	}
 	
 	/**
