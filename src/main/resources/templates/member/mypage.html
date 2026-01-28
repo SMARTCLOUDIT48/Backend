@@ -7,6 +7,7 @@
     <title>LANG:MATE - 마이페이지</title>
 
     <link rel="stylesheet" th:href="@{/css/member/mypage.css}" />
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
 
     <script th:inline="javascript">
         /*<![CDATA[*/
@@ -26,91 +27,133 @@
             <!-- 타이틀 영역 -->
             <div class="page-hero glass">
                 <h1>마이페이지</h1>
-                <p>나의 프로필 · 학습 정보 · 매너 온도 · 출석을 한눈에 관리하세요.</p>
+                <p>나의 프로필 · 친구 추천 · 매너 온도 · 인기도를 한눈에 관리하세요.</p>
             </div>
 
             <!-- 메인 그리드 -->
             <section class="grid">
 
                 <!-- LEFT -->
-                <aside class="sidebar">
+            <aside class="sidebar">
+            
+            <!-- 국적 + 언어 한 줄 -->
+        <!-- 프로필 카드 -->
+<div class="glass card profile-card">
 
-                    <!-- 프로필 카드 -->
-                    <div class="glass card profile-card">
+    <!-- 프로필 이미지 -->
+    <div class="avatar-wrap">
+        <label>
+            <input type="file" id="profileImageInput" accept="image/*" hidden />
+            <img id="profileImage" class="avatar" src="/images/profile/default.png" alt="profile" />
+        </label>
 
-                        <!-- 프로필 이미지 -->
-                        <div class="avatar-wrap">
-                            <label>
-                                <input type="file" id="profileImageInput" accept="image/*" hidden />
+        <button class="avatar-btn" type="button" title="프로필 사진 변경"
+            onclick="document.getElementById('profileImageInput').click()">
+            📷
+        </button>
+    </div>
 
-                        <img id="profileImage" class="avatar" src="/images/profile/default.png" alt="profile" />
-                            </label>
+    <!-- 프로필 메타 -->
+    <div class="profile-meta">
 
-                            <button class="avatar-btn" type="button" title="프로필 사진 변경"
-                                onclick="document.getElementById('profileImageInput').click()">
-                                📷
-                            </button>
-                        </div>
+        <!-- 닉네임 + 나이 + 국적 -->
+        <h3 class="nickname">
+            <span id="nickname">닉네임</span>
+            <span id="age" class="age">(24)</span>
+            <span id="nationFlag">🇰🇷</span>
+        </h3>
 
-                        <!-- 프로필 메타 -->
-                        <div class="profile-meta">
-                            <h3 id="nickname" class="nickname">닉네임</h3>
-                            <p id="language" class="lang">KOREAN → BEGINNER</p>
-                        </div>
+        <button id="openProfileModal" class="btn btn-profile" type="button">
+            프로필 수정
+        </button>
 
-                        <!-- 프로필 수정 버튼 -->
-                        <button id="openProfileModal" class="btn btn-glass" type="button">
-                            프로필 수정
-                        </button>
+        <!-- 🔥 언어 라인 (핵심 구조) -->
+    <div class="profile-lang-block">
+    
+        <!-- 1줄: 언어 흐름 + 레벨 -->
+        <div class="lang-line">
+            <span id="nativeLang" class="lang-flag">🇰🇷</span>
+            <span class="arrow">→</span>
+            <span id="studyLang" class="lang-flag">🇯🇵</span>
+            <span id="levelLanguage" class="level-text">Intermediate</span>
+        </div>
+    
+        <!-- 2줄: 매너 온도 -->
+<div class="manner-line" data-value="36.5">
+    <div class="manner-fill"></div>
+    <span id="manner" class="manner">36.5°C</span>
+</div>
+
+</div>
+
+
+    </div>
+
+        <!-- 자기소개 -->
+    <!-- 자기소개 -->
+<div class="glass card profile-card">
+    <div class="profile-intro">
+        <p id="intro"></p>
+    </div>
+</div>
+
+
+    </div>
+</div>
+
+
+
+                <!-- 2 메뉴 -->
+                <nav class="glass card menu">
+                    <a class="menu-item active" href="#">
+                        <span class="mi-ico">👤</span><span>프로필</span>
+                    </a>
+                    <a class="menu-item" href="#">
+                        <span class="mi-ico">📘</span><span>내 게시글</span>
+                        <span class="badge">3</span>
+                    </a>
+                    <a class="menu-item" href="#">
+                        <span class="mi-ico">💬</span><span>채팅</span>
+                    </a>
+                    <a class="menu-item" href="#">
+                        <span class="mi-ico">⚙️</span><span>계정 관리</span>
+                    </a>
+                </nav>
+            
+                <!-- 3 작은 카드 : 친한 목록 -->
+                <div class="glass card mini-card">
+                    <div class="mini-head">
+                        <h4>친한 목록</h4>
+                        <span class="mini-pill">Active</span>
                     </div>
-
-                    <!-- 메뉴 -->
-                    <nav class="glass card menu">
-                        <a class="menu-item active" href="#">
-                            <span class="mi-ico">👤</span><span>프로필</span>
-                        </a>
-                        <a class="menu-item" href="#">
-                            <span class="mi-ico">📘</span><span>학습 정보</span>
-                            <span class="badge">3</span>
-                        </a>
-                        <a class="menu-item" href="#"><span class="mi-ico">🌡️</span><span>매너 온도</span></a>
-                        <a class="menu-item" href="#"><span class="mi-ico">🗓️</span><span>출석</span></a>
-                        <a class="menu-item" href="#"><span class="mi-ico">🧾</span><span>출석 기록</span></a>
-                        <a class="menu-item" href="#"><span class="mi-ico">⚙️</span><span>계정 관리</span></a>
-                    </nav>
-
-                    <!-- 작은 카드 -->
-                    <div class="glass card mini-card">
-                        <div class="mini-head">
-                            <h4>친한 목록</h4>
-                            <span class="mini-pill">Active</span>
-                        </div>
-                        <div class="mini-row">
-                            <div class="mini-avatar"></div>
-                            <div class="mini-text">
-                                <div class="mini-name">스라</div>
-                                <div class="mini-sub">여행 · 영화</div>
-                            </div>
+                    <div class="mini-row">
+                        <div class="mini-avatar"></div>
+                        <div class="mini-text">
+                            <div class="mini-name">스라</div>
+                            <div class="mini-sub">여행 · 영화</div>
                         </div>
                     </div>
-
-                    <!-- 관심사 -->
-                    <div class="glass card mini-card">
-                        <div class="mini-head">
-                            <h4>관심사 설정</h4>
-                        </div>
-                        <div class="chip-wrap">
-                            <button class="chip">여행</button>
-                            <button class="chip">영화</button>
-                            <button class="chip">드라마</button>
-                            <button class="chip">음악</button>
-                            <button class="chip">힙합</button>
-                            <button class="chip">게임</button>
-                            <button class="chip">요리</button>
-                            <button class="chip">기타</button>
-                        </div>
+                </div>
+            
+                <!-- 4 작은 카드 : 관심사 -->
+                <div class="glass card mini-card">
+                    <div class="mini-head">
+                        <h4>관심사 설정</h4>
                     </div>
-                </aside>
+                    <div class="chip-wrap">
+                        <button class="chip">여행</button>
+                        <button class="chip">영화</button>
+                        <button class="chip">드라마</button>
+                        <button class="chip">음악</button>
+                        <button class="chip">힙합</button>
+                        <button class="chip">게임</button>
+                        <button class="chip">요리</button>
+                        <button class="chip">기타</button>
+                    </div>
+                </div>
+            
+            </aside>
+
 
                 <!-- RIGHT -->
                 <section class="content">
@@ -193,42 +236,78 @@
                     <!-- 중간 2단 카드 -->
                     <div class="stats">
 
-                        <div class="glass card stat-card">
-                            <div class="stat-head">
-                                <h3>매너 온도</h3>
-                                <span class="muted">최근 30일</span>
-                            </div>
-                            <div class="stat-main">
-                                <div class="temp">
-                                    <strong id="manner">36.5</strong><span>°C</span>
-                                </div>
-                                <div class="spark">
-                                    <div class="spark-line"></div>
-                                </div>
-                            </div>
-                            <div class="stat-foot">
-                                <span class="pill">친절함</span>
-                                <span class="pill">응답 빠름</span>
-                                <span class="pill">매칭 성실</span>
-                            </div>
+                    <div class="glass card stat-card">
+                        <div class="stat-head">
+                            <h3>내 프로필을 본 사람</h3>
+                            <span class="muted">최근 방문</span>
                         </div>
+                    
+                        <div class="profile-view-list">
+                            <!-- 1명 -->
+                            <div class="viewer-item">
+                                <div class="viewer-avatar">👤</div>
+                                <div class="viewer-info">
+                                    <strong>스라</strong>
+                                    <span class="viewer-time">10분 전</span>
+                                </div>
+                                <button class="btn-view">프로필</button>
+                            </div>
+                    
+                            <!-- 2명 -->
+                            <div class="viewer-item">
+                                <div class="viewer-avatar">👤</div>
+                                <div class="viewer-info">
+                                    <strong>유키</strong>
+                                    <span class="viewer-time">어제</span>
+                                </div>
+                                <button class="btn-view">프로필</button>
+                            </div>
+                                <div class="viewer-item">
+                                    <div class="viewer-avatar">👤</div>
+                                    <div class="viewer-info">
+                                        <strong>민석</strong>
+                                        <span class="viewer-time">어제</span>
+                                    </div>
+                                    <button class="btn-view">프로필</button>
+                                </div>
+                        </div>
+                    
+                   
+                    </div>
 
-                        <div class="glass card stat-card">
-                            <div class="stat-head">
-                                <h3>출석 현황</h3>
-                                <span class="muted">이번 달</span>
-                            </div>
-                            <div class="attendance">
-                                <div class="att-row">
-                                    <span>월</span><span>화</span><span>수</span><span>목</span>
-                                    <span>금</span><span>토</span><span>일</span>
-                                </div>
-                                <div class="att-grid">
-                                    <span class="dot on"></span><span class="dot"></span><span class="dot on"></span>
-                                    <span class="dot"></span><span class="dot on"></span>
-                                </div>
-                            </div>
-                        </div>
+<div class="glass card stat-card">
+    <div class="stat-head">
+        <h3>내 게시글 통계</h3>
+        <span class="muted">누적</span>
+    </div>
+
+    <!-- 기존 3컬럼 -->
+    <div class="stat-body">
+        <div class="stat-item posts">
+            <span class="stat-label">📝 게시글</span>
+            <span class="stat-value" id="totalPosts">0</span>
+        </div>
+
+        <div class="stat-item likes">
+            <span class="stat-label">❤️ 좋아요</span>
+            <span class="stat-value" id="totalLikes">0</span>
+        </div>
+
+        <div class="stat-item comments">
+            <span class="stat-label">💬 댓글</span>
+            <span class="stat-value" id="totalComments">0</span>
+        </div>
+    </div>
+
+
+    <div class="stat-extra">
+        <span class="extra-label">💌 현재 연락 중인 이성</span>
+        <strong class="extra-value" id="activeContacts">0</strong>
+        <span class="extra-unit">명</span>
+    </div>
+</div>
+
+
 
                     </div>
 
@@ -239,7 +318,7 @@
                                 <h2>계정 관리</h2>
                                 <p>알림/설정/로그아웃 등을 관리할 수 있어요.</p>
                             </div>
-                            <button class="btn btn-soft" type="button">설정</button>
+                       
                         </div>
 
                         <div class="account-grid">
@@ -249,7 +328,7 @@
                                 <span class="acc-go">›</span>
                             </button>
 
-                            <button class="acc-item">
+                            <button class="acc-item" type="button" onclick="logout()">
                                 <span class="acc-ico">🚪</span>
                                 <span class="acc-txt">로그아웃</span>
                                 <span class="acc-go">›</span>
@@ -296,5 +375,5 @@
     <div th:replace="~{fragments/footer :: footer}"></div>
 
 </body>
-
+    <script th:src="@{/js/member/logout.js}"></script>
 </html>

@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
@@ -23,8 +24,19 @@ public class RecommendController {
 	@GetMapping("recommend") //임시
 	public String Recommend(@AuthenticationPrincipal UserDetails user){
 		Long user_id = Long.valueOf(user.getUsername());
-		List<RecommendDTO> userDTO= rs.firstRecommend(user_id);
 		
 		return "recommend";
 	}
+	
+	@ResponseBody
+	@GetMapping("/api/recommend")
+	public List<RecommendDTO> recommend(
+			@AuthenticationPrincipal UserDetails user
+	){
+		Long user_id = Long.valueOf(user.getUsername());
+		List<RecommendDTO> userDTO= rs.firstRecommend(user_id);
+		
+		return userDTO;
+	}
+	
 }

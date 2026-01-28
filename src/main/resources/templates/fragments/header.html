@@ -32,7 +32,8 @@
 
             <!-- 로그인 상태 -->
             <div sec:authorize="isAuthenticated()">
-                <button class="signup-btn" type="button" th:onclick="|location.href='@{/member/mypage}'|">
+                <button class="signup-btn" type="button"
+                        th:onclick="|location.href='@{/member/mypage}'|">
                     마이페이지
                 </button>
 

@@ -4,9 +4,7 @@ import com.scit48.common.enums.LanguageLevel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.scit48.common.enums.Gender;
 import com.scit48.common.domain.entity.UserEntity;
-import com.scit48.common.enums.LanguageLevel;
 import lombok.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -44,6 +42,8 @@ public class UserDTO {
 	
 	private String nativeLanguage;
 
+	private String studyLanguage;
+	
 	private LanguageLevel levelLanguage;
 
 	private LocalDateTime createdAt;
@@ -67,6 +67,7 @@ public class UserDTO {
 				.nation(this.nation)
 				.manner(this.manner) // 값이 없으면 Entity Builder에서 36.5로 처리됨
 				.nativeLanguage(this.nativeLanguage)
+				.studyLanguage(this.studyLanguage)
 				.levelLanguage(this.levelLanguage)
 				.profileImageName(this.profileImageName)
 				.profileImagePath(this.profileImagePath)
@@ -89,6 +90,7 @@ public class UserDTO {
 				.nation(entity.getNation())
 				.manner(entity.getManner())
 				.nativeLanguage(entity.getNativeLanguage())
+				.studyLanguage(entity.getStudyLanguage())
 				.levelLanguage(entity.getLevelLanguage())
 				.profileImageName(entity.getProfileImageName())
 				.profileImagePath(entity.getProfileImagePath())

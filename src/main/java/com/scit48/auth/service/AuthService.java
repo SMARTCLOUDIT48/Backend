@@ -6,6 +6,7 @@ import com.scit48.auth.jwt.JwtProvider;
 import com.scit48.auth.jwt.JwtToken;
 import com.scit48.auth.repository.RefreshTokenRepository;
 import com.scit48.common.domain.entity.UserEntity;
+import com.scit48.common.enums.LanguageLevel;
 import com.scit48.common.exception.BadRequestException;
 import com.scit48.common.exception.UnauthorizedException;
 import com.scit48.common.file.FileStorageService;
@@ -21,98 +22,148 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final JwtProvider jwtProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final FileStorageService fileStorageService;
+	private final JwtProvider jwtProvider;
+	private final RefreshTokenRepository refreshTokenRepository;
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
+	private final FileStorageService fileStorageService;
 
-    // ===============================
-    // 회원가입
-    // ===============================
-    @Transactional
-    public UserEntity signup(SignupRequestDto request, MultipartFile image) {
+	// ===============================
+	// 회원가입
+	// ===============================
+	@Transactional
+	public UserEntity signup(SignupRequestDto request, MultipartFile image) {
 
-        if (userRepository.existsByMemberId(request.getMemberId())) {
-            throw new BadRequestException("이미 존재하는 ID입니다.");
-        }
+		if (userRepository.existsByMemberId(request.getMemberId())) {
+			throw new BadRequestException("이미 존재하는 ID입니다.");
+		}
 
-        if (userRepository.existsByNickname(request.getNickname())) {
-            throw new BadRequestException("이미 사용 중인 닉네임입니다.");
-        }
+		if (userRepository.existsByNickname(request.getNickname())) {
+			throw new BadRequestException("이미 사용 중인 닉네임입니다.");
+		}
 
-        UserEntity user = UserEntity.builder()
-                .memberId(request.getMemberId())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .nickname(request.getNickname())
-                .gender(request.getGender())
-                .age(request.getAge())
-                .nation(request.getNation())
-                .nativeLanguage(request.getNativeLanguage())
-                .levelLanguage(request.getLevelLanguage())
-                .role("ROLE_MEMBER")
-                // 기본 이미지 세팅
-                .profileImageName("default.png")
-                .profileImagePath("/images/profile")
-                .build();
+		// 학습 언어 처리
+		String studyLang = request.getStudyLanguage();
 
-        // 이미지 업로드한 경우만 덮어씀
-        if (image != null && !image.isEmpty()) {
-            String savedName = fileStorageService.saveProfileImage(image);
-            user.updateProfileImage(savedName, "/images/profile");
-        }
+		if (studyLang == null || studyLang.isBlank()) {
+			throw new BadRequestException("학습 언어를 선택해주세요.");
+		}
 
-        return userRepository.save(user);
-    }
+		studyLang = studyLang.trim().toUpperCase();
 
-    // ===============================
-    // 로그인
-    // ===============================
-    public JwtToken login(LoginRequestDto request) {
+		String nativeLang;
+		if ("KOREAN".equals(studyLang)) {
+			nativeLang = "JAPANESE";
+		} else if ("JAPANESE".equals(studyLang)) {
+			nativeLang = "KOREAN";
+		} else {
+			throw new BadRequestException("지원하지 않는 언어입니다.");
+		}
 
-        UserEntity user = userRepository.findByMemberId(request.getMemberId())
-                .orElseThrow(() -> new UnauthorizedException("ID 또는 비밀번호가 틀렸습니다."));
+		UserEntity user = UserEntity.builder()
+				.memberId(request.getMemberId())
+				.password(passwordEncoder.encode(request.getPassword()))
+				.nickname(request.getNickname())
+				.gender(request.getGender())
+				.age(request.getAge())
+				.nation(request.getNation())
+				.studyLanguage(studyLang)
+				.nativeLanguage(nativeLang)
+				.levelLanguage(request.getLevelLanguage())
+				.role("ROLE_MEMBER")
+				.profileImageName("default.png")
+				.profileImagePath("/images/profile")
+				.build();
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new UnauthorizedException("ID 또는 비밀번호가 틀렸습니다.");
-        }
+		if (image != null && !image.isEmpty()) {
+			String savedName = fileStorageService.saveProfileImage(image);
+			user.updateProfileImage(savedName, "/images/profile/upload");
+		}
 
-        String accessToken = jwtProvider.createAccessToken(
-                user.getId(),
-                user.getRole());
+		return userRepository.save(user);
+	}
 
-        String refreshToken = jwtProvider.createRefreshToken(user.getId());
-        refreshTokenRepository.save(user.getId(), refreshToken);
+	// ===============================
+	// 로그인
+	// ===============================
+	public JwtToken login(LoginRequestDto request) {
 
-        return new JwtToken(accessToken, refreshToken);
-    }
+		UserEntity user = userRepository.findByMemberId(request.getMemberId())
+				.orElseThrow(() -> new UnauthorizedException("ID 또는 비밀번호가 틀렸습니다."));
 
-    // ===============================
-    // 토큰 재발급
-    // ===============================
-    public JwtToken reissue(String refreshToken) {
+		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+			throw new UnauthorizedException("ID 또는 비밀번호가 틀렸습니다.");
+		}
 
-        if (!jwtProvider.validate(refreshToken)) {
-            throw new UnauthorizedException("유효하지 않은 토큰입니다.");
-        }
+		String accessToken = jwtProvider.createAccessToken(
+				user.getId(),
+				user.getRole());
 
-        Claims claims = jwtProvider.parseClaims(refreshToken);
+		String refreshToken = jwtProvider.createRefreshToken(user.getId());
+		refreshTokenRepository.save(user.getId(), refreshToken);
 
-        if (!"REFRESH".equals(claims.get("type"))) {
-            throw new BadRequestException("Refresh Token이 아닙니다.");
-        }
+		return new JwtToken(accessToken, refreshToken);
+	}
 
-        Long memberId = Long.valueOf(claims.getSubject());
+	// ===============================
+	// 토큰 재발급
+	// ===============================
+	public JwtToken reissue(String refreshToken) {
 
-        refreshTokenRepository.validate(memberId, refreshToken);
+		if (!jwtProvider.validate(refreshToken)) {
+			throw new UnauthorizedException("유효하지 않은 토큰입니다.");
+		}
 
-        UserEntity user = userRepository.findById(memberId)
-                .orElseThrow(() -> new UnauthorizedException("회원이 존재하지 않습니다."));
+		Claims claims = jwtProvider.parseClaims(refreshToken);
 
-        String newAccessToken = jwtProvider.createAccessToken(
-                memberId,
-                user.getRole());
+		if (!"REFRESH".equals(claims.get("type"))) {
+			throw new BadRequestException("Refresh Token이 아닙니다.");
+		}
 
-        return new JwtToken(newAccessToken, refreshToken);
-    }
+		Long memberId = Long.valueOf(claims.getSubject());
+
+		refreshTokenRepository.validate(memberId, refreshToken);
+
+		UserEntity user = userRepository.findById(memberId)
+				.orElseThrow(() -> new UnauthorizedException("회원이 존재하지 않습니다."));
+
+		String newAccessToken = jwtProvider.createAccessToken(
+				memberId,
+				user.getRole());
+
+		return new JwtToken(newAccessToken, refreshToken);
+	}
+
+	// ===============================
+	// 프로필 이미지 변경 (추가)
+	// ===============================
+	@Transactional
+	public void updateProfileImage(Long userId, MultipartFile image) {
+
+		UserEntity user = userRepository.findById(userId)
+				.orElseThrow(() -> new BadRequestException("회원 없음"));
+
+		String savedName = fileStorageService.saveProfileImage(image);
+
+		user.updateProfileImage(
+				savedName,
+				"/images/profile/upload");
+	}
+
+	// ===============================
+	// 프로필 이미지 수정 (추가)
+	// ===============================
+	@Transactional
+	public void updateProfile(Long userId, String intro, String levelLanguage) {
+
+		UserEntity user = userRepository.findById(userId)
+				.orElseThrow(() -> new BadRequestException("회원 없음"));
+
+		LanguageLevel level = null;
+		if (levelLanguage != null) {
+			level = LanguageLevel.valueOf(levelLanguage);
+		}
+
+		user.updateProfile(intro, level);
+	}
 }

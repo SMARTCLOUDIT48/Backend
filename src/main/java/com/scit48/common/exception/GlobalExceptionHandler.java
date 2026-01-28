@@ -8,6 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -48,8 +49,8 @@ public class GlobalExceptionHandler {
                 String message = e.getBindingResult()
                                 .getFieldErrors()
                                 .stream()
-                                .map(err -> err.getField() + ": " + err.getDefaultMessage())
                                 .findFirst()
+                                .map(err -> err.getField() + ": " + err.getDefaultMessage())
                                 .orElse("Validation Error");
 
                 return ResponseEntity
@@ -71,15 +72,29 @@ public class GlobalExceptionHandler {
 
         /*
          * =========================
-         * 500 - 서버 에러
+         * 404 - 정적 리소스 없음 (중요!!)
+         * =========================
+         */
+        @ExceptionHandler(NoResourceFoundException.class)
+        public ResponseEntity<Void> handleNoResourceFound(NoResourceFoundException e) {
+                // default.png, favicon.ico 같은 요청은 조용히 404 처리
+                return ResponseEntity.notFound().build();
+        }
+
+        /*
+         * =========================
+         * 500 - 서버 에러 (디버깅용)
          * =========================
          */
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ApiResponse<?>> handleServerError(Exception e) {
-                log.error("Unhandled exception", e);
+
+                // 콘솔에 전체 스택트레이스 출력
+                e.printStackTrace();
 
                 return ResponseEntity
                                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(ApiResponse.error("서버 오류가 발생했습니다."));
+                                .body(ApiResponse.error(
+                                                e.getClass().getName() + " : " + e.getMessage()));
         }
 }

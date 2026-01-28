@@ -1,4 +1,4 @@
-package com.scit48.member.service;
+package com.scit48.auth.member.service;
 
 import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.repository.UserRepository;
@@ -21,10 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
                 UserEntity userEntity = userRepository.findById(Long.valueOf(memberId))
                                 .orElseThrow(() -> new UsernameNotFoundException("회원 없음"));
-
-                return new User(
-                                userEntity.getId().toString(),
-                                userEntity.getPassword(),
-                                List.of(new SimpleGrantedAuthority(userEntity.getRole())));
+			
+			    return new CustomUserDetails(userEntity);
         }
 }
