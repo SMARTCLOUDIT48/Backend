@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("signupForm");
   if (!form) return;
 
+
   /* =========================
      DOM 요소
   ========================= */
@@ -12,7 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const memberIdInput = document.getElementById("memberId");
   const nicknameInput = document.getElementById("nickname");
 
-  const nativeLanguage = document.getElementById("nativeLanguage");
+  const studyLanguage = document.getElementById("studyLanguage");
+
   const tos = document.getElementById("tos");
   const privacy = document.getElementById("privacy");
 
@@ -132,8 +134,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* 나이 검증 */
     const age = Number(form.age.value);
-    if (Number.isNaN(age)) {
+    if (Number.isNaN(age) || age <= 0) {
       alert("나이를 올바르게 입력해주세요.");
+      return;
+    }
+
+    /* 학습 언어 선택 여부 */
+    if (!studyLanguage.value) {
+      alert("학습 언어를 선택해주세요.");
       return;
     }
 
@@ -145,14 +153,16 @@ document.addEventListener("DOMContentLoaded", () => {
       gender: form.gender.value,
       age,
       nation: form.nation.value,
-      nativeLanguage: nativeLanguage.value,
+      studyLanguage: studyLanguage.value,
       levelLanguage: form.levelLanguage.value
     };
 
     const formData = new FormData();
     formData.append(
       "data",
-      new Blob([JSON.stringify(signupData)], { type: "application/json" })
+      new Blob([JSON.stringify(signupData)], {
+        type: "application/json"
+      })
     );
 
     if (imageInput.files.length > 0) {
