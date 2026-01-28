@@ -259,19 +259,56 @@ align-items: stretch;
     flex: 1;
 }
 
-/* 프로필 카드 */
+/******* 프로필 카드 *********/
+/* =========================
+   프로필 카드 자기소개
+========================= */
+
 .profile-card {
-    padding: 28px 24px;
+    padding: 14px 14px;
     text-align: center;
+
 }
 
-.avatar-wrap {
-    position: relative;
-    width: 140px;
-    height: 140px;
-    margin: 0 auto 18px;
+/* 자기소개 전체 박스 */
+.profile-intro {
+    height: 70px;
+    padding: 8px 10px;
+
+    box-sizing: border-box;
+
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    font-size: 16px;
+    line-height: 1.6;
+    color: #222;
+
+    border-radius: 12px;
+    text-align: left;
+
 }
 
+/* 자기소개 텍스트 */
+.profile-intro p {
+    margin: 0;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+
+}
+
+/* 내용 없을 때 */
+.profile-intro p:empty::before {
+    content: "자기소개를 입력해주세요.";
+    color: rgba(255, 255, 255, 0.5);
+}
+
+
+/* =========================
+   아바타
+========================= */
 .avatar-wrap {
     width: 190px;
     height: 190px;
@@ -290,7 +327,6 @@ align-items: stretch;
         0 20px 40px rgba(40, 60, 120, 0.25),
         0 0 0 6px rgba(255, 255, 255, 0.35);
 }
-
 
 .avatar-btn {
     position: absolute;
@@ -315,81 +351,181 @@ align-items: stretch;
     transform: scale(1.05);
 }
 
-/* 프로필 상세 정보 */
+/* =========================
+   프로필 메타
+========================= */
+/* =========================
+   프로필 메타 정보
+========================= */
 .profile-meta {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     align-items: center;
 }
 
+/* 닉네임 + 나이 + 국적 */
 .nickname {
-    font-size: 21px;
+    font-size: 22px;
     font-weight: 900;
-}
-
-.age {
-    font-size: 14px;
-    color: rgba(60, 70, 90, 0.65);
-}
-
-.profile-meta .nation {
-    font-size: 13.5px;
-    color: rgba(60, 70, 90, 0.75);
+    letter-spacing: -0.3px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 6px 14px;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.65);
-    margin: 0 auto;
-    width: fit-content;
+    gap: 8px;
+    color: rgba(19, 29, 53, 0.92);
 }
 
-.lang {
+.age {
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(60, 70, 90, 0.6);
+}
+
+#nationFlag {
+    font-size: 20px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================
+   프로필 수정 버튼
+========================= */
+.btn-profile {
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 800;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    color: rgba(74, 108, 255, 0.9);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(74, 108, 255, 0.08);
+}
+
+.btn-profile:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 108, 255, 0.15);
+    color: rgba(74, 108, 255, 1);
+}
+
+.btn-profile:active {
+    transform: translateY(0);
+}
+
+/* ==================================================
+   언어 / 레벨 / 매너 블록
+================================================== */
+.profile-lang-block {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.65));
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+        0 10px 30px rgba(40, 60, 120, 0.12),
+        inset 0 1px 1px rgba(255, 255, 255, 0.6);
+        margin-bottom: 20px;
+}
+
+/* 언어 라인 */
+.lang-line {
     display: flex;
     align-items: center;
-    gap: 8px;
-
-    padding: 8px 14px;
-    border-radius: 999px;
-
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.7);
+    justify-content: center;
+    gap: 10px;
+    padding: 8px 0;
 }
-.level-pill {
-    font-size: 11px;
+
+.lang-flag {
+    font-size: 22px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
+    transition: transform 0.2s ease;
+}
+
+.lang-line:hover .lang-flag {
+    transform: scale(1.1);
+}
+
+.arrow {
+    font-size: 16px;
+    font-weight: 900;
+    color: rgba(60, 70, 90, 0.35);
+    margin: 0 2px;
+}
+
+.level-text {
+    font-size: 13px;
     font-weight: 800;
-
-    padding: 5px 10px;
+    padding: 4px 12px;
     border-radius: 999px;
-
-    background: rgba(74, 108, 255, 0.15);
+    background: linear-gradient(135deg, rgba(74, 108, 255, 0.15), rgba(120, 140, 255, 0.1));
     border: 1px solid rgba(74, 108, 255, 0.25);
     color: rgba(74, 108, 255, 0.95);
-}
-.profile-meta .intro {
-    width: 100%;
-    margin-top: 14px;
-
-    height: 120px;
-    /* 고정 */
-    overflow-y: auto;
-
-    padding: 14px 16px;
-    border-radius: 16px;
-
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-
-    font-size: 13.5px;
-    line-height: 1.6;
-    color: rgba(40, 60, 120, 0.85);
+    letter-spacing: 0.3px;
 }
 
-/* 메뉴 */
+
+/* 매너 온도 라인 - 온도계 스타일 */
+.manner-line {
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.78);
+}
+
+/* 🔥 색 채우는 레이어 */
+.manner-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    /* JS에서 조절 */
+    pointer-events: none;
+    border-radius: inherit;
+
+    background:
+        radial-gradient(180px 80px at 20% 60%,
+            rgba(50, 90, 210, 1),
+            rgba(50, 90, 210, 0.6) 45%,
+            transparent 70%),
+        radial-gradient(200px 90px at 50% 50%,
+            rgba(150, 70, 190, 0.8),
+            rgba(150, 70, 190, 0.4) 45%,
+            transparent 72%),
+        radial-gradient(200px 90px at 80% 45%,
+            rgba(255, 0, 0, 1),
+            rgba(255, 0, 0, 0.8) 45%,
+            transparent 75%);
+
+    filter: blur(14px);
+    opacity: 0.9;
+    clip-path: inset(0 round 22px);
+
+    transition: width 0.6s ease;
+    /* 애니메이션 */
+    z-index: 1;
+}
+
+/* 텍스트 */
+.manner {
+    position: relative;
+    z-index: 2;
+    font-weight: 800;
+}
+
+
+    /******  메뉴 *********/
 .menu {
     padding: 14px;
     display: flex;
@@ -549,7 +685,7 @@ align-items: stretch;
 .content-card {
     padding: 26px;
     flex:1;
-    margin-bottom: 20px;
+
 }
 
 .card-head {
@@ -693,55 +829,13 @@ align-items: stretch;
     margin-bottom: 18px;
 }
 
-/* 숫자 강조용 (다른 카드에서 쓰이면 유지) */
-.temp strong {
-    font-size: 36px;
-    font-weight: 900;
-    color: rgba(255, 111, 145, 0.95);
-}
-
-.temp span {
-    font-size: 15px;
-    font-weight: 800;
-    color: rgba(40, 60, 120, 0.75);
-    margin-left: 4px;
-}
-
-/* 스파크라인 (다른 카드에서 쓰이면 유지) */
-.spark {
-    flex: 1;
-    height: 62px;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    position: relative;
-    overflow: hidden;
-}
-
-.spark-line {
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(140px 60px at 20% 70%, rgba(255, 111, 145, 0.35), transparent 70%),
-        radial-gradient(160px 70px at 70% 30%, rgba(74, 108, 255, 0.35), transparent 70%),
-        linear-gradient(90deg, rgba(120, 150, 255, 0.15), rgba(255, 160, 200, 0.15));
-}
-
-/* 하단 태그 */
-.stat-foot {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.pill {
-    font-size: 11px;
-    padding: 6px 11px;
+/* 레벨 */
+.level-pill {
+    padding: 2px 8px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.75);
-    color: rgba(60, 70, 90, 0.8);
-    font-weight: 600;
+    background: rgba(0, 200, 255, 0.25);
+    font-size: 12px;
+    margin-left: 4px;
 }
 
 /* =========================
@@ -790,6 +884,52 @@ align-items: stretch;
     letter-spacing: -0.01em;
     color: rgba(60, 70, 90, 0.75);
     margin-bottom: 8px;
+}
+
+
+.profile-lang-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    font-size: 14px;
+    color: #ddd;
+}
+
+/* 구분선 */
+.profile-lang-row .divider {
+    opacity: 0.5;
+}
+
+/* 국적 */
+.nation {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 언어 */
+.lang {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 언어 pill */
+.lang-pill {
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    font-weight: 600;
+}
+
+/* 레벨 */
+.level-pill {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(0, 200, 255, 0.25);
+    font-size: 12px;
+    margin-left: 4px;
 }
 
 /* 숫자 */
@@ -844,6 +984,65 @@ align-items: stretch;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.85),
         0 8px 18px rgba(0, 0, 0, 0.04);
+}
+
+.profile-view-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.viewer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 10px 12px;
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+}
+
+.viewer-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+}
+
+.viewer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.viewer-info strong {
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(40, 60, 120, 0.9);
+}
+
+.viewer-time {
+    font-size: 12px;
+    color: rgba(60, 70, 90, 0.6);
+}
+
+.btn-view {
+    margin-left: auto;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+
+    background: rgba(74, 108, 255, 0.15);
+    color: rgba(74, 108, 255, 0.95);
+    font-size: 12px;
+    font-weight: 700;
 }
 
 /* 텍스트 */

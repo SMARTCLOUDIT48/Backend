@@ -15,6 +15,6 @@ public class SignupRequestDto {
     private Gender gender;
     private int age;
     private String nation;
-    private String nativeLanguage;
+    private String studyLanguage;
     private LanguageLevel levelLanguage;
 }
