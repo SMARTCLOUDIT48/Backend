@@ -1,25 +1,188 @@
 <!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org">
+
 <head>
 	<meta charset="UTF-8">
 	<title>파트너 추천</title>
-	<script>
+	<link rel="stylesheet" th:href="@{ /css/layout.css}">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.1/css/flag-icons.min.css" />
 
+	<script>
+		window.addEventListener('DOMContentLoaded', () => {
+			loadRecommend();
+		});
+
+		async function loadRecommend() {
+			try {
+				const response = await fetch('/api/recommend');
+
+				if (!response.ok) {
+					throw new Error('HTTP error ' + response.status);
+				}
+				const list = await response.json();
+				console.log(list);
+				renderRecommend(list);
+
+			} catch (e) {
+				console.log(e);
+			}
+		}
+
+		function renderRecommend(list) {
+			const recommendList = document.getElementById('recommendTbody');
+			let html = '';
+
+			list.forEach(item => {
+
+				let flagStatus = "";
+				let study = "";
+				let languageLevel = "";
+				let nation = "";
+
+				switch (item.native_language) {
+					case "KOR":
+						flagStatus = "fi fi-kr flag-icon";
+						break;
+					case "JPN":
+						flagStatus = "fi fi-jp flag-icon";
+						break;
+				}
+
+				switch (item.studyLanguage) {
+					case "KOR":
+						study = "fi fi-kr";
+						break;
+					case "JPN":
+						study = "fi fi-jp";
+						break;
+				}
+
+				switch (item.nation) {
+					case "KOR":
+						nation = "한국";
+						break;
+					case "JPN":
+						nation = "일본";
+						break;
+				}
+
+				switch (item.levelLanguage) {
+					case 'BEGINNER':
+						languageLevel = "★☆☆☆"
+						break;
+					case 'INTERMEDIATE':
+						languageLevel = "★★☆☆"
+						break;
+					case 'ADVANCED':
+						languageLevel = "★★★☆"
+						break;
+					case 'NATIVE':
+						languageLevel = "★★★★"
+						break;
+					default:
+						languageLevel = "★☆☆☆"
+				}
+
+
+				html += `
+            	<div class="member-card">
+			<div class="profile-wrap">
+				<img src="${item.profileImagePath}" class="profile-img" alt="">
+				
+				<span class="${flagStatus}" aria-label="Japan"></span>
+			</div>
+		
+			<!-- 정보 영역 -->
+			<div class="info">
+				<div class="nickname">${item.nickname}</div>
+		
+				<div class="row">
+					<span class="label">거주국가</span>
+					<span class="value">${nation}</span>
+				</div>
+		
+				<div class="row">
+					<span class="label">학습언어</span>
+					<span class="lang">
+						<span class="${study}"></span>
+						<span class="level">${languageLevel}</span>
+					</span>
+				</div>
+			</div>
+		
+			<!-- 우측 영역 -->
+			<div class="right">
+				<div class="temp">${item.manner}</div>
+				<button class="chat-btn" data-user-id="${item.id}">채팅 신청</button>
+			</div>
+		</div>
+        		`;
+			});
+
+			recommendList.innerHTML = html;
+		}
 
 	</script>
 </head>
+
 <body>
-<header><p>Header</p></header>
-<section>
-	<h2>Lang Talk 파트너 매칭</h2>
-	<div>Filtering 구간</div>
-	<div>
-		조건에 맞는 파트너 보여주기
+	<header>
+		<div th:replace="~{fragments/header :: header}"></div>
+	</header>
+
+	<section class="hero">
+		<h1><span>무스비</span><br>추천 파트너 리스트</h1>
+		<p>언어 리스트부터 채팅 요청까지 서비스를 한눈에 확인하세요(임시)</p>
+	</section>
+
+	<!-- <section class="filter">
+	<h3>조건 필터</h3>
+	<div class="filter-box">
+		<span class="tag">한국어</span>
+		<span class="tag">30km 이내</span>
+		<span class="tag green">칭찬</span>
+		<span class="tag orange">언제</span>
+		<button class="btn primary">필터 적용</button>
+		<button class="btn">초기화</button>
 	</div>
-</section>
+	</section> -->
+	<section class="content">
+		<div id="recommendTbody">
+			<!-- <div class="member-card">
+			
+			<div class="profile-wrap">
+				<img src="${item.profile}" class="profile-img" alt="">
+				<span class="fi fi-jp flag-icon" aria-label="Japan"></span>
+			</div>
 
 
-<footer><p>footer</p></footer>
+			<div class="info">
+				<div class="nickname">${item.nickname}</div>
 
+				<div class="row">
+					<span class="label">거주국가</span>
+					<span class="value">${item.nation}</span>
+				</div>
+
+				<div class="row">
+					<span class="label">학습언어</span>
+					<span class="lang">
+						<span class="fi fi-kr"></span>
+						<span class="level">★★★★</span>
+					</span>
+				</div>
+			</div>
+
+			<div class="right">
+				<div class="temp">37.8℃</div>
+				<button class="chat-btn">채팅 신청</button>
+			</div>
+		</div> -->
+		</div>
+	</section>
+	<footer>
+		<div th:replace="~{fragments/footer :: footer}"></div>
+	</footer>
 </body>
+
 </html>

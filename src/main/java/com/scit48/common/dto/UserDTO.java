@@ -4,9 +4,7 @@ import com.scit48.common.enums.LanguageLevel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.scit48.common.enums.Gender;
 import com.scit48.common.domain.entity.UserEntity;
-import com.scit48.common.enums.LanguageLevel;
 import lombok.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
