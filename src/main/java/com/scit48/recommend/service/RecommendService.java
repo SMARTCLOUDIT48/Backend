@@ -51,7 +51,7 @@ public class RecommendService {
 		//성별, 한일 반전된
 		//회원 목록, 회원 관심사 전체 목록 로그인한 회원 제외
 		List<UserEntity> allUserEntitylist =
-				ur.findByGenderAndNationAndUserIdNot(
+				ur.findByGenderAndNationAndIdNot(
 						targetGender,
 						targetCountry,
 						user

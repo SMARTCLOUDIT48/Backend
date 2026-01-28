@@ -24,10 +24,10 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     boolean existsByNickname(String nickname);
 	
-	List<UserEntity> findByGenderAndNationAndUserIdNot(
+	List<UserEntity> findByGenderAndNationAndIdNot(
 			Gender targetGender,
 			String targetCountry,
-			Long userId
+			Long Id
 	);
 	
 }
