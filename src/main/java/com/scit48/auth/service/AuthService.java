@@ -42,6 +42,24 @@ public class AuthService {
 			throw new BadRequestException("이미 사용 중인 닉네임입니다.");
 		}
 
+		// 학습 언어 처리
+		String studyLang = request.getStudyLanguage();
+
+		if (studyLang == null || studyLang.isBlank()) {
+			throw new BadRequestException("학습 언어를 선택해주세요.");
+		}
+
+		studyLang = studyLang.trim().toUpperCase();
+
+		String nativeLang;
+		if ("KOREAN".equals(studyLang)) {
+			nativeLang = "JAPANESE";
+		} else if ("JAPANESE".equals(studyLang)) {
+			nativeLang = "KOREAN";
+		} else {
+			throw new BadRequestException("지원하지 않는 언어입니다.");
+		}
+
 		UserEntity user = UserEntity.builder()
 				.memberId(request.getMemberId())
 				.password(passwordEncoder.encode(request.getPassword()))
@@ -49,19 +67,19 @@ public class AuthService {
 				.gender(request.getGender())
 				.age(request.getAge())
 				.nation(request.getNation())
-				.nativeLanguage(request.getNativeLanguage())
+				.studyLanguage(studyLang)
+				.nativeLanguage(nativeLang)
 				.levelLanguage(request.getLevelLanguage())
 				.role("ROLE_MEMBER")
-				// 기본 이미지 세팅
 				.profileImageName("default.png")
 				.profileImagePath("/images/profile")
 				.build();
 
-		// 이미지 업로드한 경우만 덮어씀
 		if (image != null && !image.isEmpty()) {
 			String savedName = fileStorageService.saveProfileImage(image);
 			user.updateProfileImage(savedName, "/images/profile/upload");
 		}
+
 		return userRepository.save(user);
 	}
 

@@ -3,15 +3,20 @@ console.log("[mypage.js] loaded");
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  // ===============================
-  // DOM
-  // ===============================
+  /* ===============================
+     DOM
+  =============================== */
   const nicknameEl = document.getElementById("nickname");
   const ageEl = document.getElementById("age");
   const introEl = document.getElementById("intro");
-  const nationFlagEl = document.getElementById("nationFlag");
-  const nationTextEl = document.getElementById("nationText");
-  const levelSpanEl = document.getElementById("levelLanguage"); 
+
+  const nativeFlagEl = document.getElementById("nativeLang");
+  const studyFlagEl = document.getElementById("studyLang");
+  const levelTextEl = document.getElementById("levelLanguage");
+
+  const mannerEl = document.getElementById("manner");
+  const mannerLineEl = document.querySelector(".manner-line");
+  const mannerFillEl = document.querySelector(".manner-fill"); 
 
   const profileImageEl = document.getElementById("profileImage");
   const imageInput = document.getElementById("profileImageInput");
@@ -24,9 +29,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   const introTextarea = profileForm.querySelector('textarea[name="intro"]');
   const levelSelect = profileForm.querySelector('select[name="levelLanguage"]');
 
-  // ===============================
-  // 마이페이지 데이터 로딩
-  // ===============================
+  /* ===============================
+     매너 텍스트 색상 계산
+     (왼쪽 파랑 → 오른쪽 빨강)
+  =============================== */
+  function getMannerTextColor(percent) {
+    const p = Math.max(0, Math.min(100, percent)) / 100;
+
+    const start = { r: 50, g: 90, b: 210 }; // blue
+    const end   = { r: 255, g: 0,  b: 0 };  // red
+
+    const r = Math.round(start.r + (end.r - start.r) * p);
+    const g = Math.round(start.g + (end.g - start.g) * p);
+    const b = Math.round(start.b + (end.b - start.b) * p);
+
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  /* ===============================
+     매너 온도 UI
+  =============================== */
+  function setMannerTemp(temp) {
+    const percent = Math.max(0, Math.min(100, temp));
+
+    // 텍스트
+    mannerEl.textContent = `${temp.toFixed(1)}°C`;
+
+    // 🔥 배경 채우기 (핵심)
+    mannerFillEl.style.width = `${percent}%`;
+
+    // 🔥 텍스트 색상 = 위치에 맞게
+    mannerEl.style.color = getMannerTextColor(percent);
+  }
+
+  /* ===============================
+     마이페이지 데이터 로딩
+  =============================== */
   try {
     const res = await authFetch(`${CONTEXT_PATH}api/members/me`);
     const result = await res.json();
@@ -39,24 +77,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     const user = result.data;
     console.log("API user =", user);
 
-    // ===== 프로필 =====
+    /* ===== 기본 정보 ===== */
     nicknameEl.textContent = user.nickname;
     ageEl.textContent = `(${user.age})`;
     introEl.textContent = user.intro ?? "자기소개를 작성해 주세요.";
 
-    // ===== 일본어 레벨 표시 (🔥 핵심) =====
-    levelSpanEl.textContent = user.levelLanguage ?? "BEGINNER";
+    /* ===== 언어 ===== */
+    const flagMap = {
+      KOREAN: "🇰🇷",
+      JAPANESE: "🇯🇵"
+    };
 
-    // ===== 국적 =====
-    if (user.nation === "KOREA") {
-      nationFlagEl.textContent = "🇰🇷";
-      nationTextEl.textContent = "Korea";
-    } else if (user.nation === "JAPAN") {
-      nationFlagEl.textContent = "🇯🇵";
-      nationTextEl.textContent = "Japan";
-    }
+    nativeFlagEl.textContent = flagMap[user.nativeLanguage] ?? "❓";
+    studyFlagEl.textContent = flagMap[user.studyLanguage] ?? "❓";
 
-    // ===== 이미지 =====
+    /* ===== 레벨 ===== */
+    levelTextEl.textContent = user.levelLanguage ?? "BEGINNER";
+
+    /* ===== 매너 온도 ===== */
+    const mannerValue = user.manner ?? 36.5;
+    setMannerTemp(mannerValue);
+
+    /* ===== 프로필 이미지 ===== */
     const imagePath =
       user.profileImagePath && user.profileImageName
         ? `${user.profileImagePath}/${user.profileImageName}`
@@ -64,7 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     profileImageEl.src = imagePath;
 
-    // ===== 모달 초기값 =====
+    /* ===== 모달 초기값 ===== */
     introTextarea.value = user.intro ?? "";
     levelSelect.value = user.levelLanguage;
 
@@ -73,9 +115,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("마이페이지 정보를 불러오지 못했습니다.");
   }
 
-  // ===============================
-  // 프로필 이미지 변경
-  // ===============================
+  /* ===============================
+     프로필 이미지 변경
+  =============================== */
   imageInput.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -98,9 +140,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ===============================
-  // 모달 열고 닫기
-  // ===============================
+  /* ===============================
+     모달 열고 닫기
+  =============================== */
   openModalBtn.addEventListener("click", () => {
     modal.classList.remove("hidden");
   });
@@ -109,9 +151,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     modal.classList.add("hidden");
   });
 
-  // ===============================
-  // 프로필 수정 저장
-  // ===============================
+  /* ===============================
+     프로필 수정 저장
+  =============================== */
   profileForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -126,9 +168,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
     if (res.ok) {
-      // 🔥 reload 없이 즉시 반영
-      introEl.textContent = introTextarea.value || "자기소개를 작성해 주세요.";
-      levelSpanEl.textContent = levelSelect.value;
+      introEl.textContent =
+        introTextarea.value || "자기소개를 작성해 주세요.";
+      levelTextEl.textContent = levelSelect.value;
 
       modal.classList.add("hidden");
       alert("프로필 수정 완료");
@@ -136,4 +178,5 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("프로필 수정 실패");
     }
   });
+
 });
