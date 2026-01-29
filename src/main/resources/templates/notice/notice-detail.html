@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${title} + ' | LANG:MATE'">공지사항</title>
+
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/notice/notice.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="notice-detail-wrapper"
+      th:attr="data-notice-id=${notice.noticeId}">
+
+    <div class="notice-detail-card">
+
+        <!-- 상단 헤더 -->
+        <div class="notice-detail-header">
+            <h2 class="notice-detail-title"
+                th:text="${notice.title}">
+                공지 제목
+            </h2>
+
+            <!-- 관리자 버튼 -->
+            <div class="notice-admin-actions" th:if="${isAdmin}">
+                <button class="btn-edit" id="editBtn">수정</button>
+                <button class="btn-delete" id="deleteBtn">삭제</button>
+            </div>
+        </div>
+
+        <!-- 날짜 -->
+        <div class="notice-detail-meta">
+            <span th:text="${#temporals.format(notice.createdAt, 'yyyy.MM.dd')}">
+                2026.01.28
+            </span>
+        </div>
+
+        <!-- 본문 -->
+        <div class="notice-detail-content"
+             th:utext="${notice.content}">
+        </div>
+
+        <!-- 하단 버튼 -->
+        <div class="notice-detail-footer">
+            <a th:href="@{/customer/{tab}(tab=${activeTab})}"
+               class="btn-back">
+                ← 목록으로
+            </a>
+        </div>
+
+    </div>
+
+</main>
+
+<!-- ✏️ 수정 모달 -->
+<div id="editModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>공지 수정</h3>
+
+        <input type="text" id="editTitle" placeholder="제목">
+        <textarea id="editContent" rows="8" placeholder="내용"></textarea>
+
+        <div class="modal-actions">
+            <button id="saveEditBtn">저장</button>
+            <button id="cancelEditBtn">취소</button>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- ✅ JS는 body 맨 아래 -->
+<script th:src="@{/js/notice/notice-detail.js}"></script>
+
+</body>
+</html>
