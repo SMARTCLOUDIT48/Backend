@@ -1,63 +1,102 @@
 package com.scit48.chat.service;
 
+import com.scit48.common.dto.ChatMessageDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class RedisService {
-
+	
+	// 1. 기존: 문자열/숫자 처리용 (인원수, 활동량)
 	private final RedisTemplate<String, String> redisTemplate;
-
-	// 입장: 인원수 +1
+	
+	// ✅ 2. 추가: 객체(JSON) 처리용 (채팅 내역 저장)
+	// RedisConfig에서 @Bean 이름을 "redisObjectTemplate"으로 했으므로 변수명을 맞춥니다.
+	@Qualifier("redisObjectTemplate")
+	private final RedisTemplate<String, Object> redisObjectTemplate;
+	
+	// ==========================================
+	// [기존 기능] 방 인원수 관리 (Counter)
+	// ==========================================
+	
 	public void userEnter(String roomId) {
 		ValueOperations<String, String> ops = redisTemplate.opsForValue();
 		ops.increment("roomCount:" + roomId);
 	}
-
-	// 퇴장: 인원수 -1
+	
 	public void userLeave(String roomId) {
 		ValueOperations<String, String> ops = redisTemplate.opsForValue();
-		// 0보다 작아지지 않도록 방어 로직 살짝 추가하면 더 좋습니다
 		ops.decrement("roomCount:" + roomId);
 	}
-
-	// 현재 인원수 조회
+	
 	public long getUserCount(String roomId) {
 		ValueOperations<String, String> ops = redisTemplate.opsForValue();
 		String count = ops.get("roomCount:" + roomId);
 		return (count != null) ? Long.parseLong(count) : 0;
 	}
-
+	
 	// ==========================================
-	// 2. 추가 기능: 오늘 대화한 사람 수 집계 (활동량)
+	// [기존 기능] 오늘 활동량 집계
 	// ==========================================
-
-	// 대화 발생 시 기록 (중복 자동 제거됨)
+	
 	public void recordInteraction(Long myId, Long partnerId) {
-		// Redis Key: daily:interaction:내ID:오늘날짜
 		String key = "daily:interaction:" + myId + ":" + LocalDate.now();
-
-		// opsForSet()을 사용해야 중복된 사람을 카운트하지 않습니다.
-		// 기존 템플릿이 <String, String>이므로 숫자를 String으로 변환해서 넣습니다.
 		redisTemplate.opsForSet().add(key, String.valueOf(partnerId));
-
-		// 하루(24시간) 뒤에 기록 자동 삭제 (메모리 관리)
 		redisTemplate.expire(key, 1, TimeUnit.DAYS);
 	}
-
-	// 오늘 몇 명이랑 대화했는지 조회
+	
 	public Long getTodayInteractionCount(Long myId) {
 		String key = "daily:interaction:" + myId + ":" + LocalDate.now();
-
-		// Set의 크기(size)가 곧 대화한 사람 수
 		Long count = redisTemplate.opsForSet().size(key);
-
 		return (count != null) ? count : 0L;
+	}
+	
+	// ==========================================
+	// ✅ [신규 기능] 채팅 내역 캐싱 (JSON 저장)
+	// ==========================================
+	
+	/**
+	 * 채팅 메시지를 Redis 리스트에 저장
+	 * Key: chat:room:{roomId}:msg
+	 */
+	public void saveMessageToRedis(ChatMessageDto message) {
+		String key = "chat:room:" + message.getRoomId() + ":msg";
+		
+		// redisObjectTemplate을 사용하여 객체(Dto)를 그대로 저장 (내부적으로 JSON 변환됨)
+		redisObjectTemplate.opsForList().rightPush(key, message);
+		
+		// (선택) 메모리 관리를 위해 최근 200개 메시지만 유지하고 나머지는 자름
+		// redisObjectTemplate.opsForList().trim(key, -200, -1);
+		
+		// 데이터 유효기간 설정 (예: 3일)
+		redisObjectTemplate.expire(key, 3, TimeUnit.DAYS);
+	}
+	
+	/**
+	 * 채팅방 입장 시 지난 대화 내역 불러오기
+	 */
+	public List<ChatMessageDto> getChatHistory(String roomId) {
+		String key = "chat:room:" + roomId + ":msg";
+		
+		// 리스트의 처음(0)부터 끝(-1)까지 가져옴
+		List<Object> rawList = redisObjectTemplate.opsForList().range(key, 0, -1);
+		
+		if (rawList == null) {
+			return List.of();
+		}
+		
+		// Object -> ChatMessageDto 캐스팅
+		return rawList.stream()
+				.map(obj -> (ChatMessageDto) obj)
+				.collect(Collectors.toList());
 	}
 }
