@@ -41,7 +41,7 @@ public class BoardService {
 	
 	public void write(BoardDTO boardDTO, String uploadPath, MultipartFile upload) throws IOException {
 		// 1. 작성자(User) 조회
-		UserEntity userEntity = ur.findById(boardDTO.getId())
+		UserEntity userEntity = ur.findByMemberId(boardDTO.getMemberId())
 				.orElseThrow(() -> new EntityNotFoundException("사용자가 존재하지 않습니다. id=" + boardDTO.getId()));
 		
 		// 2. 카테고리 조회 (DTO에서 ID를 받아옴)
@@ -61,8 +61,9 @@ public class BoardService {
 		// 첨부파일이 있는 경우
 		if (upload != null && !upload.isEmpty()) {
 			String fileName = fm.saveFile(uploadPath, upload);
-			boardEntity.setFileName(fileName);
+			boardEntity.setFileName("/files/" + fileName);
 			boardEntity.setFileOriginalName(upload.getOriginalFilename());
+			
 		}
 		
 		br.save(boardEntity);
@@ -73,7 +74,7 @@ public class BoardService {
 						  MultipartFile upload) throws IOException {
 		
 		// 1. 작성자(User) 조회
-		UserEntity userEntity = ur.findById(boardDTO.getId())
+		UserEntity userEntity = ur.findByMemberId(boardDTO.getMemberId())
 				.orElseThrow(() -> new EntityNotFoundException("사용자가 존재하지 않습니다. id=" + boardDTO.getId()));
 		
 		// '일상' 카테고리 자동 지정 (DB에 'DAILY' 또는 '일상'이라는 이름의 카테고리가 있다고 가정)
@@ -94,8 +95,9 @@ public class BoardService {
 		// 첨부파일이 있는 경우
 		if (upload != null && !upload.isEmpty()) {
 			String fileName = fm.saveFile(uploadPath, upload);
-			boardEntity.setFileName(fileName);
+			boardEntity.setFileName("/files/" + fileName);
 			boardEntity.setFileOriginalName(upload.getOriginalFilename());
+			
 		}
 		
 		br.save(boardEntity);
@@ -115,11 +117,11 @@ public class BoardService {
 		}
 		
 		// 2. ID 추출
-		Long userId = Long.valueOf(user.getUsername());
+		String memberId = user.getUsername();
 		
 		// 3. DB 조회 (없으면 에러 발생)
-		UserEntity userEntity = ur.findById(userId)
-				.orElseThrow(() -> new EntityNotFoundException("사용자 정보를 찾을 수 없습니다. ID: " + userId));
+		UserEntity userEntity = ur.findByMemberId(memberId)
+				.orElseThrow(() -> new EntityNotFoundException("사용자 정보를 찾을 수 없습니다. ID: " + memberId));
 		
 		// 4. Entity -> DTO 변환 후 반환
 		UserDTO userDTO = UserDTO.fromEntity(userEntity);
@@ -143,6 +145,7 @@ public class BoardService {
 				.id(board.getUser().getId())
 				.title(board.getTitle())
 				.viewCount(board.getViewCount())
+				.boardId(board.getBoardId())
 				.createdDate(board.getCreatedAt()) // BaseTimeEntity 사용 시
 				.categoryId(board.getCategory().getCategoryId())
 				.categoryName(board.getCategory().getName()) // 카테고리 명
@@ -152,17 +155,17 @@ public class BoardService {
 		return boardDTOS;
 	}
 	
-	public Page<BoardDTO> searchPosts(Pageable pageable, Long cateId, String searchType, String keyword) {
+	public Page<BoardDTO> searchPosts(Pageable pageable, String cateName, String searchType, String keyword) {
 		
 		int page = pageable.getPageNumber() - 1;
-		PageRequest pageRequest = PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "id"));
+		PageRequest pageRequest = PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "boardId"));
 		
 		String excludeName = "일상"; // 제외할 카테고리명
 		Page<BoardEntity> entities;
 		
 		// 1. 카테고리 필터가 있는 경우 (예: '질문'만 보기)
-		if (cateId != null) {
-			CategoryEntity category = ctr.findById(cateId).orElse(null);
+		if (cateName != null) {
+			CategoryEntity category = ctr.findByName(cateName).orElse(null);
 			if (category != null) {
 				// 특정 카테고리 내에서만 조회 (이때도 혹시 몰라 '일상' 제외 조건을 걸 수 있지만, ID로 조회하므로 안전)
 				// 하지만 검색어까지 있다면 복잡해지므로 여기서는 단순 필터링만 구현하거나
@@ -198,6 +201,7 @@ public class BoardService {
 		return entities.map(board -> BoardDTO.builder()
 				.id(board.getUser().getId())
 				.title(board.getTitle())
+				.boardId(board.getBoardId())
 				.viewCount(board.getViewCount())
 				.createdDate(board.getCreatedAt())
 				.categoryName(board.getCategory().getName())

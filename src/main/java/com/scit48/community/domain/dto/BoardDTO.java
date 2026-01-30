@@ -28,9 +28,12 @@ public class BoardDTO {
 	
 	
 	// 3. 작성자 정보 (User 연동)
+	private String memberId;
 	private String writerNickname;     //
-	private String writerProfileImage; //
-	private BigDecimal manner;   //
+	private String profileImagePath;
+	private String profileImageName;//
+	private BigDecimal manner;  //
+	private String nation;
 	
 	
 	
@@ -38,8 +41,9 @@ public class BoardDTO {
 	// 4. 첨부 파일 정보
 	private String fileName;
 	private String fileOriginalName;
+	private String filePath;
 	
 	// 5. 연관 데이터
 	private List<CommentDTO> comments; // 댓글 목록
-	private int likeCount;             // 좋아요 총 개수
+	private Integer likeCount;             // 좋아요 총 개수
 }

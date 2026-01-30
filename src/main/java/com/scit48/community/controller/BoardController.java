@@ -3,7 +3,9 @@ package com.scit48.community.controller;
 import com.scit48.common.dto.UserDTO;
 import com.scit48.common.repository.UserRepository;
 import com.scit48.community.domain.dto.BoardDTO;
+import com.scit48.community.domain.entity.BoardEntity;
 import com.scit48.community.domain.entity.CategoryEntity;
+import com.scit48.community.repository.BoardRepository;
 import com.scit48.community.repository.CategoryRepository;
 import com.scit48.community.service.BoardService;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,6 +35,7 @@ public class BoardController {
 	private final BoardService bs;
 	private final CategoryRepository cr;
 	private final UserRepository ur;
+	private final BoardRepository br;
 	
 	// application.properties 파일의 설정값
 	@Value("${board.pageSize}")
@@ -45,7 +48,7 @@ public class BoardController {
 	String uploadPath;
 	
 	@GetMapping("write")
-	public String write (@AuthenticationPrincipal UserDetails user, Model model) {
+	public String write (@AuthenticationPrincipal UserDetails user, Model model, BoardDTO boardDTO) {
 		
 		// 1. 서비스 호출 (비즈니스 로직 위임)
 		UserDTO userDTO = bs.getUserInfo(user);
@@ -61,6 +64,7 @@ public class BoardController {
 		model.addAttribute("categories", categories);
 		model.addAttribute("userDTO", userDTO);
 		
+		
 		return "boardWrite";
 	}
 	
@@ -73,7 +77,7 @@ public class BoardController {
 	) {
 		
 		// 작성한 글 정보에 사용자 아이디 추가
-		boardDTO.setId(Long.valueOf(user.getUsername()));
+		boardDTO.setMemberId(user.getUsername());
 		log.debug("저장할 글 정보: {}", boardDTO);
 		
 		// 업로드된 첨부파일
@@ -100,7 +104,7 @@ public class BoardController {
 			return "redirect:/board/write";
 		}
 		
-		return "redirect:/community";	//추후 구현
+		return "redirect:/board/list";
 	}
 	
 	
@@ -134,7 +138,7 @@ public class BoardController {
 	) {
 		
 		// 작성한 글 정보에 사용자 아이디 추가
-		boardDTO.setId(Long.valueOf(user.getUsername()));
+		boardDTO.setMemberId(user.getUsername());
 		log.debug("저장할 피드글 정보: {}", boardDTO);
 		
 		// 업로드된 첨부파일
@@ -152,7 +156,7 @@ public class BoardController {
 			return "redirect:/board/feedWrite";
 		}
 		
-		return "redirect:/community"; // 피드 목록으로 이동 (추후 구현)
+		return "redirect:/board/feedView"; // 피드 목록으로 이동 (추후 구현)
 	}
 	
 	
@@ -160,9 +164,9 @@ public class BoardController {
 	@GetMapping("list")
 	public String list(
 			Model model,
-			@PageableDefault(page = 1, size = 10, sort = "id", direction = Sort.Direction.DESC)
+			@PageableDefault(page = 1, size = 10, sort = "boardId", direction = Sort.Direction.DESC)
 			Pageable pageable,
-			@RequestParam(required = false) Long cateId,       // 카테고리 필터
+			@RequestParam(required = false) String cateName,       // 카테고리 필터
 			@RequestParam(required = false) String searchType, // title, content, writer
 			@RequestParam(required = false) String keyword) {  // 검색어
 		
@@ -173,7 +177,7 @@ public class BoardController {
 		model.addAttribute("categories", categories);
 		
 		// 검색 로직 수행
-		Page<BoardDTO> boardList = bs.searchPosts(pageable, cateId, searchType, keyword);
+		Page<BoardDTO> boardList = bs.searchPosts(pageable, cateName, searchType, keyword);
 		
 		
 		// 페이징 블록 계산
@@ -186,11 +190,42 @@ public class BoardController {
 		model.addAttribute("endPage", endPage);
 		
 		// 검색 상태 유지를 위해 모델에 추가
-		model.addAttribute("cateId", cateId);
+		model.addAttribute("cateName", cateName);
 		model.addAttribute("searchType", searchType);
 		model.addAttribute("keyword", keyword);
 		
 		return "boardList";
+	}
+	
+	@GetMapping("feedView")
+	public String feedView(
+			Model model,
+			@PageableDefault(page = 0, size = 5, sort = "boardId",
+					direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		// 1. '일상' 카테고리 글만 조회
+		Page<BoardEntity> feeds = br.findByCategoryName("일상", pageable);
+		
+		// 2. Entity -> DTO 변환
+		Page<BoardDTO> feedList = feeds.map(board -> BoardDTO.builder()
+				.id(board.getUser().getId())
+				.title(board.getTitle())
+				.content(board.getContent())
+				.boardId(board.getBoardId())
+				.writerNickname(board.getUser().getNickname())
+				.profileImagePath(board.getUser().getProfileImagePath())// 프로필 이미지
+				.profileImageName("/images/profile/upload/" + board.getUser().getProfileImageName())
+				.fileName(board.getFileName())
+				.filePath(board.getFilePath()) // ★ 중요: 피드 이미지
+				.createdDate(board.getCreatedAt())
+				.likeCount(board.getLikeCount())// 좋아요 수 (Entity에 해당 필드나 로직 필요)
+				.nation(board.getUser().getNation())
+				.build());
+		
+		
+		model.addAttribute("feedList", feedList);
+		
+		return "feedView";
 	}
 	
 }

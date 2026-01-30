@@ -38,6 +38,9 @@ public class BoardEntity {
 	@Column(name = "file_name")
 	private String fileName;
 	
+	@Column(name = "file_path")
+	private String filePath;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private UserEntity user; // 작성자
@@ -54,6 +57,10 @@ public class BoardEntity {
 	@Builder.Default
 	@OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
 	private List<LikeEntity> likes = new ArrayList<>();
+	
+	
+	@Column(name = "like_count", columnDefinition = "integer default 0")
+	private Integer likeCount;
 	
 	// 생성자, 빌더 등 추가 구현
 	

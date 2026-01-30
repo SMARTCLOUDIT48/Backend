@@ -71,11 +71,11 @@
     <div class="filter-search-bar">
 
         <select class="filter-select" onchange="location.href=this.value">
-            <option value="/board/list" th:selected="${cateId == null}">전체보기</option>
+            <option value="/board/list" th:selected="${cateName == null}">전체보기</option>
             <option th:each="cate : ${categories}"
-                    th:value="@{/board/list(cateId=${cate.id})}"
+                    th:value="@{/board/list(cateName=${cate.Name})}"
                     th:text="${cate.name}"
-                    th:selected="${cateId == cate.id}"></option>
+                    th:selected="${cateName == cate.Name}"></option>
         </select>
 
         <form action="/board/list" method="get" class="search-form">
@@ -108,7 +108,7 @@
             </tr>
 
             <tr th:each="board : ${boardList}">
-                <td th:text="${board.id}">1</td>
+                <td th:text="${board.boardId}"></td>
                 <td>
                     <span class="category-badge" th:text="${board.categoryName}">질문</span>
                 </td>

@@ -27,6 +27,8 @@ public class LikeEntity {
 	@JoinColumn(name = "board_id")
 	private BoardEntity board;
 	
+	
+	
 	public LikeEntity(UserEntity user, BoardEntity board) {
 		this.user = user;
 		this.board = board;

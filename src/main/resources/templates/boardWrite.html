@@ -88,7 +88,7 @@
 
         <div class="writer-info">
             <div class="avatar">
-                <img th:src="${userDTO.profileImagePath != null ? userDTO.profileImagePath : '/images/default_profile.png'}"
+                <img th:src="${userDTO.profileImageName != null ? '/images/profile/upload/' + userDTO.profileImageName : '/images/default_profile.png'}"
                      alt="Profile">
             </div>
             <div class="info-text">
