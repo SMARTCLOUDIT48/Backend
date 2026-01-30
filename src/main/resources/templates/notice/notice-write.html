@@ -47,7 +47,7 @@
             </div>
 
             <!-- 상단 고정 -->
-            <div class="form-row checkbox-row">
+            <div class="form-row checkbox-row" id="pinnedRow">
                 <label>
                     <input type="checkbox" name="isPinned">
                     상단 고정
@@ -67,6 +67,30 @@
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const typeSelect = document.querySelector('select[name="type"]');
+        const pinnedRow = document.getElementById("pinnedRow");
+
+        if (!typeSelect || !pinnedRow) return;
+
+        function togglePinned() {
+            if (typeSelect.value === "NOTICE") {
+                pinnedRow.style.display = "flex";
+            } else {
+                pinnedRow.style.display = "none";
+                pinnedRow.querySelector('input').checked = false;
+            }
+        }
+
+        // 최초 실행
+        togglePinned();
+
+        // 타입 변경 시
+        typeSelect.addEventListener("change", togglePinned);
+    });
+</script>
 
 </body>
 </html>
