@@ -22,8 +22,7 @@ public class RecommendController {
 	
 	
 	@GetMapping("recommend") //임시
-	public String Recommend(@AuthenticationPrincipal UserDetails user){
-		Long user_id = Long.valueOf(user.getUsername());
+	public String Recommend(){
 		
 		return "recommend";
 	}
@@ -33,7 +32,8 @@ public class RecommendController {
 	public List<RecommendDTO> recommend(
 			@AuthenticationPrincipal UserDetails user
 	){
-		Long user_id = Long.valueOf(user.getUsername());
+		
+		Long user_id = rs.searchid(user);
 		List<RecommendDTO> userDTO= rs.firstRecommend(user_id);
 		
 		return userDTO;

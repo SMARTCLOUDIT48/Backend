@@ -35,7 +35,9 @@ public class RecommendDTO {
 	private String nativeLanguage;
 
 	private LanguageLevel levelLanguage;
-
+	
+	private String studyLanguage;
+	
 	private int matchPoint;
 
 	// --- DTO 변환 메서드 (편의성 제공) ---
