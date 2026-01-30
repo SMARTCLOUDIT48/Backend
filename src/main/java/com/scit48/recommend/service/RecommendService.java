@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -105,6 +106,7 @@ public class RecommendService {
 					.profileImagePath(partner.getProfileImagePath())
 					.nativeLanguage(partner.getNativeLanguage())
 					.levelLanguage(partner.getLevelLanguage())
+					.studyLanguage(partner.getStudyLanguage())
 					.matchPoint(totalScore)
 					.build();
 			
@@ -211,4 +213,11 @@ public class RecommendService {
 		return (int) Math.round(score);
 	}
 	
+	public Long searchid(UserDetails user) {
+		UserEntity entity = ur.findByMemberId(user.getUsername()).orElseThrow(
+				()-> new EntityNotFoundException("회원을 찾을 수 없습니다.")
+		);
+		
+		return entity.getId();
+	}
 }

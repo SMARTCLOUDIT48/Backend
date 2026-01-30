@@ -4,7 +4,8 @@
 <head>
 	<meta charset="UTF-8">
 	<title>파트너 추천</title>
-	<link rel="stylesheet" th:href="@{ /css/layout.css}">
+	<link rel="stylesheet" th:href="@{/css/layout.css}">
+	<link rel="stylesheet" th:href="@{/css/recommend/recommend.css}" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.1/css/flag-icons.min.css" />
 
 	<script>
@@ -38,31 +39,43 @@
 				let study = "";
 				let languageLevel = "";
 				let nation = "";
+				let imagePath = item.profileImagePath + "/" + item.profileImageName;
+				console.log(item.id);
 
-				switch (item.native_language) {
-					case "KOR":
+				switch (item.nativeLanguage) {
+					case "KOREAN":
 						flagStatus = "fi fi-kr flag-icon";
 						break;
-					case "JPN":
+					case "JAPANESE":
 						flagStatus = "fi fi-jp flag-icon";
+						break;
+					default:
+						flagStatus = "default"
 						break;
 				}
 
 				switch (item.studyLanguage) {
-					case "KOR":
+					case "KOREAN":
 						study = "fi fi-kr";
 						break;
-					case "JPN":
+					case "JAPANESE":
 						study = "fi fi-jp";
+						break;
+					default:
+						study = "default"
 						break;
 				}
 
 				switch (item.nation) {
-					case "KOR":
+
+					case "KOREA":
 						nation = "한국";
 						break;
-					case "JPN":
+					case "JAPAN":
 						nation = "일본";
+						break;
+					default:
+						nation = "default"
 						break;
 				}
 
@@ -87,8 +100,7 @@
 				html += `
             	<div class="member-card">
 			<div class="profile-wrap">
-				<img src="${item.profileImagePath}" class="profile-img" alt="">
-				
+				<img src="${imagePath}" class="profile-img" alt="">
 				<span class="${flagStatus}" aria-label="Japan"></span>
 			</div>
 		
@@ -112,7 +124,8 @@
 		
 			<!-- 우측 영역 -->
 			<div class="right">
-				<div class="temp">${item.manner}</div>
+				<span class="chatting-text">"인기 멤버예요! 🔥 답장이 늦을 수 있어요."</span>
+				<div class="temp">${item.manner}℃</div>
 				<button class="chat-btn" data-user-id="${item.id}">채팅 신청</button>
 			</div>
 		</div>
@@ -121,6 +134,22 @@
 
 			recommendList.innerHTML = html;
 		}
+
+			// async function chattingNumber(user_id) {
+			// 	try {
+			// 		const response = await fetch('/api/chat/partner-activity/{id}');
+
+			// 		if (!response.ok) {
+			// 			throw new Error('HTTP error ' + response.status);
+			// 		}
+			// 		const list = await response.json();
+			// 		console.log(list);
+			// 		renderRecommend(list);
+
+			// 	} catch (e) {
+			// 		console.log(e);
+			// 	}
+			// }
 
 	</script>
 </head>
@@ -131,10 +160,13 @@
 	</header>
 
 	<section class="hero">
-		<h1><span>무스비</span><br>추천 파트너 리스트</h1>
-		<p>언어 리스트부터 채팅 요청까지 서비스를 한눈에 확인하세요(임시)</p>
+		<h1 class="webTitle">무스비</h1>
+		<h1 class="SubTitle">추천 파트너 리스트</h1>
+		<p class="temp_context">언어 리스트부터 채팅 요청까지 서비스를 한눈에 확인하세요(임시)</p>
 	</section>
-
+	<section>
+		<button>자동 매칭</button>
+	</section>
 	<!-- <section class="filter">
 	<h3>조건 필터</h3>
 	<div class="filter-box">
@@ -148,36 +180,6 @@
 	</section> -->
 	<section class="content">
 		<div id="recommendTbody">
-			<!-- <div class="member-card">
-			
-			<div class="profile-wrap">
-				<img src="${item.profile}" class="profile-img" alt="">
-				<span class="fi fi-jp flag-icon" aria-label="Japan"></span>
-			</div>
-
-
-			<div class="info">
-				<div class="nickname">${item.nickname}</div>
-
-				<div class="row">
-					<span class="label">거주국가</span>
-					<span class="value">${item.nation}</span>
-				</div>
-
-				<div class="row">
-					<span class="label">학습언어</span>
-					<span class="lang">
-						<span class="fi fi-kr"></span>
-						<span class="level">★★★★</span>
-					</span>
-				</div>
-			</div>
-
-			<div class="right">
-				<div class="temp">37.8℃</div>
-				<button class="chat-btn">채팅 신청</button>
-			</div>
-		</div> -->
 		</div>
 	</section>
 	<footer>
