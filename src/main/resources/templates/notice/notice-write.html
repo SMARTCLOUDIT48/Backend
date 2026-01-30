@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>공지 작성 | LANG:MATE</title>
+
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/notice/notice.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="notice-detail-wrapper">
+
+    <div class="notice-detail-card">
+
+        <h2 class="notice-detail-title">공지 작성</h2>
+
+        <form th:action="@{/customer/notice/write}" method="post" class="notice-write-form">
+
+            <!-- 타입 -->
+            <div class="form-row">
+                <label>게시물 타입</label>
+                <select name="type" required>
+                    <option value="NOTICE">공지사항</option>
+                    <option value="FAQ">FAQ</option>
+                </select>
+            </div>
+
+            <!-- 카테고리 -->
+            <div class="form-row">
+                <label>카테고리</label>
+                <input type="text" name="category" placeholder="예: 서비스, 정책" required>
+            </div>
+
+            <!-- 제목 -->
+            <div class="form-row">
+                <label>제목</label>
+                <input type="text" name="title" placeholder="제목을 입력하세요" required>
+            </div>
+
+            <!-- 내용 -->
+            <div class="form-row">
+                <label>내용</label>
+                <textarea name="content" rows="10"
+                          placeholder="공지 내용을 입력하세요" required></textarea>
+            </div>
+
+            <!-- 상단 고정 -->
+            <div class="form-row checkbox-row">
+                <label>
+                    <input type="checkbox" name="isPinned">
+                    상단 고정
+                </label>
+            </div>
+
+            <!-- 버튼 -->
+            <div class="form-actions">
+                <a th:href="@{/customer/notice}" class="btn-back">취소</a>
+                <button type="submit" class="btn-edit">등록</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>
