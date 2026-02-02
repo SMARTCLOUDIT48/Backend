@@ -11,7 +11,99 @@
 	<script>
 		window.addEventListener('DOMContentLoaded', () => {
 			loadRecommend();
+			
+			document.getElementById('recommendTbody').addEventListener('click', async (e) => {
+				const chat_partner_btn = e.target.closest('.chat-btn');
+				if (!chat_partner_btn) return;
+
+				const partnerId = chat_partner_btn.dataset.userId;
+				chat_partner_btn.disabled = true;
+
+				try {
+					const res = await fetch(`/api/chat/rooms/direct/${partnerId}`, { method: 'POST' });
+					if (!res.ok) throw new Error('HTTP ' + res.status);
+
+					const data = await res.json();
+					// 채팅 페이지 라우팅 규칙에 맞게 수정
+					location.href = `/chat/room/${data.roomUuid}`;
+
+				} catch (err) {
+					console.error(err);
+					alert('채팅방 생성 실패');
+					chat_partner_btn.disabled = false;
+				}
+			});
+
+			const btn = document.getElementById('auto_matching');
+			
+			// btn.addEventListener('click', async () => {
+			// 	btn.disabled = true;
+
+			// 	try {
+			// 		// ✅ 필요하면 여기서 필터 조건을 같이 보냅니다.
+			// 		// 서버에서 로그인 유저 기준으로 자동 계산한다면 body 없이 보내도 됩니다.
+			// 		const payload = {
+			// 			// 예시(선택): 서버가 criteriaKey를 요구한다면 전달
+			// 			// criteriaKey: "g=FEMALE|n=JAPAN|s=KOREAN|l=ANY"
+			// 		};
+
+			// 		const res = await fetch('/api/match/start', {
+			// 			method: 'POST',
+			// 			headers: { 'Content-Type': 'application/json' },
+			// 			body: JSON.stringify(payload) // payload가 필요 없으면 이 줄 제거 가능
+			// 		});
+
+			// 		if (!res.ok) {
+			// 			throw new Error('HTTP ' + res.status);
+			// 		}
+
+			// 		const data = await res.json();
+			// 		// data 예시:
+			// 		// { status: "WAITING" }
+			// 		// { status: "MATCHED", roomId: 10, roomUuid: "....", partnerId: 2 }
+
+			// 		if (data.status === 'MATCHED') {
+			// 			// ✅ 채팅방 페이지 규칙에 맞게 수정
+			// 			// roomUuid로 이동하는 구조라면:
+			// 			location.href = `/chat/room/${data.roomUuid}`;
+			// 			return;
+			// 		}
+
+			// 		// WAITING이면 폴링 시작(1초마다 매칭 결과 확인)
+			// 		startPollingForMatch(btn);
+
+			// 	} catch (err) {
+			// 		console.error(err);
+			// 		alert('매칭 시작 실패');
+			// 		btn.disabled = false;
+			// 	}
+			// });
+
 		});
+
+		function startPollingForMatch(btn) {
+				const intervalMs = 1000;
+
+				const timer = setInterval(async () => {
+					try {
+						const res = await fetch('/api/match/result');
+						if (!res.ok) throw new Error('HTTP ' + res.status);
+
+						const data = await res.json();
+
+						if (data.status === 'MATCHED') {
+							clearInterval(timer);
+							location.href = `/chat/room/${data.roomUuid}`;
+						}
+					} catch (err) {
+						console.error(err);
+						// 폴링 중 에러가 나도 계속 시도할지/중단할지 선택 가능
+						// 여기서는 3회 연속 실패 시 중단 같은 정책을 둘 수도 있습니다.
+					}
+				}, intervalMs);
+
+				// (선택) 취소 버튼이 있으면 clearInterval(timer)로 중단하게 만들면 됩니다.
+			}
 
 		async function loadRecommend() {
 			try {
@@ -28,6 +120,8 @@
 				console.log(e);
 			}
 		}
+
+		
 
 		function renderRecommend(list) {
 			const recommendList = document.getElementById('recommendTbody');
@@ -135,21 +229,21 @@
 			recommendList.innerHTML = html;
 		}
 
-			// async function chattingNumber(user_id) {
-			// 	try {
-			// 		const response = await fetch('/api/chat/partner-activity/{id}');
+		// async function chattingNumber(user_id) {
+		// 	try {
+		// 		const response = await fetch('/api/chat/partner-activity/{id}');
 
-			// 		if (!response.ok) {
-			// 			throw new Error('HTTP error ' + response.status);
-			// 		}
-			// 		const list = await response.json();
-			// 		console.log(list);
-			// 		renderRecommend(list);
+		// 		if (!response.ok) {
+		// 			throw new Error('HTTP error ' + response.status);
+		// 		}
+		// 		const list = await response.json();
+		// 		console.log(list);
+		// 		renderRecommend(list);
 
-			// 	} catch (e) {
-			// 		console.log(e);
-			// 	}
-			// }
+		// 	} catch (e) {
+		// 		console.log(e);
+		// 	}
+		// }
 
 	</script>
 </head>
@@ -165,7 +259,7 @@
 		<p class="temp_context">언어 리스트부터 채팅 요청까지 서비스를 한눈에 확인하세요(임시)</p>
 	</section>
 	<section>
-		<button>자동 매칭</button>
+		<button id="auto_matching">자동 매칭</button>
 	</section>
 	<!-- <section class="filter">
 	<h3>조건 필터</h3>
