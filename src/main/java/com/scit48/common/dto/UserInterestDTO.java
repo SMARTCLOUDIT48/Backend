@@ -13,22 +13,30 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UserInterestDTO {
-	
-	// 응답 시에만 사용 (요청 시 null 허용)
+
+	// 응답 시에만 사용
 	private Long userInterestId;
-	
-	// 요청 / 응답 공용
-	private InterestType interest;
-	private InterestDetail interestDetail;
-	
-	/* =========================
-	   Entity → DTO 변환
-	   ========================= */
+
+	// 코드값 (요청/응답 공용)
+	private InterestType interest; // STUDY
+	private InterestDetail interestDetail; // LANGUAGE_STUDY
+
+	// 화면 표시용 (응답 전용)
+	private String interestLabel; // 학습·자기계발
+	private String interestDetailLabel; // 언어 학습
+
+	/*
+	 * =========================
+	 * Entity → DTO 변환
+	 * =========================
+	 */
 	public static UserInterestDTO fromEntity(UserInterestEntity entity) {
 		return UserInterestDTO.builder()
 				.userInterestId(entity.getId())
 				.interest(entity.getInterest())
 				.interestDetail(entity.getInterestDetail())
+				.interestLabel(entity.getInterest().getValue())
+				.interestDetailLabel(entity.getInterestDetail().getValue())
 				.build();
 	}
 }

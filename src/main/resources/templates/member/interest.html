@@ -7,9 +7,7 @@
     <title>LANG:MATE - 관심사 설정</title>
 
     <!-- 공통 CSS -->
-<link rel="stylesheet" th:href="@{/css/layout.css}">
-
-    <!-- 페이지 전용 CSS -->
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
     <link rel="stylesheet" th:href="@{/css/member/interest.css}" />
 
     <script th:inline="javascript">
@@ -23,43 +21,111 @@
 
 <body>
 
-    <!-- HEADER -->
-<div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: header}"></div>
 
-
-    <!-- MAIN -->
     <main class="page">
         <div class="panel interest-panel">
             <div class="interest-inner">
 
-                <!-- 타이틀 -->
                 <div class="interest-title">
                     <h2>관심사 설정</h2>
                     <p>관심 있는 주제를 최대 5개까지 선택해 주세요.</p>
                 </div>
 
-                <!-- 관심사 -->
                 <div class="interest-grid">
-                    <button type="button" class="interest-item active">🎒 여행</button>
-                    <button type="button" class="interest-item">🎬 영화</button>
-                    <button type="button" class="interest-item">🎵 음악</button>
-                    <button type="button" class="interest-item">⚽ 스포츠</button>
-                    <button type="button" class="interest-item">💻 기술 / IT</button>
-                    <button type="button" class="interest-item">📚 독서 / 작문</button>
+
+                <div class="interest-group">
+                    
+                    
+                    <h3>🎨 문화 · 예술</h3>
+                    <button class="interest-item" data-interest="CULTURE" data-detail="MOVIE">영화</button>
+                    <button class="interest-item" data-interest="CULTURE" data-detail="DRAMA">드라마</button>
+                    <button class="interest-item" data-interest="CULTURE" data-detail="MUSIC">음악</button>
+                    <button class="interest-item" data-interest="CULTURE" data-detail="EXHIBITION">전시 · 미술관</button>
+                    <button class="interest-item" data-interest="CULTURE" data-detail="PERFORMANCE">공연 · 연극</button>
+                </div>
+                
+                <!-- 취미 · 여가 -->
+                <div class="interest-group">
+                    <h3>🎮 취미 · 여가</h3>
+                    <button class="interest-item" data-interest="HOBBY" data-detail="PHOTO">사진</button>
+                    <button class="interest-item" data-interest="HOBBY" data-detail="GAME">게임</button>
+                    <button class="interest-item" data-interest="HOBBY" data-detail="BOARD_GAME">보드게임</button>
+                    <button class="interest-item" data-interest="HOBBY" data-detail="DIY">DIY · 만들기</button>
+                    <button class="interest-item" data-interest="HOBBY" data-detail="COLLECT">수집</button>
+                </div>
+                
+                <!-- 운동 · 스포츠 -->
+                <div class="interest-group">
+                    <h3>⚽ 운동 · 스포츠</h3>
+                    <button class="interest-item" data-interest="SPORTS" data-detail="FITNESS">헬스</button>
+                    <button class="interest-item" data-interest="SPORTS" data-detail="RUNNING">러닝</button>
+                    <button class="interest-item" data-interest="SPORTS" data-detail="YOGA">요가</button>
+                    <button class="interest-item" data-interest="SPORTS" data-detail="BALL_SPORTS">구기 스포츠</button>
+                    <button class="interest-item" data-interest="SPORTS" data-detail="HIKING">등산</button>
+                </div>
+                
+                <!-- 여행 -->
+                <div class="interest-group">
+                    <h3>✈️ 여행 · 지역</h3>
+                    <button class="interest-item" data-interest="TRAVEL" data-detail="DOMESTIC_TRAVEL">국내 여행</button>
+                    <button class="interest-item" data-interest="TRAVEL" data-detail="OVERSEAS_TRAVEL">해외 여행</button>
+                    <button class="interest-item" data-interest="TRAVEL" data-detail="BACKPACKING">배낭여행</button>
+                    <button class="interest-item" data-interest="TRAVEL" data-detail="FOOD_TRIP">맛집 탐방</button>
+                    <button class="interest-item" data-interest="TRAVEL" data-detail="LOCAL_TOUR">로컬 투어</button>
+                </div>
+                
+                <!-- 음식 -->
+                <div class="interest-group">
+                    <h3>🍳 음식 · 요리</h3>
+                    <button class="interest-item" data-interest="FOOD" data-detail="COOKING">요리</button>
+                    <button class="interest-item" data-interest="FOOD" data-detail="BAKING">베이킹</button>
+                    <button class="interest-item" data-interest="FOOD" data-detail="CAFE">카페</button>
+                    <button class="interest-item" data-interest="FOOD" data-detail="ALCOHOL">술</button>
+                    <button class="interest-item" data-interest="FOOD" data-detail="GOURMET">미식</button>
+                </div>
+                
+                <!-- 학습 -->
+                <div class="interest-group">
+                    <h3>📚 학습 · 자기계발</h3>
+                    <button class="interest-item" data-interest="STUDY" data-detail="LANGUAGE_STUDY">언어 학습</button>
+                    <button class="interest-item" data-interest="STUDY" data-detail="CERTIFICATE">자격증</button>
+                    <button class="interest-item" data-interest="STUDY" data-detail="READING">독서</button>
+                    <button class="interest-item" data-interest="STUDY" data-detail="STUDY_GROUP">스터디</button>
+                    <button class="interest-item" data-interest="STUDY" data-detail="CAREER">커리어</button>
+                </div>
+                
+                <!-- IT -->
+                <div class="interest-group">
+                    <h3>💻 IT · 기술</h3>
+                    <button class="interest-item" data-interest="IT" data-detail="PROGRAMMING">프로그래밍</button>
+                    <button class="interest-item" data-interest="IT" data-detail="WEB_APP">웹·앱 개발</button>
+                    <button class="interest-item" data-interest="IT" data-detail="GAME_DEV">게임 개발</button>
+                    <button class="interest-item" data-interest="IT" data-detail="AI_DATA">AI · 데이터</button>
+                    <button class="interest-item" data-interest="IT" data-detail="IT_TREND">IT 트렌드</button>
+                </div>
+                
+                <!-- 라이프스타일 -->
+                <div class="interest-group">
+                    <h3>🏡 라이프스타일</h3>
+                    <button class="interest-item" data-interest="LIFESTYLE" data-detail="DAILY">일상</button>
+                    <button class="interest-item" data-interest="LIFESTYLE" data-detail="PET">반려동물</button>
+                    <button class="interest-item" data-interest="LIFESTYLE" data-detail="FASHION">패션</button>
+                    <button class="interest-item" data-interest="LIFESTYLE" data-detail="INTERIOR">인테리어</button>
+                    <button class="interest-item" data-interest="LIFESTYLE" data-detail="WELLNESS">건강</button>
                 </div>
 
-                <!-- 액션 -->
+                </div>
+
                 <div class="actions">
-                    <button class="next-btn">다음</button>
-                    <span class="skip">건너뛰기 &gt;</span>
+<button id="saveInterestBtn" class="next-btn">저장</button>
                 </div>
 
             </div>
         </div>
     </main>
 
-    <!-- FOOTER -->
-<div th:replace="~{fragments/footer :: footer}"></div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
 </body>
 

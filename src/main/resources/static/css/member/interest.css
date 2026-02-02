@@ -4,66 +4,27 @@
         radial-gradient(1000px 700px at 90% 20%, rgba(120, 140, 255, 0.75), transparent 55%),
         radial-gradient(900px 800px at 50% 90%, rgba(120, 220, 200, 0.75), transparent 55%),
         linear-gradient(180deg, #eceeff 0%, #e6ebff 100%);
-
     --glass-bg: rgba(255, 255, 255, 0.75);
     --radius-lg: 28px;
     --radius-md: 18px;
     --muted: #555;
 }
 
-/* Reset */
-* {
-    box-sizing: border-box;
-    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
-}
+/* ===============================
+   Layout
+=============================== */
 
-/* 🔥 BODY = 페이지 틀 (절대 가운데 정렬 X) */
-body {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    /* 헤더 / 메인 / 푸터 분리 */
-    overflow-x: hidden;
-    position: relative;
-}
-
-/* 배경 */
-body::before {
-    content: "";
-    position: fixed;
-    inset: -20%;
-    background: var(--bg);
-    filter: blur(48px);
-    z-index: -2;
-}
-
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background:
-        radial-gradient(circle at 20% 30%, rgba(130, 180, 255, 0.6), transparent 40%),
-        radial-gradient(circle at 70% 40%, rgba(255, 150, 200, 0.6), transparent 45%);
-    filter: blur(40px);
-    opacity: 0.6;
-    z-index: -1;
-}
-
-/* 🔥 MAIN만 가운데 정렬 */
 .page {
     flex: 1;
-    /* footer 아래로 밀기 */
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 80px 24px;
 }
 
-/* Panel */
 .panel {
     width: 100%;
-    max-width: 980px;
+    max-width: 1200px;
     background: var(--glass-bg);
     backdrop-filter: blur(14px);
     border-radius: var(--radius-lg);
@@ -71,7 +32,10 @@ body::after {
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12);
 }
 
-/* Title */
+/* ===============================
+   Title
+=============================== */
+
 .interest-title {
     text-align: center;
 }
@@ -88,32 +52,65 @@ body::after {
     color: var(--muted);
 }
 
-/* Grid */
+/* ===============================
+   🔥 핵심: 대분류 4 × 2 Grid
+=============================== */
+
 .interest-grid {
     margin-top: 36px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(4, 1fr);
+    /* 🔥 무조건 4개 */
+    gap: 24px;
 }
 
-/* Item */
-.interest-item {
-    height: 54px;
-    border-radius: var(--radius-md);
-    border: none;
+/* ===============================
+   대분류 카드
+=============================== */
+
+.interest-group {
     background: rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-md);
+    padding: 18px;
+}
+
+.interest-group-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+/* ===============================
+   소분류 버튼 Grid
+=============================== */
+
+.interest-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.interest-item {
+    height: 42px;
+    border-radius: 14px;
+    border: none;
+    background: rgba(255, 255, 255, 0.75);
     font-weight: 600;
     cursor: pointer;
 }
 
-/* Active */
+/* 선택 상태 */
 .interest-item.active {
-    background: linear-gradient(135deg, #ffb36a, #ff8a00);
-    color: #fff;
+    background: linear-gradient(135deg, #e3f0ff, #cfe6ff);
+    color: #2c4a7a;
     font-weight: 800;
+    box-shadow: 0 8px 20px rgba(90, 140, 255, 0.35);
 }
 
-/* Actions */
+/* ===============================
+   Actions
+=============================== */
+
 .actions {
     margin-top: 42px;
     text-align: center;
@@ -137,3 +134,22 @@ body::after {
     font-size: 13px;
     color: #777;
 }
+
+/* ===============================
+   모바일 대응
+=============================== */
+
+@media (max-width: 1024px) {
+    .interest-grid {
+        grid-template-columns: repeat(2, 1fr);
+        /* 태블릿: 2 × 4 */
+    }
+}
+
+@media (max-width: 600px) {
+    .interest-grid {
+        grid-template-columns: 1fr;
+        /* 모바일: 1 × 8 */
+    }
+}
+
