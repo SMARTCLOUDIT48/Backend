@@ -50,7 +50,8 @@ public class RecommendController {
 			@AuthenticationPrincipal UserDetails userDetails,
 			@PathVariable Long partnerId
 	){
-		Long myId = Long.valueOf(userDetails.getUsername());
+		Long myId = rs.searchid(userDetails);
+		log.debug(userDetails.getUsername());
 		DirectRoomResponseDTO dto = chatRoomMemberService.createOrGetDirectRoom(myId,partnerId);
 		return dto;
 	}

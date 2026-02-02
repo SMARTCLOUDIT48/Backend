@@ -25,7 +25,7 @@
 
 					const data = await res.json();
 					// 채팅 페이지 라우팅 규칙에 맞게 수정
-					location.href = `/chat/room/${data.roomUuid}`;
+					location.href = `/chat/room/${data.roomId}`;
 
 				} catch (err) {
 					console.error(err);
