@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>1:1 문의 | LANG:MATE</title>
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/inquiry/inquiry.css}">
+
+
+</head>
+<body>
+<!-- ===== HEADER ===== -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="inquiry-wrapper">
+
+    <!-- 좌측 문의 작성 -->
+    <section class="inquiry-form">
+        <h3>1:1 문의하기</h3>
+
+        <form method="post" enctype="multipart/form-data">
+
+            <div class="field">
+                <label>문의 유형</label>
+                <select name="type" required>
+                    <option value="">문의 유형 선택</option>
+                    <option value="ACCOUNT">계정</option>
+                    <option value="CHAT">채팅</option>
+                    <option value="REPORT">신고</option>
+                    <option value="ETC">기타</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>제목</label>
+                <input type="text" name="title" placeholder="문의 제목" required>
+            </div>
+
+            <div class="field">
+                <label>내용</label>
+                <textarea name="content" placeholder="문의 내용을 입력하세요" required></textarea>
+            </div>
+
+            <div class="file-field">
+                <input type="file" id="fileInput" name="image" accept="image/*" hidden>
+
+                <label for="fileInput" class="file-btn">
+                    파일 선택
+                </label>
+
+                <!-- 미리보기 영역 -->
+                <div class="preview hidden" id="preview">
+                    <img id="previewImg" alt="미리보기">
+                    <span id="previewName"></span>
+                    <button type="button" class="remove-btn" id="removeFile">✕</button>
+                </div>
+
+                <span class="file-name" id="fileName">
+        선택된 파일 없음
+    </span>
+            </div>
+
+
+            <button type="submit" class="submit-btn">문의 등록</button>
+        </form>
+
+    </section>
+
+    <!-- 우측 문의 내역 -->
+    <section class="inquiry-list">
+        <h3>내 문의 내역</h3>
+
+        <ul>
+            <li th:each="inq : ${inquiries}">
+                <a th:href="@{/customer/inquiry/{id}(id=${inq.inquiryId})}"
+                   class="inquiry-item">
+
+                    <div class="title" th:text="${inq.title}"></div>
+
+                    <span class="status"
+                          th:text="${inq.status == T(com.scit48.Inquiry.domain.entity.InquiryStatus).WAITING ? '대기중' : '답변완료'}"
+                          th:classappend="${inq.status.name().toLowerCase()}">
+            </span>
+                </a>
+            </li>
+        </ul>
+
+    </section>
+
+</main>
+<!-- ===== FOOTER ===== -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+
+
+<script th:src="@{/js/inquiry/inquiry.js}"></script>
+
+</body>
+</html>

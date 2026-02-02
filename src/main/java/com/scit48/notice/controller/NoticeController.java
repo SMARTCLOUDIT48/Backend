@@ -122,5 +122,41 @@ public class NoticeController {
 		noticeService.deleteNotice(id);
 	}
 	
+	// 글작성 페이지
+	@GetMapping("/customer/notice/write")
+	public String noticeWritePage(
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			Model model
+	) {
+		if (userDetails == null || !"ADMIN".equals(userDetails.getUser().getRole())) {
+			throw new IllegalStateException("권한 없음");
+		}
+		
+		model.addAttribute("title", "공지 작성");
+		model.addAttribute("activeTab", "notice");
+		return "notice/notice-write";
+	}
+	
+	// 글 저장
+	@PostMapping("/customer/notice/write")
+	public String noticeWrite(
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@RequestParam String type,
+			@RequestParam String title,
+			@RequestParam String content,
+			@RequestParam String category,
+			@RequestParam(defaultValue = "false") boolean isPinned
+	) {
+		noticeService.createNotice(
+				type,
+				title,
+				content,
+				category,
+				isPinned,
+				userDetails.getUser().getId()
+		);
+		
+		return "redirect:/customer/notice";
+	}
 	
 }

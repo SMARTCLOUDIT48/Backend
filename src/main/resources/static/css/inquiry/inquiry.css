@@ -1,0 +1,289 @@
+/* ===== 전체 배경 ===== */
+body {
+    background: linear-gradient(135deg, #cfd9ff, #f6d8ff, #dff4ff);
+    font-family: 'Pretendard', sans-serif;
+}
+
+/* ===== 레이아웃 ===== */
+.inquiry-wrapper {
+    max-width: 1200px;
+    margin: 100px auto;
+    display: flex;
+    gap: 40px;
+}
+
+/* ===== 카드 공통 ===== */
+.inquiry-form,
+.inquiry-list {
+    flex: 1;
+    padding: 48px;
+    border-radius: 28px;
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.85),
+        rgba(255,255,255,0.65)
+    );
+    backdrop-filter: blur(18px);
+    box-shadow:
+        0 30px 60px rgba(0,0,0,0.12),
+        inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+/* ===== 제목 ===== */
+.inquiry-form h3,
+.inquiry-list h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 32px;
+}
+
+/* ===== 필드 ===== */
+.field {
+    margin-bottom: 24px;
+}
+
+.field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #444;
+}
+
+/* ===== 입력 요소 ===== */
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: none;
+    font-size: 14px;
+    background: #fff;
+    box-shadow:
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 8px 20px rgba(0,0,0,0.06);
+    transition: all 0.25s ease;
+}
+
+.field textarea {
+    min-height: 140px;
+    resize: none;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+    outline: none;
+    box-shadow:
+        0 0 0 3px rgba(140, 160, 255, 0.4),
+        0 12px 30px rgba(0,0,0,0.1);
+}
+
+/* ===== 문의 등록 버튼 ===== */
+.submit-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 18px;
+    border-radius: 999px;
+
+    border: none;
+    cursor: pointer;
+
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+
+    background: linear-gradient(
+        135deg,
+        #ff8ccf 0%,
+        #b78cff 100%
+    );
+
+    box-shadow:
+        0 12px 30px rgba(183, 140, 255, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        filter 0.25s ease;
+}
+
+/* ===== hover ===== */
+.submit-btn:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.05);
+
+    box-shadow:
+        0 20px 45px rgba(183, 140, 255, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* ===== 클릭(active) ===== */
+.submit-btn:active {
+    transform: translateY(1px) scale(0.98);
+    filter: brightness(0.97);
+
+    box-shadow:
+        0 8px 18px rgba(183, 140, 255, 0.35),
+        inset 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== 포커스(접근성) ===== */
+.submit-btn:focus {
+    outline: none;
+    box-shadow:
+        0 0 0 4px rgba(255, 140, 207, 0.35),
+        0 20px 45px rgba(183, 140, 255, 0.55);
+}
+
+
+/* ===== 문의 내역 ===== */
+.inquiry-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.inquiry-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.inquiry-list .title {
+    font-weight: 600;
+    color: #333;
+}
+
+/* ===== 상태 뱃지 ===== */
+.status {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status.waiting {
+    background: rgba(100,150,255,0.15);
+    color: #4f6fff;
+}
+
+.status.answered {
+    background: rgba(60,200,150,0.15);
+    color: #1f9d6a;
+}
+
+
+/* ===== 파일 업로드 영역 ===== */
+.file-field {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* ===== 가짜 파일 버튼 ===== */
+.file-btn {
+    padding: 10px 20px;
+    border-radius: 999px;
+
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+
+    background: linear-gradient(
+        135deg,
+        #ff8ccf,
+        #b78cff
+    );
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 20px rgba(183, 140, 255, 0.45),
+        inset 0 1px 0 rgba(255,255,255,0.35);
+
+    transition: all 0.25s ease;
+}
+
+/* hover */
+.file-btn:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 14px 30px rgba(183, 140, 255, 0.6),
+        inset 0 1px 0 rgba(255,255,255,0.45);
+}
+
+/* click */
+.file-btn:active {
+    transform: translateY(1px) scale(0.97);
+    box-shadow:
+        0 6px 14px rgba(183, 140, 255, 0.35),
+        inset 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* ===== 파일명 ===== */
+.file-name {
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===== 미리보기 영역 ===== */
+.preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 10px 14px;
+
+    background: rgba(255,255,255,0.8);
+    border-radius: 16px;
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.preview.hidden {
+    display: none;
+}
+
+/* 썸네일 */
+.preview img {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+/* 파일명 */
+.preview span {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 제거 버튼 */
+.remove-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #999;
+    transition: color 0.2s;
+}
+
+.remove-btn:hover {
+    color: #ff5fa2;
+}

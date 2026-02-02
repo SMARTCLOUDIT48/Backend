@@ -12,9 +12,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	// 예: file.upload.profile-dir=C:/scit_chat/upload/profile
 	@Value("${file.upload.profile-dir}")
 	private String profileUploadDir;
+	
+	@Value("${file.upload.inquiry-dir}")
+	private String inquiryUploadDir;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		
+		// 🔥 1️⃣ 문의 이미지 (가장 구체적인 경로 먼저!)
+		registry.addResourceHandler("/images/inquiry/upload/**")
+				.addResourceLocations("file:" + inquiryUploadDir + "/");
+		
 
 		/*
 		 * ===============================
@@ -41,5 +49,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		 */
 		registry.addResourceHandler("/images/**")
 				.addResourceLocations("classpath:/static/images/");
+		
+		
 	}
 }
