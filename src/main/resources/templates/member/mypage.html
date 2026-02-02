@@ -7,6 +7,7 @@
     <title>LANG:MATE - 마이페이지</title>
 
     <link rel="stylesheet" th:href="@{/css/member/mypage.css}" />
+        <link rel="stylesheet" th:href="@{/css/member/interest.css}" />
     <link rel="stylesheet" th:href="@{/css/layout.css}">
 
     <script th:inline="javascript">
@@ -136,21 +137,19 @@
                 </div>
             
                 <!-- 4 작은 카드 : 관심사 -->
-                <div class="glass card mini-card">
-                    <div class="mini-head">
-                        <h4>관심사 설정</h4>
-                    </div>
-                    <div class="chip-wrap">
-                        <button class="chip">여행</button>
-                        <button class="chip">영화</button>
-                        <button class="chip">드라마</button>
-                        <button class="chip">음악</button>
-                        <button class="chip">힙합</button>
-                        <button class="chip">게임</button>
-                        <button class="chip">요리</button>
-                        <button class="chip">기타</button>
-                    </div>
-                </div>
+        <div class="glass card mini-card">
+            <div class="mini-head">
+                <h4>관심사</h4>
+                <button id="openInterestModal" class="btn btn-member">수정</button>
+            </div>
+        
+            <!-- JS가 전부 채울 영역 -->
+            <div class="chip-wrap" id="interestChips">
+                <!-- JS renderChips()로 동적 생성 -->
+            </div>
+        </div>
+
+
             
             </aside>
 
@@ -165,7 +164,7 @@
                                 <h2>관심사에 맞는 친구 추천</h2>
                                 <p>내 관심사에 맞는 친구를 추천해드려요.</p>
                             </div>
-                            <button class="btn btn-soft" type="button">더보기</button>
+                            <button class="btn btn-member" type="button">더보기</button>
                         </div>
 
                         <div class="reco-grid">
@@ -343,14 +342,15 @@
 
     <!-- ================= 프로필 수정 모달 ================= -->
     <div id="profileModal" class="modal hidden">
-        <div class="modal-content glass">
+        <div class="modal-container glass">
 
-            <h3>프로필 수정</h3>
+            <h3 class="modal-name">프로필 수정</h3>
 
             <form id="profileForm">
 
                 <!-- 자기소개 -->
-            <textarea name="intro" placeholder="자기소개"></textarea>
+        <textarea name="intro" placeholder="자기소개"></textarea>
+
 
 
                 <!-- 언어 레벨 -->
@@ -372,8 +372,112 @@
     </div>
     <!-- ================================================== -->
 
+    <!-- 관심사 수정 모달 -->
+    <div id="interestModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+    
+        <div class="modal-content glass">
+            <h3>관심사 수정</h3>
+            <p>관심 있는 주제를 최대 5개까지 선택해 주세요.</p>
+    
+       
+            <div class="interest-grid">
+    
+                <!-- 1. 문화 · 예술 -->
+                <div class="interest-group">
+                    <h3>🎨 문화 · 예술</h3>
+                    <button class="interest-item" data-interest="CULTURE" data-detail="MOVIE">영화</button>
+                    <button class="interest-item" data-interest="CULTURE" data-detail="DRAMA">드라마</button>
+                    <button class="interest-item" data-interest="CULTURE" data-detail="MUSIC">음악</button>
+                    <button class="interest-item" data-interest="CULTURE" data-detail="EXHIBITION">전시 · 미술관</button>
+                    <button class="interest-item" data-interest="CULTURE" data-detail="PERFORMANCE">공연 · 연극</button>
+                </div>
+                
+                <!-- 취미 · 여가 -->
+                <div class="interest-group">
+                    <h3>🎮 취미 · 여가</h3>
+                    <button class="interest-item" data-interest="HOBBY" data-detail="PHOTO">사진</button>
+                    <button class="interest-item" data-interest="HOBBY" data-detail="GAME">게임</button>
+                    <button class="interest-item" data-interest="HOBBY" data-detail="BOARD_GAME">보드게임</button>
+                    <button class="interest-item" data-interest="HOBBY" data-detail="DIY">DIY · 만들기</button>
+                    <button class="interest-item" data-interest="HOBBY" data-detail="COLLECT">수집</button>
+                </div>
+                
+                <!-- 운동 · 스포츠 -->
+                <div class="interest-group">
+                    <h3>⚽ 운동 · 스포츠</h3>
+                    <button class="interest-item" data-interest="SPORTS" data-detail="FITNESS">헬스</button>
+                    <button class="interest-item" data-interest="SPORTS" data-detail="RUNNING">러닝</button>
+                    <button class="interest-item" data-interest="SPORTS" data-detail="YOGA">요가</button>
+                    <button class="interest-item" data-interest="SPORTS" data-detail="BALL_SPORTS">구기 스포츠</button>
+                    <button class="interest-item" data-interest="SPORTS" data-detail="HIKING">등산</button>
+                </div>
+                
+                <!-- 여행 -->
+                <div class="interest-group">
+                    <h3>✈️ 여행 · 지역</h3>
+                    <button class="interest-item" data-interest="TRAVEL" data-detail="DOMESTIC_TRAVEL">국내 여행</button>
+                    <button class="interest-item" data-interest="TRAVEL" data-detail="OVERSEAS_TRAVEL">해외 여행</button>
+                    <button class="interest-item" data-interest="TRAVEL" data-detail="BACKPACKING">배낭여행</button>
+                    <button class="interest-item" data-interest="TRAVEL" data-detail="FOOD_TRIP">맛집 탐방</button>
+                    <button class="interest-item" data-interest="TRAVEL" data-detail="LOCAL_TOUR">로컬 투어</button>
+                </div>
+                
+                <!-- 음식 -->
+                <div class="interest-group">
+                    <h3>🍳 음식 · 요리</h3>
+                    <button class="interest-item" data-interest="FOOD" data-detail="COOKING">요리</button>
+                    <button class="interest-item" data-interest="FOOD" data-detail="BAKING">베이킹</button>
+                    <button class="interest-item" data-interest="FOOD" data-detail="CAFE">카페</button>
+                    <button class="interest-item" data-interest="FOOD" data-detail="ALCOHOL">술</button>
+                    <button class="interest-item" data-interest="FOOD" data-detail="GOURMET">미식</button>
+                </div>
+                
+                <!-- 학습 -->
+                <div class="interest-group">
+                    <h3>📚 학습 · 자기계발</h3>
+                    <button class="interest-item" data-interest="STUDY" data-detail="LANGUAGE_STUDY">언어 학습</button>
+                    <button class="interest-item" data-interest="STUDY" data-detail="CERTIFICATE">자격증</button>
+                    <button class="interest-item" data-interest="STUDY" data-detail="READING">독서</button>
+                    <button class="interest-item" data-interest="STUDY" data-detail="STUDY_GROUP">스터디</button>
+                    <button class="interest-item" data-interest="STUDY" data-detail="CAREER">커리어</button>
+                </div>
+                
+                <!-- IT -->
+                <div class="interest-group">
+                    <h3>💻 IT · 기술</h3>
+                    <button class="interest-item" data-interest="IT" data-detail="PROGRAMMING">프로그래밍</button>
+                    <button class="interest-item" data-interest="IT" data-detail="WEB_APP">웹·앱 개발</button>
+                    <button class="interest-item" data-interest="IT" data-detail="GAME_DEV">게임 개발</button>
+                    <button class="interest-item" data-interest="IT" data-detail="AI_DATA">AI · 데이터</button>
+                    <button class="interest-item" data-interest="IT" data-detail="IT_TREND">IT 트렌드</button>
+                </div>
+                
+                <!-- 라이프스타일 -->
+                <div class="interest-group">
+                    <h3>🏡 라이프스타일</h3>
+                    <button class="interest-item" data-interest="LIFESTYLE" data-detail="DAILY">일상</button>
+                    <button class="interest-item" data-interest="LIFESTYLE" data-detail="PET">반려동물</button>
+                    <button class="interest-item" data-interest="LIFESTYLE" data-detail="FASHION">패션</button>
+                    <button class="interest-item" data-interest="LIFESTYLE" data-detail="INTERIOR">인테리어</button>
+                    <button class="interest-item" data-interest="LIFESTYLE" data-detail="WELLNESS">건강</button>
+                </div>
+    
+            </div>
+    
+    
+            <div class="modal-actions">
+                <button id="saveInterestBtn" class="btn btn-glass">저장</button>
+                <button id="closeInterestBtn" class="btn btn-soft">취소</button>
+            </div>
+        </div>
+    </div>
+
+
+
     <div th:replace="~{fragments/footer :: footer}"></div>
 
 </body>
     <script th:src="@{/js/member/logout.js}"></script>
+        <script th:src="@{/js/member/interestModal.js}"></script>
 </html>

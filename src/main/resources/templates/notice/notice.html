@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${title} + ' | LANG:MATE'">고객센터 | LANG:MATE</title>
+
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/notice/notice.css}" />
+    <script src="/js/notice/notice.js" defer></script>
+</head>
+<body th:data-active-tab="${activeTab}">
+
+<!-- ===== HEADER ===== -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<div class="customer-container">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="customer-sidebar">
+        <h3 class="sidebar-title">고객센터</h3>
+        <ul class="sidebar-menu">
+            <li th:classappend="${activeTab == 'notice'} ? 'active'">
+                <a th:href="@{/customer/notice(page=0)}">공지사항</a>
+            </li>
+            <li th:classappend="${activeTab == 'faq'} ? 'active'">
+                <a th:href="@{/customer/faq(page=0)}">FAQ</a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- ===== CONTENT ===== -->
+    <main class="customer-content">
+
+        <!-- 🔍 검색 + 글작성 (여기!) -->
+        <div class="notice-toolbar">
+
+            <div class="notice-search">
+                <span class="search-icon">🔍</span>
+                <input
+                        type="text"
+                        id="noticeSearchInput"
+                        placeholder="찾고 싶은 내용을 검색하세요"
+                />
+            </div>
+
+            <a
+                    th:if="${isAdmin}"
+                    th:href="@{/customer/notice/write}"
+                    class="notice-write-btn"
+            >
+                ✏️ 글작성
+            </a>
+
+        </div>
+
+        <h2 th:text="${title}">공지사항</h2>
+
+        <!-- ===== LIST ===== -->
+        <ul class="notice-list">
+
+            <li th:each="item : ${list}">
+                <a th:href="@{/customer/notice/{id}(id=${item.noticeId})}"
+                   class="notice-link">
+
+            <span class="badge"
+                  th:if="${activeTab == 'notice' and item.isPinned}">
+                공지
+            </span>
+
+                    <span class="notice-title"
+                          th:text="${item.title}">
+                제목
+            </span>
+
+                    <span class="notice-date"
+                          th:text="${item.createdAt}">
+                2026-01-27
+            </span>
+
+                </a>
+            </li>
+
+        </ul>
+
+
+
+        <!-- ===== EMPTY ===== -->
+        <p class="empty-message"
+           th:if="${totalPages == 0}">
+            등록된 내용이 없습니다.
+        </p>
+
+        <!-- ===== PAGINATION ===== -->
+        <div class="pagination"
+             th:if="${totalPages > 1}">
+
+            <a class="page-btn prev"
+               th:if="${currentPage > 0}"
+               th:href="@{${baseUrl}(page=${currentPage - 1})}">
+                ‹
+            </a>
+
+            <a class="page-btn"
+               th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+               th:classappend="${i == currentPage} ? 'active'"
+               th:text="${i + 1}"
+               th:href="@{${baseUrl}(page=${i})}">
+            </a>
+
+            <a class="page-btn next"
+               th:if="${currentPage < totalPages - 1}"
+               th:href="@{${baseUrl}(page=${currentPage + 1})}">
+                ›
+            </a>
+
+        </div>
+
+    </main>
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

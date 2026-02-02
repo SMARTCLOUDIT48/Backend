@@ -1,3 +1,5 @@
+console.log(CONTEXT_PATH);
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("signupForm");
   if (!form) return;
@@ -39,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `${CONTEXT_PATH}api/members/exists?memberId=${encodeURIComponent(memberId)}`
       );
       const result = await res.json();
+
 
       if (res.ok && result.data?.available) {
         alert("사용 가능한 아이디입니다");
@@ -172,7 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const res = await fetch(`${CONTEXT_PATH}api/members`, {
         method: "POST",
-        body: formData
+        body: formData,
+        credentials: "include" 
       });
 
       const result = await res.json();
@@ -183,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       alert("회원가입 완료");
-      location.href = `${CONTEXT_PATH}login`;
+      location.href = `${CONTEXT_PATH}member/interest`;
     } catch (e) {
       alert("회원가입 중 오류가 발생했습니다.");
     }
