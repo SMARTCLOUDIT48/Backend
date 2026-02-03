@@ -33,7 +33,7 @@ public class NoticeEntity {
 	@Column(nullable = false, length = 20)
 	private String category;
 	
-	
+	@Builder.Default
 	@Column(name = "is_pinned", nullable = false)
 	private boolean isPinned = false;
 	
@@ -45,7 +45,7 @@ public class NoticeEntity {
 	@Column(nullable = false)
 	private Integer sortOrder = 0;
 	
-	
+	@Builder.Default
 	@Column(name = "is_active", nullable = false)
 	private boolean isActive = true;
 	
