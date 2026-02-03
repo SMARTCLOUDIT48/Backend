@@ -19,7 +19,7 @@ public class CommentEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "comment_id")
-	private Long id;
+	private Long commentId;
 	
 	@Column(columnDefinition = "TEXT", nullable = false)
 	private String content;

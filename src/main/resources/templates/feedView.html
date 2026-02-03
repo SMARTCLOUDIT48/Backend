@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>MUSUBI - 일상 공유</title>
+    <link rel="stylesheet" th:href="@{/css/feedView.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header th:fragment="header" xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="header">
+
+    <div class="header-inner">
+
+        <!-- 로고 -->
+        <div class="logo" th:onclick="|location.href='@{/}'|">
+            💬 MUSUBI
+        </div>
+
+        <!-- 네비게이션 -->
+        <nav class="nav">
+            <a th:href="@{/community}">커뮤니티</a>
+            <a th:href="@{/recommend}">파트너찾기</a>
+            <a th:href="@{/chat}">채팅</a>
+            <a th:href="@{/support}">고객센터</a>
+        </nav>
+
+        <!-- 인증 버튼 영역 -->
+        <div class="auth-buttons">
+
+            <!-- =========================
+                 비로그인 상태
+            ========================= -->
+            <div sec:authorize="isAnonymous()">
+                <button class="login-btn" type="button" th:onclick="|location.href='@{/login}'|">
+                    로그인
+                </button>
+
+                <button class="signup-btn" type="button" th:onclick="|location.href='@{/member/signup}'|">
+                    회원가입
+                </button>
+            </div>
+
+            <!-- =========================
+                 로그인 상태
+            ========================= -->
+            <div sec:authorize="isAuthenticated()">
+                <button class="login-btn" type="button" onclick="logout()">
+                    로그아웃
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 로그아웃 JS (공통) -->
+    <script th:src="@{/js/member/logout.js}"></script>
+
+</header>
+
+<main class="feed-container">
+
+    <div class="feed-actions-top">
+        <a th:href="@{/board/feedWrite}" class="new-feed-btn">📸 새 일상 공유하기</a>
+    </div>
+
+    <div class="feed-wrapper" th:each="feed : ${feedList}">
+
+        <div class="feed-header">
+            <div class="user-profile">
+                <img th:src="${feed.profileImageName != null ? feed.profileImageName : '/images/default_profile.png'}"
+                     class="profile-img-sm" alt="프로필">
+                <div class="user-info">
+                    <span class="username" th:text="${feed.writerNickname}">nickname</span>
+                    <span class="location" th:text="${feed.nation}"></span> </div>
+            </div>
+            <button class="more-btn">•••</button>
+        </div>
+
+        <div class="feed-image-area" th:if="${feed.fileName != null}">
+            <img th:src="${feed.fileName}" alt="Feed Image">
+        </div>
+
+        <br>
+
+        <div class="feed-caption">
+            <span class="username" th:text="${feed.writerNickname}">nickname</span>
+            <span class="caption-text" th:text="${feed.content}">오늘 날씨가 참 좋네요.</span>
+        </div>
+
+        <div class="feed-action-bar">
+            <div class="left-actions">
+                <button type="button" class="icon-btn heart-btn"><svg aria-label="" color="rgb(38, 38, 38)" fill="rgb(38, 38, 38)" height="24" role="img" viewBox="0 0 24 24" width="24">
+                    <path d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.956-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 0 1 3.679-1.938m0-2a6.04 6.04 0 0 0-4.797 2.127 6.052 6.052 0 0 0-4.787-2.127A6.985 6.985 0 0 0 .5 9.122c0 3.61 2.55 5.827 5.015 7.97.283.246.569.494.853.747l1.027.918a44.998 44.998 0 0 0 3.518 3.018 2 2 0 0 0 2.174 0 45.263 45.263 0 0 0 3.626-3.115l.922-.824c.293-.26.59-.519.885-.774 2.334-2.025 4.98-4.32 4.98-7.94a6.985 6.985 0 0 0-6.708-7.218Z"></path>
+                </svg></button>
+                <button type="button" class="icon-btn comment-btn"><svg aria-label="댓글" color="rgb(38, 38, 38)" fill="rgb(38, 38, 38)" height="24" role="img" viewBox="0 0 24 24" width="24">
+                    <path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="2"></path>
+                </svg></button>
+            </div>
+            <!--
+            <div class="right-actions">
+                <button type="button" class="icon-btn bookmark-btn">🔖</button>
+            </div>
+            -->
+        </div>
+
+        <div class="feed-likes">
+            좋아요 <span th:text="${feed.likeCnt}"></span>개
+        </div>
+
+        <div class="feed-meta">
+            <a href="#" class="view-comments">댓글 모두 보기</a>
+            <span class="time-ago" th:text="${#temporals.format(feed.createdDate, 'yyyy-MM-dd HH:mm')}">2시간 전</span>
+        </div>
+
+    </div>
+
+    <div class="no-feed" th:if="${feedList.isEmpty()}">
+        <p>아직 공유된 일상이 없습니다.<br>첫 번째 일상을 공유해보세요!</p>
+    </div>
+
+    <div class="pagination-area" th:if="${!feedList.last}">
+        <a th:href="@{/board/feedView(page=${feedList.number + 1})}" class="load-more-btn">더 보기 +</a>
+    </div>
+
+</main>
+
+<footer th:fragment="footer" class="site-footer">
+    <div class="footer-inner">
+
+        <div class="footer-links">
+            <div class="footer-col">
+                <h4>소개</h4>
+                <a href="#">서비스 소개</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>제품</h4>
+                <a href="#">커뮤니티</a>
+                <a href="#">파트너 찾기</a>
+                <a href="#">채팅</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>가이드</h4>
+                <a href="#">이용 안내</a>
+                <a href="#">자주 하는 질문</a>
+                <a href="#">이용 가이드</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>지원</h4>
+                <a href="#">공지사항</a>
+                <a href="#">1:1 문의</a>
+                <a href="#">고객센터</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-meta">
+                <span>이용약관</span>
+                <span>·</span>
+                <span>개인정보 처리방침</span>
+                <span>·</span>
+                <span>고객센터</span>
+            </div>
+
+            <div class="footer-copy">
+                © 2026 MUSUBI. All rights reserved.
+            </div>
+        </div>
+
+    </div>
+</footer>
+
+</body>
+</html>

@@ -11,19 +11,37 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BoardRepository
 			extends JpaRepository<BoardEntity, Long> {
-	// 1. 카테고리별 게시글 목록 조회 (페이징 포함)
+	// 0. 카테고리별 게시글 목록 조회 (페이징 포함)
 	Page<BoardEntity> findAllByCategory(CategoryEntity category, Pageable pageable);
 	
-	// 2. 제목 또는 내용으로 검색 (필요 시 추가)
-	Page<BoardEntity> findByTitleContainingOrContentContaining(String title, String content, Pageable pageable);
+	// 1. 기본 전체 목록 (일상 제외)
+	Page<BoardEntity> findByCategoryNameNot(String excludeName, Pageable pageable);
 	
-	// 3. 일상공유 피드용 전체 조회 (작성일 기준 내림차순은 Pageable에서 처리)
-	/**
-	 * 3. 일상공유 피드용 전체 조회 (SNS 스타일)
+	// 2. 카테고리 필터링 (일상 제외 + 특정 카테고리 선택)
+	Page<BoardEntity> findByCategoryNameAndCategoryNameNot(String categoryName, String excludeName, Pageable pageable);
+	
+	// 3. 검색 기능 (제목, 내용, 작성자) - 일상 제외 조건 포함
+	// 예: 제목 검색
+	Page<BoardEntity> findByTitleContainingAndCategoryNameNot(String keyword, String excludeName, Pageable pageable);
+	
+	// 예: 내용 검색
+	Page<BoardEntity> findByContentContainingAndCategoryNameNot(String keyword, String excludeName, Pageable pageable);
+	
+	// 예: 작성자 검색
+	Page<BoardEntity> findByUserNicknameContainingAndCategoryNameNot(String keyword, String excludeName, Pageable pageable);
+	
+	
+	// '일상' 카테고리인 글만 조회 (피드용)
+	Page<BoardEntity> findByCategoryName(String categoryName, Pageable pageable);
+	
+	
+	/*
+	 * 일상공유 피드용 전체 조회 (SNS 스타일)
 	 * @EntityGraph를 사용하여 연관된 Member 정보를 한 번의 쿼리로 가져옵니다.
 	 * 이를 통해 피드 목록에서 작성자의 닉네임, 프로필 이미지를 효율적으로 표시할 수 있습니다.
-	 */
 	@Override
 	@EntityGraph(attributePaths = {"member", "category"})
 	Page<BoardEntity> findAll(Pageable pageable);
+	*/
+	
 }

@@ -11,7 +11,7 @@
 	<script>
 		window.addEventListener('DOMContentLoaded', () => {
 			loadRecommend();
-			
+
 			document.getElementById('recommendTbody').addEventListener('click', async (e) => {
 				const chat_partner_btn = e.target.closest('.chat-btn');
 				if (!chat_partner_btn) return;
@@ -38,7 +38,7 @@
 			});
 
 			const btn = document.getElementById('auto_matching');
-			
+
 			// btn.addEventListener('click', async () => {
 			// 	btn.disabled = true;
 
@@ -124,7 +124,7 @@
 			}
 		}
 
-		
+
 
 		function renderRecommend(list) {
 			const recommendList = document.getElementById('recommendTbody');
@@ -200,16 +200,16 @@
 				<img src="${imagePath}" class="profile-img" alt="">
 				<span class="${flagStatus}" aria-label="Japan"></span>
 			</div>
-		
+
 			<!-- 정보 영역 -->
 			<div class="info">
 				<div class="nickname">${item.nickname}</div>
-		
+
 				<div class="row">
 					<span class="label">거주국가</span>
 					<span class="value">${nation}</span>
 				</div>
-		
+
 				<div class="row">
 					<span class="label">학습언어</span>
 					<span class="lang">
@@ -218,7 +218,7 @@
 					</span>
 				</div>
 			</div>
-		
+
 			<!-- 우측 영역 -->
 			<div class="right">
 				<span class="chatting-text">"인기 멤버예요! 🔥 답장이 늦을 수 있어요."</span>
