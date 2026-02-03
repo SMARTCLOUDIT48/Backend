@@ -11,11 +11,15 @@
 
 <main class="inquiry-wrapper">
 
-    <!-- 좌측 문의 작성 -->
+    <!-- ======================
+         좌측 문의 작성
+    ====================== -->
     <section class="inquiry-form">
         <h3>1:1 문의하기</h3>
 
         <form method="post" enctype="multipart/form-data">
+
+            <!-- 문의 유형 -->
             <div class="field">
                 <label>문의 유형</label>
                 <select name="type" required>
@@ -27,36 +31,72 @@
                 </select>
             </div>
 
+            <!-- 제목 -->
             <div class="field">
                 <label>제목</label>
-                <input type="text" name="title" required>
+                <input type="text" name="title" placeholder="문의 제목" required>
             </div>
 
+            <!-- 내용 -->
             <div class="field">
                 <label>내용</label>
-                <textarea name="content" required></textarea>
+                <textarea name="content" placeholder="문의 내용을 입력하세요" required></textarea>
             </div>
 
-            <button type="submit" class="submit-btn">문의 등록</button>
+            <!-- ======================
+                 📎 파일 첨부 영역
+            ====================== -->
+            <div class="file-field">
+                <!-- 실제 파일 input -->
+                <input type="file"
+                       id="fileInput"
+                       name="image"
+                       accept="image/*"
+                       hidden>
+
+                <!-- 가짜 버튼 -->
+                <label for="fileInput" class="file-btn">
+                    사진 첨부
+                </label>
+
+                <!-- 파일명 -->
+                <span class="file-name" id="fileName">
+                    선택된 파일 없음
+                </span>
+            </div>
+
+            <!-- 미리보기 -->
+            <div class="preview hidden" id="preview">
+                <img id="previewImg" alt="미리보기 이미지">
+                <span id="previewName"></span>
+                <button type="button" class="remove-btn" id="removeFile">✕</button>
+            </div>
+
+            <!-- 등록 버튼 -->
+            <button type="submit" class="submit-btn">
+                문의 등록
+            </button>
+
         </form>
     </section>
 
-    <!-- 우측 문의 내역 -->
+    <!-- ======================
+         우측 문의 내역
+    ====================== -->
     <section class="inquiry-list">
         <h3>내 문의 내역</h3>
 
-        <!-- 🔥 JS가 찾는 클래스 -->
         <ul class="inquiry-ul">
 
             <li th:each="inq : ${inquiries}"
                 class="inquiry-item"
                 tabindex="0"
                 th:attr="
-                data-status=${inq.status.name()},
-                data-title=${inq.title},
-                data-content=${inq.content},
-                data-answer=${inq.answerContent}
-            ">
+                    data-status=${inq.status.name()},
+                    data-title=${inq.title},
+                    data-content=${inq.content},
+                    data-answer=${inq.answerContent}
+                ">
 
                 <div class="item-left">
                     <div class="title" th:text="${inq.title}"></div>
@@ -64,12 +104,11 @@
                     <span class="status"
                           th:text="${inq.status.name() == 'WAITING' ? '대기중' : '답변완료'}"
                           th:classappend="${inq.status.name().toLowerCase()}">
-                </span>
+                    </span>
                 </div>
 
-                <!-- ✅ 수정 버튼은 링크 -->
-                <a
-                   th:href="@{/customer/inquiry/{id}(id=${inq.inquiryId})}"
+                <!-- 수정 → 상세 페이지 이동 -->
+                <a th:href="@{/customer/inquiry/{id}(id=${inq.inquiryId})}"
                    class="edit-btn">
                     수정
                 </a>
@@ -78,10 +117,11 @@
         </ul>
     </section>
 
-
 </main>
 
-<!-- ===== 문의/답변 모달 ===== -->
+<!-- ======================
+     문의 / 답변 모달
+====================== -->
 <div id="viewModal" class="modal-overlay hidden">
     <div class="modal-card">
         <h3 id="modalTitle"></h3>
@@ -97,12 +137,15 @@
         </div>
 
         <div class="modal-actions">
-            <button type="button" class="btn-cancel" id="modalCloseBtn">닫기</button>
+            <button type="button" class="btn-cancel" id="modalCloseBtn">
+                닫기
+            </button>
         </div>
     </div>
 </div>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+
 <script th:src="@{/js/inquiry/inquiry.js}"></script>
 </body>
 </html>
