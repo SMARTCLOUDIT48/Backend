@@ -22,6 +22,9 @@ public class BoardDTO {
 	private LocalDateTime createdDate;
 	private Long id;
 	
+	
+	
+	
 	// 2. 카테고리 정보
 	private Long categoryId;   // 작성 시 전달용
 	private String categoryName; // 조회 시 반환용
@@ -45,5 +48,5 @@ public class BoardDTO {
 	
 	// 5. 연관 데이터
 	private List<CommentDTO> comments; // 댓글 목록
-	private Integer likeCount;             // 좋아요 총 개수
+	private Integer likeCnt;           // 좋아요 총 개수
 }

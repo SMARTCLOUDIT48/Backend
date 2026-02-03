@@ -3,6 +3,7 @@ package com.scit48.community.controller;
 import com.scit48.common.dto.UserDTO;
 import com.scit48.common.repository.UserRepository;
 import com.scit48.community.domain.dto.BoardDTO;
+import com.scit48.community.domain.dto.LikeDTO;
 import com.scit48.community.domain.entity.BoardEntity;
 import com.scit48.community.domain.entity.CategoryEntity;
 import com.scit48.community.repository.BoardRepository;
@@ -217,8 +218,8 @@ public class BoardController {
 				.profileImageName("/images/profile/upload/" + board.getUser().getProfileImageName())
 				.fileName(board.getFileName())
 				.filePath(board.getFilePath()) // ★ 중요: 피드 이미지
+				.likeCnt(board.getLikeCnt() != null ? board.getLikeCnt() : 0)
 				.createdDate(board.getCreatedAt())
-				.likeCount(board.getLikeCount())// 좋아요 수 (Entity에 해당 필드나 로직 필요)
 				.nation(board.getUser().getNation())
 				.build());
 		

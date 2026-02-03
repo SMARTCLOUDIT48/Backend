@@ -53,25 +53,38 @@ public class BoardEntity {
 	@OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
 	private List<CommentEntity> comments = new ArrayList<>();
 	
-	
 	@Builder.Default
 	@OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
 	private List<LikeEntity> likes = new ArrayList<>();
 	
 	
-	@Column(name = "like_count", columnDefinition = "integer default 0")
-	private Integer likeCount;
+	@Builder.Default
+	@Column(name = "like_cnt", nullable = false)
+	private Integer likeCnt = 0;
 	
-	// 생성자, 빌더 등 추가 구현
 	
-	// 1. 필드 직접 추가
+	@CreatedDate
+	@Column(name = "created_at", updatable = false)
 	private LocalDateTime createdAt;
 	
-	// 2. 저장 전 자동으로 현재 시간을 세팅하는 메소드
-	@CreatedDate // 자동으로 생성 시간 주입
-	@Column(name = "created_at", updatable = false)
-	public void prePersist() {
-		this.createdAt = LocalDateTime.now();
-		
+	// [수정] 비즈니스 로직 (좋아요 증가/감소 메서드)
+	// ==========================================
+	
+	// 좋아요 1 증가
+	public void increaseLikeCount() {
+		if (this.likeCnt == null) {
+			this.likeCnt = 0;
+		}
+		this.likeCnt++;
+	}
+	
+	// 좋아요 1 감소 (0 밑으로 내려가지 않도록 방어)
+	public void decreaseLikeCount() {
+		if (this.likeCnt == null) {
+			this.likeCnt = 0;
+		}
+		if (this.likeCnt > 0) {
+			this.likeCnt--;
+		}
 	}
 }
