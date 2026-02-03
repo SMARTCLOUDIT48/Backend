@@ -2,26 +2,25 @@ package com.scit48.auth.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scit48.auth.dto.SignupRequestDto;
+import com.scit48.auth.jwt.JwtToken;
 import com.scit48.auth.member.service.CustomUserDetails;
+import com.scit48.auth.member.service.MemberInterestService;
 import com.scit48.auth.service.AuthService;
-import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.dto.UserDTO;
+import com.scit48.common.dto.UserInterestDTO;
 import com.scit48.common.exception.UnauthorizedException;
 import com.scit48.common.response.ApiResponse;
 import com.scit48.common.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.Map;
-import com.scit48.common.exception.BadRequestException;
-import com.scit48.auth.member.controller.MemberController;
 
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/members")
@@ -31,37 +30,42 @@ public class MemberController {
     private final AuthService authService;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final MemberInterestService memberInterestService;
 
     /*
      * =========================
-     * 회원가입 (개발단계용: 결과 보이게)
+     * 회원가입 + 자동 로그인
      * =========================
      * POST /api/members
      */
     @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> signup(
+    public ResponseEntity<ApiResponse<Void>> signup(
             @RequestPart("data") String data,
-            @RequestPart(value = "image", required = false) MultipartFile image)
-            throws Exception {
+            @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
 
         SignupRequestDto request = objectMapper.readValue(data, SignupRequestDto.class);
 
-        UserEntity saved = authService.signup(request, image);
+        // 회원가입 + 토큰 발급
+        JwtToken token = authService.signupAndLogin(request, image);
 
-        Map<String, Object> responseData = Map.of(
-                "id", saved.getId(),
-                "memberId", saved.getMemberId(),
-                "nickname", saved.getNickname(),
-                "gender", saved.getGender(),
-                "age", saved.getAge(),
-                "nation", saved.getNation(),
-                "nativeLanguage", saved.getNativeLanguage(),
-                "levelLanguage", saved.getLevelLanguage(),
-                "role", saved.getRole(),
-                "createdAt", saved.getCreatedAt());
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", token.accessToken())
+                .httpOnly(true)
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(30 * 60)
+                .build();
 
-        return ResponseEntity.ok(
-                ApiResponse.success(responseData, "회원가입 완료"));
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", token.refreshToken())
+                .httpOnly(true)
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(14 * 24 * 60 * 60)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(ApiResponse.success(null, "회원가입 및 로그인 완료"));
     }
 
     /*
@@ -86,8 +90,7 @@ public class MemberController {
         }
 
         return ResponseEntity.ok(
-                ApiResponse.success(
-                        Map.of("available", !exists)));
+                ApiResponse.success(Map.of("available", !exists)));
     }
 
     /*
@@ -99,6 +102,7 @@ public class MemberController {
     @GetMapping("/me")
     public ApiResponse<UserDTO> me(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
         if (userDetails == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         }
@@ -107,10 +111,17 @@ public class MemberController {
                 UserDTO.fromEntity(userDetails.getUser()));
     }
 
+    /*
+     * =========================
+     * 프로필 이미지 수정
+     * =========================
+     * PUT /api/members/me/profile-image
+     */
     @PutMapping(value = "/me/profile-image", consumes = "multipart/form-data")
     public ApiResponse<Void> updateProfileImage(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam("image") MultipartFile image) {
+
         if (userDetails == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         }
@@ -122,11 +133,18 @@ public class MemberController {
         return ApiResponse.success(null, "프로필 이미지 변경 완료");
     }
 
+    /*
+     * =========================
+     * 프로필 수정
+     * =========================
+     * PUT /api/members/me/profile
+     */
     @PutMapping("/me/profile")
     public ApiResponse<Void> updateProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) String intro,
             @RequestParam(required = false) String levelLanguage) {
+
         if (userDetails == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         }
@@ -137,6 +155,36 @@ public class MemberController {
                 levelLanguage);
 
         return ApiResponse.success(null, "프로필 수정 완료");
+    }
+
+    @PostMapping("/me/interests")
+    public ApiResponse<Void> saveInterests(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody List<UserInterestDTO> interests) {
+
+        if (userDetails == null) {
+            throw new UnauthorizedException("로그인이 필요합니다.");
+        }
+
+        memberInterestService.saveUserInterests(
+                userDetails.getUser().getId(),
+                interests);
+
+        return ApiResponse.success(null, "관심사 저장 완료");
+    }
+
+    @GetMapping("/me/interests")
+    public ApiResponse<List<UserInterestDTO>> getMyInterests(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null) {
+            throw new UnauthorizedException("로그인이 필요합니다.");
+        }
+
+        List<UserInterestDTO> interests = memberInterestService.getUserInterests(
+                userDetails.getUser().getId());
+
+        return ApiResponse.success(interests);
     }
 
 }

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>문의 상세 | LANG:MATE</title>
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/inquiry/inquiry-detail.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="detail-wrapper">
+    <div class="detail-card">
+
+        <!-- ===== HEADER ===== -->
+        <div class="detail-header">
+            <h2 th:text="${inquiry.title}">문의 제목</h2>
+
+            <span class="status"
+                  th:classappend="${inquiry.status.name().toLowerCase()}"
+                  th:text="${inquiry.status == T(com.scit48.Inquiry.domain.entity.InquiryStatus).WAITING ? '대기중' : '답변완료'}">
+            </span>
+        </div>
+
+        <!-- ===== CONTENT ===== -->
+        <div class="detail-content"
+             th:text="${inquiry.content}">
+        </div>
+
+        <!-- ===== EXISTING IMAGE ===== -->
+        <div class="detail-attachment"
+             th:if="${inquiry.attachmentPath != null}">
+            <p class="attachment-title">첨부 이미지</p>
+
+            <div class="image-box">
+                <img th:src="${inquiry.attachmentPath}" alt="첨부 이미지">
+
+            </div>
+        </div>
+
+
+        <!-- ==============================
+             ✏️ 수정 FORM
+        =============================== -->
+        <form class="edit-form"
+              th:action="@{/customer/inquiry/{id}/edit(id=${inquiry.inquiryId})}"
+              method="post"
+              enctype="multipart/form-data">
+
+            <input type="text"
+                   name="title"
+                   th:value="${inquiry.title}"
+                   placeholder="제목">
+
+            <textarea name="content"
+                      placeholder="내용"
+                      th:text="${inquiry.content}">
+            </textarea>
+
+            <!-- ===== FILE ===== -->
+            <div class="file-field">
+                <input type="file" id="fileInput" name="image" accept="image/*" hidden>
+                <label for="fileInput" class="file-btn">이미지 변경</label>
+
+                <!-- 새 이미지 미리보기 -->
+                <div class="preview hidden" id="preview">
+                    <img id="previewImg" alt="미리보기">
+                    <span id="previewName"></span>
+                    <button type="button" id="removeFile">✕</button>
+                </div>
+            </div>
+
+            <!-- ===== ACTION ===== -->
+            <div class="action-row">
+                <button type="submit" class="btn-edit">수정</button>
+            </div>
+        </form>
+
+        <!-- ==============================
+             🗑 삭제
+        =============================== -->
+        <form class="delete-form"
+              th:action="@{/customer/inquiry/{id}/delete(id=${inquiry.inquiryId})}"
+              method="post"
+              onsubmit="return confirm('정말 삭제하시겠습니까?');">
+            <button type="submit" class="btn-delete">삭제</button>
+        </form>
+
+        <a href="/customer/inquiry" class="back-link">← 목록으로</a>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:src="@{/js/inquiry/inquiry.js}"></script>
+</body>
+</html>

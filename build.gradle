@@ -85,3 +85,13 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+dependencies {
+
+    // Spring Boot 설정(application.properties / yml)의
+    // 자동완성 + 경고(Unknown property) 해결을 위한 설정
+    // 실제 런타임 동작에는 영향 없고, IDE(IntelliJ) 지원용
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+}
+
+

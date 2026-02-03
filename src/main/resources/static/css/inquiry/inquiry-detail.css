@@ -1,0 +1,240 @@
+/* =========================
+   GLOBAL
+========================= */
+body {
+    margin: 0;
+    font-family: 'Pretendard', sans-serif;
+    background: linear-gradient(
+        135deg,
+        #cfd9ff 0%,
+        #f6d8ff 45%,
+        #dff4ff 100%
+    );
+    color: #222;
+}
+
+/* =========================
+   LAYOUT
+========================= */
+.detail-wrapper {
+    max-width: 960px;
+    margin: 140px auto;
+    padding: 0 24px;
+}
+
+/* =========================
+   CARD
+========================= */
+.detail-card {
+    padding: 56px;
+    border-radius: 36px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 40px 90px rgba(0,0,0,0.18);
+}
+
+/* =========================
+   HEADER
+========================= */
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.detail-header h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0;
+}
+
+/* =========================
+   STATUS
+========================= */
+.status {
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.status.waiting {
+    background: rgba(120,150,255,0.2);
+    color: #5a6fff;
+}
+
+.status.answered {
+    background: rgba(100,220,180,0.2);
+    color: #2e9f7c;
+}
+
+/* =========================
+   CONTENT
+========================= */
+.detail-content {
+    font-size: 15.5px;
+    line-height: 1.8;
+    margin-bottom: 40px;
+    white-space: pre-line;
+}
+
+/* =========================
+   ATTACHMENT (FIXED FINAL)
+========================= */
+.detail-attachment {
+    margin-bottom: 44px;
+}
+
+.detail-attachment p {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.image-box {
+    width: 220px;
+    max-width: 100%;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #fff;
+
+    box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+}
+
+/* 🔥 핵심 수정 */
+.image-box img {
+    width: 100%;
+    height: auto;        /* ✅ 비율 유지 */
+    display: block;
+}
+
+/* =========================
+   FORM
+========================= */
+.edit-form {
+    margin-top: 20px;
+}
+
+.edit-form input,
+.edit-form textarea {
+    width: 100%;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+
+    border-radius: 18px;
+    border: none;
+    outline: none;
+
+    background: #fff;
+    font-size: 14.5px;
+    font-family: inherit;
+
+    box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+}
+
+.edit-form textarea {
+    min-height: 140px;
+    resize: none;
+}
+
+/* =========================
+   FILE
+========================= */
+.file-field {
+    margin: 18px 0 26px;
+}
+
+.file-btn {
+    display: inline-block;
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #a48cff, #ff8ccf);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* =========================
+   PREVIEW (FIXED)
+========================= */
+.preview {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.95);
+
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+}
+
+.preview.hidden {
+    display: none;
+}
+
+.preview img {
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
+    object-fit: cover;
+    display: block;
+}
+
+.preview span {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+}
+
+.preview button {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #ff6b6b;
+    cursor: pointer;
+}
+
+/* =========================
+   ACTION
+========================= */
+.action-row {
+    display: flex;
+    gap: 14px;
+    margin-top: 22px;
+}
+
+.btn-edit {
+    padding: 12px 34px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff8ccf, #b78cff);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-delete {
+    padding: 12px 34px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff6b6b, #ff9a9a);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+}
+
+/* =========================
+   BACK
+========================= */
+.back-link {
+    display: inline-block;
+    margin-top: 32px;
+    font-weight: 700;
+    color: #7b5cff;
+    text-decoration: none;
+}
