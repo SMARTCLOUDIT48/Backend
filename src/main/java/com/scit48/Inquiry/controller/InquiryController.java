@@ -35,7 +35,7 @@ public class InquiryController {
 		
 		model.addAttribute(
 				"inquiries",
-				inquiryService.findMyInquiries(userId)
+				inquiryService.findMyInquiryDtos(userId)
 		);
 		
 		return "Inquiry/inquiry";

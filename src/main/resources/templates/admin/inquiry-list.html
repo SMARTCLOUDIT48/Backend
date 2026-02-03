@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>1:1 문의 관리</title>
+
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
+</head>
+<body>
+
+<!-- 헤더 -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<!-- 컨텐츠 -->
+<div class="admin-container">
+    <h2 class="page-title">1:1 문의 관리</h2>
+
+    <table class="admin-table">
+        <thead>
+        <tr>
+            <th>회원</th>
+            <th>유형</th>
+            <th>제목</th>
+            <th>상태</th>
+            <th>작성일</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="inq : ${inquiries}"
+            th:attr="
+                data-id=${inq.inquiryId},
+                data-content=${inq.content},
+                data-answer=${inq.answerContent},
+                data-image=${inq.attachmentPath}
+            ">
+            <td th:text="${inq.userNickname}"></td>
+            <td th:text="${inq.type}"></td>
+            <td th:text="${inq.title}"></td>
+            <td>
+                <span class="status"
+                      th:classappend="${inq.status.name().toLowerCase()}"
+                      th:text="${inq.status.name() == 'WAITING' ? '대기중' : '답변완료'}">
+                </span>
+            </td>
+            <td th:text="${#temporals.format(inq.createdAt, 'yyyy-MM-dd')}"></td>
+            <td>
+                <!-- 대기중 → 답변 -->
+                <button class="btn-answer"
+                        th:if="${inq.status.name() == 'WAITING'}"
+                        th:onclick="|openAnswerModal(${inq.inquiryId}, 'create')|">
+                    답변
+                </button>
+
+                <!-- 답변완료 → 수정 -->
+                <button class="btn-edit"
+                        th:if="${inq.status.name() == 'ANSWERED'}"
+                        th:onclick="|openAnswerModal(${inq.inquiryId}, 'edit')|">
+                    수정
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- 답변 모달 -->
+<div id="answerModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h3 class="modal-title">문의 답변</h3>
+
+        <div class="inquiry-preview">
+            <div class="inquiry-label">첨부 이미지</div>
+
+            <div id="modalImageWrapper" class="image-wrapper hidden">
+                <img id="modalImage" alt="첨부 이미지">
+            </div>
+
+            <p id="noImageText" class="no-image-text">
+                첨부된 이미지가 없습니다.
+            </p>
+        </div>
+
+        <!-- 🔽 사용자 문의 내용 -->
+        <div class="inquiry-preview">
+            <div class="inquiry-label">문의 내용</div>
+            <div id="inquiryContent" class="inquiry-content"></div>
+        </div>
+
+        <!-- 🔽 관리자 답변 -->
+        <textarea id="answerContent"
+                  placeholder="답변 내용을 입력해주세요"></textarea>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeAnswerModal()">취소</button>
+            <button class="btn-save" onclick="submitAnswer()">저장</button>
+        </div>
+    </div>
+</div>
+
+<!-- 푸터 -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="/js/admin/admin-inquiry.js"></script>
+</body>
+</html>
