@@ -4,11 +4,9 @@
     <title>1:1 문의 | LANG:MATE</title>
     <link rel="stylesheet" th:href="@{/css/layout.css}">
     <link rel="stylesheet" th:href="@{/css/inquiry/inquiry.css}">
-
-
 </head>
 <body>
-<!-- ===== HEADER ===== -->
+
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main class="inquiry-wrapper">
@@ -18,7 +16,6 @@
         <h3>1:1 문의하기</h3>
 
         <form method="post" enctype="multipart/form-data">
-
             <div class="field">
                 <label>문의 유형</label>
                 <select name="type" required>
@@ -32,67 +29,80 @@
 
             <div class="field">
                 <label>제목</label>
-                <input type="text" name="title" placeholder="문의 제목" required>
+                <input type="text" name="title" required>
             </div>
 
             <div class="field">
                 <label>내용</label>
-                <textarea name="content" placeholder="문의 내용을 입력하세요" required></textarea>
+                <textarea name="content" required></textarea>
             </div>
-
-            <div class="file-field">
-                <input type="file" id="fileInput" name="image" accept="image/*" hidden>
-
-                <label for="fileInput" class="file-btn">
-                    파일 선택
-                </label>
-
-                <!-- 미리보기 영역 -->
-                <div class="preview hidden" id="preview">
-                    <img id="previewImg" alt="미리보기">
-                    <span id="previewName"></span>
-                    <button type="button" class="remove-btn" id="removeFile">✕</button>
-                </div>
-
-                <span class="file-name" id="fileName">
-        선택된 파일 없음
-    </span>
-            </div>
-
 
             <button type="submit" class="submit-btn">문의 등록</button>
         </form>
-
     </section>
 
     <!-- 우측 문의 내역 -->
     <section class="inquiry-list">
         <h3>내 문의 내역</h3>
 
-        <ul>
-            <li th:each="inq : ${inquiries}">
-                <a th:href="@{/customer/inquiry/{id}(id=${inq.inquiryId})}"
-                   class="inquiry-item">
+        <!-- 🔥 JS가 찾는 클래스 -->
+        <ul class="inquiry-ul">
 
+            <li th:each="inq : ${inquiries}"
+                class="inquiry-item"
+                tabindex="0"
+                th:attr="
+                data-status=${inq.status.name()},
+                data-title=${inq.title},
+                data-content=${inq.content},
+                data-answer=${inq.answerContent}
+            ">
+
+                <div class="item-left">
                     <div class="title" th:text="${inq.title}"></div>
 
                     <span class="status"
-                          th:text="${inq.status == T(com.scit48.Inquiry.domain.entity.InquiryStatus).WAITING ? '대기중' : '답변완료'}"
+                          th:text="${inq.status.name() == 'WAITING' ? '대기중' : '답변완료'}"
                           th:classappend="${inq.status.name().toLowerCase()}">
-            </span>
+                </span>
+                </div>
+
+                <!-- ✅ 수정 버튼은 링크 -->
+                <a
+                   th:href="@{/customer/inquiry/{id}(id=${inq.inquiryId})}"
+                   class="edit-btn">
+                    수정
                 </a>
+
             </li>
         </ul>
-
     </section>
 
+
 </main>
-<!-- ===== FOOTER ===== -->
+
+<!-- ===== 문의/답변 모달 ===== -->
+<div id="viewModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h3 id="modalTitle"></h3>
+
+        <div class="inquiry-preview">
+            <div class="inquiry-label">문의 내용</div>
+            <div id="modalInquiryContent" class="inquiry-content"></div>
+        </div>
+
+        <div class="inquiry-preview">
+            <div class="inquiry-label">답변</div>
+            <div id="modalAnswerContent" class="inquiry-content"></div>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-cancel" id="modalCloseBtn">닫기</button>
+        </div>
+    </div>
+</div>
+
 <div th:replace="~{fragments/footer :: footer}"></div>
-
-
-
 <script th:src="@{/js/inquiry/inquiry.js}"></script>
-
 </body>
 </html>

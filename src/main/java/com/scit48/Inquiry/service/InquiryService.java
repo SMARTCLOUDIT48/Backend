@@ -1,6 +1,8 @@
 package com.scit48.Inquiry.service;
 
+import com.scit48.Inquiry.domain.dto.MyInquiryListDto;
 import com.scit48.Inquiry.domain.entity.*;
+import com.scit48.Inquiry.repository.InquiryAnswerRepository;
 import com.scit48.Inquiry.repository.InquiryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import java.util.List;
 public class InquiryService {
 	
 	private final InquiryRepository inquiryRepository;
+	private final InquiryAnswerRepository inquiryAnswerRepository;
 	
 	public void create(
 			Long userId,
@@ -72,6 +75,32 @@ public class InquiryService {
 	public void delete(Long id, Long userId) {
 		InquiryEntity inquiry = findMyInquiry(id, userId);
 		inquiryRepository.delete(inquiry);
+	}
+	
+	@Transactional(readOnly = true)
+	public List<MyInquiryListDto> findMyInquiryDtos(Long userId) {
+		
+		return inquiryRepository
+				.findByUserIdAndIsActiveTrueOrderByCreatedAtDesc(userId)
+				.stream()
+				.map(inquiry -> {
+					
+					String answerContent = inquiry.getStatus() == InquiryStatus.ANSWERED
+							? inquiryAnswerRepository
+							.findByInquiry_InquiryId(inquiry.getInquiryId())
+							.map(InquiryAnswerEntity::getContent)
+							.orElse(null)
+							: null;
+					
+					return MyInquiryListDto.builder()
+							.inquiryId(inquiry.getInquiryId())
+							.title(inquiry.getTitle())
+							.content(inquiry.getContent())
+							.status(inquiry.getStatus())
+							.answerContent(answerContent)
+							.build();
+				})
+				.toList();
 	}
 	
 	
