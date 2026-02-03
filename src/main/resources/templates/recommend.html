@@ -25,7 +25,10 @@
 
 					const data = await res.json();
 					// 채팅 페이지 라우팅 규칙에 맞게 수정
-					location.href = `/chat/room/${data.roomId}`;
+					// ✅ roomId를 임시 저장하고 /chat으로 이동 (URL은 /chat 그대로)
+					sessionStorage.setItem('openRoomId', data.roomId);
+
+					location.href = `/chat`;
 
 				} catch (err) {
 					console.error(err);
