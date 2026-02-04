@@ -2,7 +2,18 @@ let currentInquiryId = null;
 let currentMode = "create"; // create | edit
 
 // =========================
-// 모달 열기 (답변 / 수정)
+// DOM 캐시
+// =========================
+const modal = document.getElementById("answerModal");
+const inquiryContentEl = document.getElementById("inquiryContent");
+const answerTextarea = document.getElementById("answerContent");
+
+const imageWrapper = document.getElementById("modalImageWrapper");
+const imageEl = document.getElementById("modalImage");
+const noImageText = document.getElementById("noImageText");
+
+// =========================
+// 모달 열기
 // =========================
 function openAnswerModal(inquiryId, mode) {
     currentInquiryId = inquiryId;
@@ -11,18 +22,13 @@ function openAnswerModal(inquiryId, mode) {
     const row = document.querySelector(`tr[data-id="${inquiryId}"]`);
     if (!row) return;
 
-    // 문의 내용
-    document.getElementById("inquiryContent").textContent =
-        row.dataset.content || "";
+    /* 문의 내용 */
+    inquiryContentEl.textContent = row.dataset.content || "";
 
-    // 첨부 이미지
+    /* 첨부 이미지 */
     const imagePath = row.dataset.image;
-    const imageWrapper = document.getElementById("modalImageWrapper");
-    const image = document.getElementById("modalImage");
-    const noImageText = document.getElementById("noImageText");
-
     if (imagePath && imagePath.trim() !== "") {
-        image.src = imagePath;
+        imageEl.src = imagePath;
         imageWrapper.classList.remove("hidden");
         noImageText.classList.add("hidden");
     } else {
@@ -30,32 +36,31 @@ function openAnswerModal(inquiryId, mode) {
         noImageText.classList.remove("hidden");
     }
 
-    // 답변 내용 (수정 시 기존 답변)
-    const answerTextarea = document.getElementById("answerContent");
+    /* 답변 내용 */
     if (mode === "edit") {
         answerTextarea.value = row.dataset.answer || "";
     } else {
         answerTextarea.value = "";
     }
 
-    document.getElementById("answerModal").classList.remove("hidden");
+    modal.classList.remove("hidden");
 }
 
 // =========================
 // 모달 닫기
 // =========================
 function closeAnswerModal() {
-    document.getElementById("answerModal").classList.add("hidden");
+    modal.classList.add("hidden");
+    answerTextarea.value = "";
     currentInquiryId = null;
     currentMode = "create";
 }
 
 // =========================
-// 답변 저장 / 수정
+// 답변 저장 / 수정 (🔥 핵심)
 // =========================
 function submitAnswer() {
-    const content = document.getElementById("answerContent").value.trim();
-
+    const content = answerTextarea.value.trim();
     if (!content) {
         alert("답변 내용을 입력해주세요.");
         return;
@@ -65,57 +70,62 @@ function submitAnswer() {
 
     fetch(`/admin/inquiries/${currentInquiryId}/answer`, {
         method,
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content })
     })
-        .then(res => {
-            if (!res.ok) throw new Error();
-            closeAnswerModal();
+    .then(res => {
+        if (!res.ok) throw new Error();
+        return res;
+    })
+    .then(() => {
+        const row = document.querySelector(`tr[data-id="${currentInquiryId}"]`);
+        if (!row) return;
 
-            const row = document.querySelector(
-                `tr[data-id="${currentInquiryId}"]`
-            );
-            if (!row) return;
+        /* =========================
+           1️⃣ 데이터 상태 강제 동기화
+        ========================= */
+        row.dataset.status = "ANSWERED";
+        row.dataset.answer = content;
 
-            // 상태 변경
-            const statusSpan = row.querySelector(".status");
-            statusSpan.textContent = "답변완료";
-            statusSpan.classList.remove("waiting");
-            statusSpan.classList.add("answered");
+        /* =========================
+           2️⃣ 상태 뱃지 즉시 변경
+        ========================= */
+        const statusSpan = row.querySelector(".status");
+        statusSpan.textContent = "답변완료";
+        statusSpan.className = "status answered";
 
-            // 답변 내용 저장 (다음 수정 대비)
-            row.dataset.answer = content;
+        /* =========================
+           3️⃣ 관리 버튼 즉시 교체
+        ========================= */
+        const manageTd = row.querySelector("td:last-child");
+        manageTd.innerHTML = `
+            <button class="btn-edit"
+                onclick="openAnswerModal(${currentInquiryId}, 'edit')">
+                수정
+            </button>
+        `;
 
-            // 관리 버튼 교체
-            const manageTd = row.lastElementChild;
-            manageTd.innerHTML = `
-                <button class="btn-edit"
-                    onclick="openAnswerModal(${currentInquiryId}, 'edit')">
-                    수정
-                </button>
-            `;
-        })
-        .catch(() => {
-            alert("답변 처리 중 오류가 발생했습니다.");
-        });
+        closeAnswerModal();
+    })
+    .catch(() => {
+        alert("답변 처리 중 오류가 발생했습니다.");
+    });
 }
 
 // =========================
-// ESC 키로 모달 닫기
+// ESC 키 닫기
 // =========================
 document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
         closeAnswerModal();
     }
 });
 
 // =========================
-// 오버레이 클릭 시 닫기
+// 오버레이 클릭 닫기
 // =========================
-document.getElementById("answerModal")?.addEventListener("click", (e) => {
-    if (e.target.id === "answerModal") {
+modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
         closeAnswerModal();
     }
 });

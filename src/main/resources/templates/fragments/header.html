@@ -1,5 +1,7 @@
-<header th:fragment="header" xmlns:th="http://www.thymeleaf.org"
-    xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="header">
+<header th:fragment="header"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+        class="header">
 
     <div class="header-inner">
 
@@ -22,18 +24,31 @@
 
             <!-- 비로그인 상태 -->
             <div sec:authorize="isAnonymous()">
-                <button class="login-btn" type="button" th:onclick="|location.href='@{/login}'|">
+                <button class="login-btn" type="button"
+                        th:onclick="|location.href='@{/login}'|">
                     로그인
                 </button>
 
-                <button class="signup-btn" type="button" th:onclick="|location.href='@{/member/signup}'|">
+                <button class="signup-btn" type="button"
+                        th:onclick="|location.href='@{/member/signup}'|">
                     회원가입
                 </button>
             </div>
 
             <!-- 로그인 상태 -->
             <div sec:authorize="isAuthenticated()">
+
+                <!-- 관리자 로그인 시 -->
                 <button class="signup-btn" type="button"
+                        sec:authorize="hasAuthority('ADMIN')"
+                        th:onclick="|location.href='@{/admin/dashboard}'|">
+                    관리자 대시보드
+                </button>
+
+
+                <!-- 관리자 아닐 경우 (일반 유저) -->
+                <button class="signup-btn" type="button"
+                        sec:authorize="!hasAuthority('ADMIN')"
                         th:onclick="|location.href='@{/member/mypage}'|">
                     마이페이지
                 </button>
