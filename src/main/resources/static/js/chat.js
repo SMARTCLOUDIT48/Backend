@@ -541,62 +541,62 @@ function checkPartnerActivity(partnerId) {
 
 
 // ==========================================================
-// ✅ [NEW] 16. 상대방 프로필 정보 로드 (사이드바용)
+// ✅ [NEW] 16. 상대방 프로필 정보 로드 (사이드바용) - 수정됨
 // ==========================================================
 function loadPartnerInfo(roomId) {
     const sidebar = document.getElementById("partnerProfileArea");
     if (!sidebar) return;
 
-    // 초기화 (로딩 중 표시)
+    // 1. 초기화 (로딩 중 표시)
+    // 기존 데이터가 잠깐 보이는 것을 방지하기 위해 초기화합니다.
     document.getElementById("partnerName").innerText = "Loading...";
-    document.getElementById("partnerIntro").innerText = "상대방 정보를 불러오고 있습니다...";
+    document.getElementById("partnerIntro").innerText = "...";
+    document.getElementById("partnerImg").src = "/images/profile/default.png";
+    document.getElementById("partnerNationText").innerText = "";
+    document.getElementById("partnerAge").innerText = "";
 
-    // API 호출: (서버 구현에 맞춰 엔드포인트 수정 필요)
-    // 예시: GET /api/chat/room/{roomId}/partner
-    fetch(`/api/chat/room/${roomId}/partner`)
+    // 2. 실제 API 호출
+    fetch(`/api/chat/room/${roomId}`)
         .then(res => {
-            if (!res.ok) throw new Error("API 호출 실패");
+            if (!res.ok) throw new Error("프로필 정보 로드 실패");
             return res.json();
         })
         .then(data => {
+            console.log("📌 상대방 정보:", data);
             updatePartnerProfileUI(data);
         })
         .catch(err => {
-            console.warn("파트너 정보 로드 실패 (테스트 데이터로 대체합니다):", err);
-
-            // 🚨 백엔드 API가 없을 경우를 대비한 [테스트용 가짜 데이터]
-            // 나중에 서버 API가 준비되면 이 부분을 제거하세요.
-            updatePartnerProfileUI({
-                nickname: "Global Friend",
-                profileImage: null, // null이면 기본값
-                nation: "USA",
-                flag: "🇺🇸",
-                languageMain: "EN",
-                languageLearn: "KR",
-                level: "Intermediate",
-                intro: "Hello! I am interested in K-Pop and Korean culture. Let's be friends!"
-            });
+            console.error("API 호출 에러:", err);
+            // 에러 발생 시 '알 수 없음' 처리
+            document.getElementById("partnerName").innerText = "(알 수 없음)";
+            document.getElementById("partnerIntro").innerText = "상대방 정보를 불러올 수 없습니다.";
         });
 }
 
-// UI 업데이트 함수
+// UI 업데이트 함수 (DTO 필드명에 맞춰 수정됨)
 function updatePartnerProfileUI(data) {
     const sidebar = document.getElementById("partnerProfileArea");
     if (sidebar) sidebar.style.display = "flex";
 
-    document.getElementById("partnerName").innerText = data.nickname || "Unknown";
-    document.getElementById("partnerImg").src = data.profileImage || "/images/profile/default.png";
+    // 1. 닉네임 (opponentNickname)
+    document.getElementById("partnerName").innerText = data.opponentNickname || "알 수 없음";
 
-    document.getElementById("partnerNationText").innerText = data.nation || "Unknown";
-    document.getElementById("partnerNationFlag").innerText = data.flag || "🏳️";
+    // 2. 프로필 이미지 (opponentProfileImg)
+    const imgPath = data.opponentProfileImg ? data.opponentProfileImg : "/images/profile/default.png";
+    document.getElementById("partnerImg").src = imgPath;
 
-    document.getElementById("partnerLangMain").innerText = data.languageMain || "EN";
-    document.getElementById("partnerLangLearn").innerText = data.languageLearn || "KR";
-    document.getElementById("partnerLevel").innerText = data.level || "Beginner";
+    // 3. 국적 (opponentNation)
+    document.getElementById("partnerNationText").innerText = data.opponentNation || "Unknown";
+    // (참고: 현재 DTO에는 국기 이모지 데이터가 없으므로 기본 아이콘 유지)
+    document.getElementById("partnerNationFlag").innerText = "🏳️";
 
-    document.getElementById("partnerIntro").innerText = data.intro || "자기소개가 없습니다.";
+    // 4. 자기소개 (opponentIntro)
+    document.getElementById("partnerIntro").innerText = data.opponentIntro || "자기소개가 없습니다.";
 
-    // 나이가 있다면 표시, 없으면 공백
-    const ageSpan = document.getElementById("partnerAge");
-    if (ageSpan) ageSpan.innerText = data.age ? `(${data.age})` : "";
+    // ⚠️ [참고] 나이, 언어 정보는 현재 백엔드 DTO(ChatRoomDetailDto)에 포함되어 있지 않습니다.
+    // 따라서 화면에서는 비워두거나 숨깁니다.
+    document.getElementById("partnerAge").innerText = "";
+    document.getElementById("partnerLangMain").innerText = "-";
+    document.getElementById("partnerLangLearn").innerText = "-";
+    document.getElementById("partnerLevel").innerText = "";
 }
