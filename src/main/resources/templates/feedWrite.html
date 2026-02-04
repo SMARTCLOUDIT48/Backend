@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>MUSUBI - 일상 공유</title>
+    <link rel="stylesheet" th:href="@{/css/feedWrite.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header th:fragment="header" xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="header">
+
+    <div class="header-inner">
+
+        <!-- 로고 -->
+        <div class="logo" th:onclick="|location.href='@{/}'|">
+            💬 MUSUBI
+        </div>
+
+        <!-- 네비게이션 -->
+        <nav class="nav">
+            <a th:href="@{/community}">커뮤니티</a>
+            <a th:href="@{/recommend}">파트너찾기</a>
+            <a th:href="@{/chat}">채팅</a>
+            <a th:href="@{/support}">고객센터</a>
+        </nav>
+
+        <!-- 인증 버튼 영역 -->
+        <div class="auth-buttons">
+
+            <!-- =========================
+                 비로그인 상태
+            ========================= -->
+            <div sec:authorize="isAnonymous()">
+                <button class="login-btn" type="button" th:onclick="|location.href='@{/login}'|">
+                    로그인
+                </button>
+
+                <button class="signup-btn" type="button" th:onclick="|location.href='@{/member/signup}'|">
+                    회원가입
+                </button>
+            </div>
+
+            <!-- =========================
+                 로그인 상태
+            ========================= -->
+            <div sec:authorize="isAuthenticated()">
+                <button class="login-btn" type="button" onclick="logout()">
+                    로그아웃
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 로그아웃 JS (공통) -->
+    <script th:src="@{/js/member/logout.js}"></script>
+
+</header>
+
+<main class="feed-container">
+    <form th:action="@{/board/feedWrite}" method="post" enctype="multipart/form-data" class="feed-card">
+
+        <div class="card-header">
+            <div class="user-profile">
+                <img th:src="${'/images/profile/upload/' + user.profileImageName}"
+                     alt="User" class="profile-img">
+                <div class="user-info">
+                    <span class="username" th:text="${user.nickname}"></span>
+                    <span class="location" th:text="${user.nation}"></span>
+                </div>
+            </div>
+            <button type="button" class="close-btn" onclick="history.back()">✕</button>
+        </div>
+
+        <div class="image-preview-area" id="previewArea">
+            <div class="placeholder-text">
+                <span>📷</span>
+                <p>사진을 끌어오거나 클릭해서 업로드하세요</p>
+            </div>
+            <img id="imagePreview" src="" alt="Preview" style="display:none;">
+            <input type="file" name="upload" id="fileInput" accept="image/*" required>
+        </div>
+
+        <div class="content-area">
+            <textarea name="content" placeholder="문득 든 생각이나 일상을 공유해보세요..." required></textarea>
+            <input type="hidden" name="title" value="일상 피드입니다.">
+        </div>
+
+        <div class="card-footer">
+            <button type="submit" class="share-btn">공유하기</button>
+        </div>
+
+    </form>
+</main>
+
+<footer th:fragment="footer" class="site-footer">
+    <div class="footer-inner">
+
+        <div class="footer-links">
+            <div class="footer-col">
+                <h4>소개</h4>
+                <a href="#">서비스 소개</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>제품</h4>
+                <a href="#">커뮤니티</a>
+                <a href="#">파트너 찾기</a>
+                <a href="#">채팅</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>가이드</h4>
+                <a href="#">이용 안내</a>
+                <a href="#">자주 하는 질문</a>
+                <a href="#">이용 가이드</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>지원</h4>
+                <a href="#">공지사항</a>
+                <a href="#">1:1 문의</a>
+                <a href="#">고객센터</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-meta">
+                <span>이용약관</span>
+                <span>·</span>
+                <span>개인정보 처리방침</span>
+                <span>·</span>
+                <span>고객센터</span>
+            </div>
+
+            <div class="footer-copy">
+                © 2026 MUSUBI. All rights reserved.
+            </div>
+        </div>
+
+    </div>
+</footer>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const previewArea = document.getElementById('previewArea');
+    const imagePreview = document.getElementById('imagePreview');
+    const placeholder = document.querySelector('.placeholder-text');
+
+    // 영역 클릭 시 파일창 열기
+    previewArea.addEventListener('click', () => fileInput.click());
+
+    // 파일 선택 시 미리보기 변경
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+</body>
+</html>

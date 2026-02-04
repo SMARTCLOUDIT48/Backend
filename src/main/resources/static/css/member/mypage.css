@@ -1414,7 +1414,7 @@ align-items: stretch;
         /* 수직 가운데 */
         padding: 32px 36px;
         border-radius: 28px;
-    
+
         overflow-y: auto;
         /* 내용 많으면 스크롤 */
 

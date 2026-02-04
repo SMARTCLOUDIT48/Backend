@@ -1,0 +1,339 @@
+/* =========================
+   전체 레이아웃
+========================= */
+.admin-container {
+    padding: 56px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 28px;
+    letter-spacing: -0.3px;
+}
+
+/* =========================
+   테이블 (글라스 스타일)
+========================= */
+.admin-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    border-radius: 22px;
+    overflow: hidden;
+
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.08),
+        inset 0 0 0 1px rgba(255,255,255,0.4);
+}
+
+.admin-table thead {
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.75),
+        rgba(240,240,255,0.65)
+    );
+}
+
+.admin-table th {
+    padding: 18px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    color: #333;
+}
+
+.admin-table td {
+    padding: 18px;
+    text-align: center;
+    font-size: 14px;
+    color: #222;
+}
+
+/* =========================
+   행 인터랙션 (Hover / Active)
+========================= */
+.admin-table tbody tr {
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+}
+
+.admin-table tbody tr:hover {
+    background: rgba(255,255,255,0.6);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+}
+
+.admin-table tbody tr:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.1) inset;
+}
+
+/* 마지막 줄 보더 제거 */
+.admin-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* =========================
+   상태 뱃지
+========================= */
+.status {
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+}
+
+.status.waiting {
+    color: #ff8a00;
+    background: rgba(255, 138, 0, 0.12);
+}
+
+.status.answered {
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.12);
+}
+
+/* =========================
+   답변 버튼 (글라스 + 애니메이션)
+========================= */
+.btn-answer {
+    padding: 8px 20px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+
+    background: linear-gradient(135deg, #8b7bff, #c59cff);
+
+    box-shadow:
+        0 6px 14px rgba(139,123,255,0.35);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
+}
+
+.btn-answer:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(139,123,255,0.45);
+    filter: brightness(1.05);
+}
+
+.btn-answer:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(139,123,255,0.35) inset;
+}
+
+/* =========================
+   모달 오버레이
+========================= */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.hidden {
+    display: none;
+}
+
+/* =========================
+   모달 카드 (FAQ / 공지 수정 톤)
+========================= */
+.modal-card {
+    width: 520px;
+    padding: 36px;
+    border-radius: 26px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.95),
+        rgba(240,240,255,0.92)
+    );
+
+    backdrop-filter: blur(20px);
+
+    box-shadow:
+        0 30px 60px rgba(0,0,0,0.15),
+        inset 0 0 0 1px rgba(255,255,255,0.6);
+
+    animation: modalFadeUp 0.3s ease;
+}
+
+.modal-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 22px;
+}
+
+/* textarea */
+.modal-card textarea {
+    width: 100%;
+    height: 160px;
+    padding: 16px 18px;
+
+    border-radius: 18px;
+    border: none;
+    resize: none;
+
+    font-size: 14px;
+    line-height: 1.6;
+
+    background: rgba(255,255,255,0.85);
+    box-shadow:
+        inset 0 0 0 1px rgba(0,0,0,0.06);
+
+    transition: box-shadow 0.2s ease;
+}
+
+.modal-card textarea:focus {
+    outline: none;
+    box-shadow:
+        inset 0 0 0 2px #c7b8ff;
+}
+
+/* =========================
+   모달 버튼
+========================= */
+.modal-actions {
+    margin-top: 26px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+}
+
+.btn-cancel {
+    padding: 10px 24px;
+    border-radius: 999px;
+    border: none;
+
+    background: rgba(0,0,0,0.05);
+    font-weight: 700;
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: rgba(0,0,0,0.1);
+}
+
+.btn-save {
+    padding: 10px 26px;
+    border-radius: 999px;
+    border: none;
+
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+
+    background: linear-gradient(135deg, #ff9fcf, #b28cff);
+    box-shadow: 0 6px 16px rgba(178,140,255,0.4);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(178,140,255,0.5);
+}
+
+.btn-save:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(178,140,255,0.4) inset;
+}
+
+/* =========================
+   애니메이션
+========================= */
+@keyframes modalFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 문의 내용 미리보기 */
+.inquiry-preview {
+    background: rgba(255,255,255,0.7);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.inquiry-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 6px;
+}
+
+.inquiry-content {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+    white-space: pre-wrap;
+}
+
+.btn-edit {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: #fff;
+
+    background: linear-gradient(135deg, #9be15d, #00e3ae);
+}
+
+.image-wrapper {
+    margin-top: 10px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.12);
+}
+
+.image-wrapper img {
+    width: 100%;
+    max-height: 240px;
+    object-fit: contain;
+    background: #fff;
+}
+
+.no-image-text {
+    font-size: 13px;
+    color: #999;
+    margin-top: 8px;
+}
+
+.hidden {
+    display: none;
+}

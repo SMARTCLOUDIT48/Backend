@@ -73,10 +73,32 @@ public class NoticeService {
 	
 	@Transactional
 	public void deleteNotice(Long id) {
-		NoticeEntity notice = noticeRepository.findById(id)
+		noticeRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("게시글 없음"));
 		
-		notice.setActive(false); // 실제 삭제 ❌ (소프트 삭제)
+		noticeRepository.deleteById(id);
+	}
+	
+	@Transactional
+	public void createNotice(
+			String type,
+			String title,
+			String content,
+			String category,
+			boolean isPinned,
+			Long createdBy
+	) {
+		NoticeEntity notice = NoticeEntity.builder()
+				.type(type)
+				.title(title)
+				.content(content)
+				.category(category)
+				.isPinned(isPinned)
+				.createdBy(createdBy)
+				.isActive(true)
+				.build();
+		
+		noticeRepository.save(notice);
 	}
 	
 	

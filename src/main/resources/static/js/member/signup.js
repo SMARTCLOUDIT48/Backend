@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch(`${CONTEXT_PATH}api/members`, {
         method: "POST",
         body: formData,
-        credentials: "include" 
+        credentials: "include"
       });
 
       const result = await res.json();

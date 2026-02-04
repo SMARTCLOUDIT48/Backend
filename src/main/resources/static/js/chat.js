@@ -61,7 +61,7 @@ function loadChatRooms() {
                     <div class="room-avatar">💬</div>
                     <div class="room-info">
                         <div class="room-name">${room.name}</div>
-                        <div class="room-last-msg">ID: ${realId}</div> 
+                        <div class="room-last-msg">ID: ${realId}</div>
                     </div>`;
                 listArea.appendChild(li);
             });
