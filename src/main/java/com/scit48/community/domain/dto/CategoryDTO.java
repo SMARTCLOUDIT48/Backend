@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CategoryDTO {
-	private Long id;   // 조회 시 사용
+	private Long categoryId;   // 조회 시 사용
 	private String name; // 생성 및 조회 시 사용
 }

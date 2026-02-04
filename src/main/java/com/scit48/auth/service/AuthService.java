@@ -166,4 +166,25 @@ public class AuthService {
 
 		user.updateProfile(intro, level);
 	}
+
+	// ===============================
+	// 회원가입 + 자동 로그인
+	// ===============================
+	@Transactional
+	public JwtToken signupAndLogin(SignupRequestDto request, MultipartFile image) {
+
+		// 1. 회원가입 (기존 메서드 재사용)
+		UserEntity user = signup(request, image);
+
+		// 2. 로그인과 동일한 토큰 발급
+		String accessToken = jwtProvider.createAccessToken(
+				user.getId(),
+				user.getRole());
+
+		String refreshToken = jwtProvider.createRefreshToken(user.getId());
+		refreshTokenRepository.save(user.getId(), refreshToken);
+
+		return new JwtToken(accessToken, refreshToken);
+	}
+
 }

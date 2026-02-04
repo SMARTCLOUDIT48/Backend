@@ -14,7 +14,7 @@ public class CategoryEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "category_id")
-	private Long id;
+	private Long categoryId;
 	
 	@Column(nullable = false, unique = true)
 	private String name; // 예: "Q&A", "RECRUIT" 등

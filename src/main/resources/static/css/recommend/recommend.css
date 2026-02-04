@@ -1,0 +1,351 @@
+/* =========================================================
+   RECOMMEND PAGE OVERRIDES (layout.css 톤과 통일)
+   - layout.css의 background/글래스 톤을 그대로 살리고,
+     recommend.css에서 body 배경을 덮지 않도록 구성
+========================================================= */
+
+/* ✅ 기존 recommend.css에 body 배경을 고정(#f4f6fb)하는 부분이 있어
+   layout.css의 var(--bg) 배경을 가립니다. 여기서 투명 처리합니다. */
+body {
+  background: transparent !important;
+}
+
+/* =========================================================
+   LIST LAYOUT
+   - #recommendTbody가 카드들의 컨테이너
+   - 반응형 그리드로 “깔끔하게 배치”
+========================================================= */
+
+.content {
+  max-width: 1200px; /* layout.css header-inner와 폭 통일감 */
+  margin: 0 auto;
+  padding: 28px 24px 40px;
+}
+
+/* 카드 리스트 컨테이너 */
+#recommendTbody {
+  display: grid;
+  /* 1~2열로 자연스럽게 바뀌도록(카드가 가로형이므로 최소폭을 크게) */
+  grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+/* 작은 화면에서는 1열 고정 */
+@media (max-width: 620px) {
+  #recommendTbody {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   CARD (member-card)
+   - 기존: width 720px 고정 → 그리드 배치 방해
+   - 개선: width:100%, glass 스타일, hover lift
+========================================================= */
+
+.member-card {
+  width: 100%;
+  /* layout.css의 glass 톤과 맞추기 */
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-radius: 20px;
+  padding: 18px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.10);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+.member-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* 모바일에서 카드 내부 줄바꿈 */
+@media (max-width: 520px) {
+  .member-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+}
+
+/* =========================================================
+   PROFILE
+   - 기존 구조 유지 (profile-wrap / profile-img / flag-icon)
+========================================================= */
+
+.profile-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.profile-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+
+  /* 글래스 톤에 맞춰 테두리 + 살짝 그림자 */
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.10);
+}
+
+/* 국기 오버레이(기존 방식 유지, z-index/배경/테두리 강화) */
+.flag-icon {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: inline-block;
+  z-index: 10;
+
+  width: 22px;
+  height: 22px;
+
+  border-radius: 50%;
+  background-color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+/* =========================================================
+   INFO (left-middle)
+========================================================= */
+
+.info {
+  flex: 1;
+  min-width: 0; /* 긴 닉네임 줄바꿈/말줄임 안전 */
+}
+
+.nickname {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: rgba(19, 29, 53, 0.92);
+  letter-spacing: -0.2px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: rgba(19, 29, 53, 0.82);
+}
+
+.label {
+  color: rgba(60, 70, 90, 0.65);
+  min-width: 64px;
+  flex-shrink: 0;
+}
+
+.value {
+  color: rgba(19, 29, 53, 0.85);
+}
+
+/* 학습언어 영역 */
+.lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.level {
+  color: #ffb400;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+}
+
+/* =========================================================
+   RIGHT SIDE (temp / chatting text / button)
+   - 오른쪽 정렬 유지 + 깔끔한 간격
+========================================================= */
+
+.right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* "인기 멤버..." 문구를 pill 형태로 정리 */
+.chatting-text {
+  font-size: 12px;
+  color: rgba(40, 60, 120, 0.82);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  padding: 6px 10px;
+  border-radius: 999px;
+  max-width: 260px;
+  text-align: right;
+  line-height: 1.2;
+}
+
+/* 온도 */
+.temp {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ff6b00;
+}
+
+/* 버튼: layout.css의 로그인 버튼 느낌(그라데이션)로 통일 */
+.chat-btn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+
+  background: linear-gradient(135deg, #ff6f91, #ff9f7f);
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+
+  box-shadow: 0 12px 26px rgba(255, 120, 150, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.chat-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+  box-shadow: 0 16px 34px rgba(255, 120, 150, 0.42);
+}
+
+.chat-btn:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+
+/* ===== 프로필 + 국기 오버레이 고정 (최종 덮어쓰기) ===== */
+.member-card .profile-wrap {
+  position: relative !important;
+  /* 오버레이 기준점 */
+  width: 72px !important;
+  height: 72px !important;
+  flex-shrink: 0;
+  overflow: visible !important;
+  /* 국기가 살짝 밖으로 나와도 보이게 */
+}
+
+.member-card .profile-wrap .profile-img {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  object-fit: cover;
+  display: block;
+}
+
+/* flag-icons의 span에 우리가 원하는 위치를 강제 */
+.member-card .profile-wrap .flag-icon {
+  position: absolute !important;
+  right: -4px !important;
+  bottom: -4px !important;
+  left: auto !important;
+  top: auto !important;
+
+  width: 22px !important;
+  height: 22px !important;
+
+  border-radius: 50%;
+  background-color: #fff;
+  /* ✅ background(축약) 금지 */
+  border: 2px solid #fff;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, .18);
+  z-index: 20 !important;
+  display: inline-block;
+  overflow: hidden;
+  /* ✅ 원형 안에 국기 잘리게 */
+}
+
+/* ✅ flag-icons(.fi)가 가진 background-image가 원형 안에 꽉 차도록 */
+.member-card .profile-wrap .flag-icon.fi {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* =========================
+   HERO (가운데 정렬 버전)
+   ========================= */
+
+.hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 34px 24px 16px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* ✅ 수평 중앙 */
+  justify-content: center;
+  text-align: center;
+  /* ✅ 텍스트 중앙 */
+}
+
+.hero .webTitle {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  margin: 0 0 6px;
+  color: rgba(19, 29, 53, 0.92);
+}
+
+.hero .SubTitle {
+  font-size: 40px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin: 0 0 12px;
+
+  background: linear-gradient(90deg, #ff6f91, #ff9f7f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero .temp_context {
+  margin: 0;
+  padding: 10px 14px;
+  display: inline-block;
+
+  font-size: 13px;
+  line-height: 1.4;
+  color: rgba(19, 29, 53, 0.78);
+
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-radius: 999px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.08);
+}
+
+/* 반응형 */
+@media (max-width: 620px) {
+  .hero {
+    padding: 26px 18px 12px;
+  }
+
+  .hero .SubTitle {
+    font-size: 30px;
+  }
+
+  .hero .temp_context {
+    border-radius: 14px;
+    padding: 10px 12px;
+  }
+}

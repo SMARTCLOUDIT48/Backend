@@ -61,7 +61,7 @@ function loadChatRooms() {
                     <div class="room-avatar">💬</div>
                     <div class="room-info">
                         <div class="room-name">${room.name}</div>
-                        <div class="room-last-msg">ID: ${realId}</div> 
+                        <div class="room-last-msg">ID: ${realId}</div>
                     </div>`;
                 listArea.appendChild(li);
             });
@@ -86,7 +86,7 @@ function enterRoom(roomId, roomName, element) {
 
     // 활성화 스타일 변경
     document.querySelectorAll(".room-item").forEach(item => item.classList.remove("active"));
-    if(element) element.classList.add("active");
+    if (element) element.classList.add("active");
 
     // 소켓 연결
     connect(roomId);
@@ -110,7 +110,7 @@ function connect(roomId) {
         document.getElementById("connectionStatus").innerText = "🟢 실시간 연결됨";
         document.getElementById("connectionStatus").style.color = "green";
         subscribeToRoom(roomId);
-    }, function(error) {
+    }, function (error) {
         console.error("연결 실패:", error);
     });
 }
@@ -144,7 +144,7 @@ function loadChatHistory(roomId) {
             if (messages && messages.length > 0) {
                 messages.forEach(msg => {
                     showUi(msg);
-                    if(String(msg.senderId) !== String(mySenderId)) {
+                    if (String(msg.senderId) !== String(mySenderId)) {
                         lastPartnerId = msg.senderId;
                     }
                 });
@@ -229,7 +229,7 @@ function showUi(message) {
         const transBtn = document.createElement("button");
         transBtn.className = "action-btn";
         transBtn.innerHTML = "🇰🇷↔🇯🇵";
-        transBtn.onclick = function() {
+        transBtn.onclick = function () {
             if (transResultBox.style.display === "block") {
                 transResultBox.style.display = "none";
             } else {
@@ -463,7 +463,7 @@ function checkLoveSignal() {
     btnSpan.innerText = "분석중...";
     btn.disabled = true;
     const overlay = document.getElementById("loadingOverlay");
-    if(overlay) overlay.style.display = "flex";
+    if (overlay) overlay.style.display = "flex";
 
     fetch('/api/ai/sentiment', {
         method: 'POST',
@@ -471,7 +471,7 @@ function checkLoveSignal() {
         body: JSON.stringify({ chatHistory: chatLog })
     }).then(res => res.json()).then(data => showLoveModal(data))
         .catch(err => { console.error(err); alert("분석 실패!"); })
-        .finally(() => { btnSpan.innerText = originalText; btn.disabled = false; if(overlay) overlay.style.display = "none"; });
+        .finally(() => { btnSpan.innerText = originalText; btn.disabled = false; if (overlay) overlay.style.display = "none"; });
 }
 function showLoveModal(data) {
     const modal = document.getElementById("loveModal");
@@ -582,7 +582,7 @@ function loadPartnerInfo(roomId) {
 // UI 업데이트 함수
 function updatePartnerProfileUI(data) {
     const sidebar = document.getElementById("partnerProfileArea");
-    if(sidebar) sidebar.style.display = "flex";
+    if (sidebar) sidebar.style.display = "flex";
 
     document.getElementById("partnerName").innerText = data.nickname || "Unknown";
     document.getElementById("partnerImg").src = data.profileImage || "/images/profile/default.png";

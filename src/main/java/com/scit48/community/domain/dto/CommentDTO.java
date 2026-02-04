@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class CommentDTO {
-	private Long id;
+	private Long commentId;
 	private Long boardId;      // 작성 시 어떤 게시글인지 지정
 	private String content;    //
 	

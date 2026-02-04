@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -45,9 +46,17 @@ public class RecommendService {
 		Gender targetGender =getOppositeGender(loginUserEntity.getGender());
 		String targetCountry = getOppositeCountry(loginUserEntity.getNation());
 		
+		
+		//List <UserEntity> allUserEntitylist = ur.findByGenderAndNation(targetGender,targetCountry);
+		
 		//성별, 한일 반전된
-		//회원 목록, 회원 관심사 전체 목록
-		List <UserEntity> allUserEntitylist = ur.findByGenderAndNation(targetGender,targetCountry);
+		//회원 목록, 회원 관심사 전체 목록 로그인한 회원 제외
+		List<UserEntity> allUserEntitylist =
+				ur.findByGenderAndNationAndIdNot(
+						targetGender,
+						targetCountry,
+						user
+				);
 		
 		//allUsersEntitylist에 해당하는 id들의 리스트를 만들겠다.
 		List<Long> userIds = allUserEntitylist.stream().map(UserEntity::getId).toList();
@@ -97,6 +106,7 @@ public class RecommendService {
 					.profileImagePath(partner.getProfileImagePath())
 					.nativeLanguage(partner.getNativeLanguage())
 					.levelLanguage(partner.getLevelLanguage())
+					.studyLanguage(partner.getStudyLanguage())
 					.matchPoint(totalScore)
 					.build();
 			
@@ -110,6 +120,9 @@ public class RecommendService {
 				).reversed())
 				.limit(10)
 				.toList();
+		
+		//로그인 한 계정을 제외하는 기능
+		
 	}
 	
 	
@@ -120,7 +133,7 @@ public class RecommendService {
 	}
 	// 처음 찾을 때 한일 반전 찾기
 	private String getOppositeCountry(String country){
-		return country.equals("KOR") ? "JPN" : "KOR";
+		return country.equals("KOREA") ? "JAPAN" : "KOREA";
 	}
 	
 	/**
@@ -200,4 +213,11 @@ public class RecommendService {
 		return (int) Math.round(score);
 	}
 	
+	public Long searchid(UserDetails user) {
+		UserEntity entity = ur.findByMemberId(user.getUsername()).orElseThrow(
+				()-> new EntityNotFoundException("회원을 찾을 수 없습니다.")
+		);
+		
+		return entity.getId();
+	}
 }
