@@ -92,7 +92,17 @@ function enterRoom(roomId, roomName, element) {
     connect(roomId);
 
     // ✅ [NEW] 오른쪽 사이드바에 상대방 프로필 불러오기
-    loadPartnerInfo(roomId);
+    loadPartnerInfo(roomId)
+        .catch(err => {
+        console.error("API 호출 에러:", err);
+
+        // 👇 [추가] 에러가 나도 일단 사이드바를 보여줍니다!
+        const sidebar = document.getElementById("partnerProfileArea");
+        if (sidebar) sidebar.style.display = "flex";
+
+        document.getElementById("partnerName").innerText = "(알 수 없음)";
+        document.getElementById("partnerIntro").innerText = "정보를 불러올 수 없습니다.";
+    });
 }
 
 // --- 5. 소켓 연결 ---
@@ -573,30 +583,50 @@ function loadPartnerInfo(roomId) {
         });
 }
 
-// UI 업데이트 함수 (DTO 필드명에 맞춰 수정됨)
+// ==========================================================
+// UI 업데이트 함수 (최신 DTO 반영 완료)
+// ==========================================================
 function updatePartnerProfileUI(data) {
     const sidebar = document.getElementById("partnerProfileArea");
     if (sidebar) sidebar.style.display = "flex";
 
-    // 1. 닉네임 (opponentNickname)
+    // 1. 닉네임
     document.getElementById("partnerName").innerText = data.opponentNickname || "알 수 없음";
 
-    // 2. 프로필 이미지 (opponentProfileImg)
+    // 2. 프로필 이미지
     const imgPath = data.opponentProfileImg ? data.opponentProfileImg : "/images/profile/default.png";
-    document.getElementById("partnerImg").src = imgPath;
+    const imgTag = document.getElementById("partnerImg");
+    if (imgTag) imgTag.src = imgPath;
 
-    // 3. 국적 (opponentNation)
+    // 3. 국적 (DB에서 가져온 값 표시)
     document.getElementById("partnerNationText").innerText = data.opponentNation || "Unknown";
-    // (참고: 현재 DTO에는 국기 이모지 데이터가 없으므로 기본 아이콘 유지)
-    document.getElementById("partnerNationFlag").innerText = "🏳️";
+    document.getElementById("partnerNationFlag").innerText = "🏳️"; // 국기는 일단 고정 (추후 매핑 가능)
 
-    // 4. 자기소개 (opponentIntro)
+    // 4. 자기소개
     document.getElementById("partnerIntro").innerText = data.opponentIntro || "자기소개가 없습니다.";
 
-    // ⚠️ [참고] 나이, 언어 정보는 현재 백엔드 DTO(ChatRoomDetailDto)에 포함되어 있지 않습니다.
-    // 따라서 화면에서는 비워두거나 숨깁니다.
-    document.getElementById("partnerAge").innerText = "";
-    document.getElementById("partnerLangMain").innerText = "-";
-    document.getElementById("partnerLangLearn").innerText = "-";
-    document.getElementById("partnerLevel").innerText = "";
+    // 5. [NEW] 나이 표시 (백엔드에서 가져옴!)
+    const ageElem = document.getElementById("partnerAge");
+    if (ageElem) {
+        if (data.opponentAge && data.opponentAge > 0) {
+            ageElem.innerText = data.opponentAge + "세";
+        } else {
+            ageElem.innerText = ""; // 나이 정보 없으면 공란
+        }
+    }
+
+    // 6. [NEW] '상대방 프로필 확인' 버튼 링크 걸기
+    const profileBtn = document.getElementById("opponentProfileBtn");
+    if (profileBtn) {
+        if (data.opponentId && data.opponentId !== 0) {
+            // 예: /member/profile/3 (상대방 ID로 이동)
+            profileBtn.href = "/member/profile/" + data.opponentId;
+            profileBtn.style.display = "inline-block";
+            profileBtn.innerText = "상대방 프로필 확인 >";
+        } else {
+            // 상대방 정보가 없으면 버튼 숨김
+            profileBtn.href = "#";
+            profileBtn.style.display = "none";
+        }
+    }
 }
