@@ -10,10 +10,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <link rel="stylesheet" th:href="@{/css/layout.css}">
-
     <link rel="stylesheet" href="/css/style.css?v=2.6">
+
+    <style>
+        /* 프로필 확인 버튼 스타일 (임시 추가) */
+        .btn-profile-check {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #f0f7ff;
+            color: #007bff;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-profile-check:hover {
+            background-color: #e0efff;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body class="chat-page-body">
+
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main class="chat-main-wrapper">
@@ -110,23 +130,32 @@
                 <div class="profile-meta">
                     <h3 class="nickname">
                         <span id="partnerName">상대방 ID</span>
-                        <span id="partnerAge" class="age"></span>
+                        <span id="partnerAge" class="age" style="font-size: 0.8em; color: #888; margin-left: 5px;"></span>
                     </h3>
                     <div class="nation">
                         <span id="partnerNationFlag" class="flag">🏳️</span>
                         <span id="partnerNationText">Unknown</span>
                     </div>
+
                     <div class="lang">
                         <span class="lang-pill" id="partnerLangMain">KR</span>
                         <i class="fa-solid fa-arrow-right" style="font-size:12px; color:#999;"></i>
                         <span class="lang-pill" id="partnerLangLearn">EN</span>
                         <span id="partnerLevel" class="level-pill">Beginner</span>
                     </div>
+
                     <hr style="opacity: 0.2; margin: 15px 0;">
+
                     <p class="intro-label">자기소개</p>
                     <p id="partnerIntro" class="intro">
                         채팅방을 선택하면 상대방의 프로필이 여기에 표시됩니다.
                     </p>
+
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a id="opponentProfileBtn" href="#" class="btn-profile-check" style="display: none;">
+                            상대방 프로필 확인 >
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
