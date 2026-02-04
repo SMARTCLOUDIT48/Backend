@@ -15,11 +15,29 @@ var subscription = null;
 var aiData = {};
 
 // --- 2. 페이지 로드 시 실행 ---
-document.addEventListener('DOMContentLoaded', () => {
+// 함수를 async()로 변경  
+document.addEventListener('DOMContentLoaded', async () => {
     console.log(`✅ 채팅 초기화 완료 (내 ID: ${mySenderId}, 닉네임: ${mySenderName})`);
-    loadChatRooms();
     createLoadingOverlay();
+    await loadChatRooms(); //await 추가해서 순서를 부여 (목록이 로딩된 후에 자동입장)
+    autoEnterRoomIfNeeded();
 });
+
+// 채팅 신청시 바로 그 채팅방에 입장 하게 함
+function autoEnterRoomIfNeeded() {
+    const roomId = sessionStorage.getItem('openRoomId');
+    if (!roomId) return;
+
+    const el = document.querySelector(`.room-item[data-room-id="${roomId}"]`);
+    if (!el) return;
+
+    const roomName = el.dataset.roomName;
+
+    enterRoom(roomId, roomName, el);
+
+    // ✅ 한 번 쓰고 바로 삭제
+    sessionStorage.removeItem('openRoomId');
+}
 
 // 로딩 오버레이 동적 생성
 function createLoadingOverlay() {
@@ -42,9 +60,9 @@ function createLoadingOverlay() {
     }
 }
 
-// --- 3. 채팅방 목록 로드 ---
+// --- 3. 채팅방 목록 로드 --- //return 추가
 function loadChatRooms() {
-    fetch('/api/chat/rooms')
+    return fetch('/api/chat/rooms')//return 추가
         .then(res => res.json())
         .then(rooms => {
             console.log("📌 서버에서 온 방 데이터:", rooms);
@@ -55,6 +73,10 @@ function loadChatRooms() {
                 const realId = room.roomId || room.id || room.chatRoomId;
                 const li = document.createElement("li");
                 li.className = "room-item";
+                //roomId roomName 데이터를 삽입 li
+                li.dataset.roomId = realId;
+                li.dataset.roomName = room.name;
+                //
                 li.onclick = () => enterRoom(realId, room.name, li);
 
                 li.innerHTML = `
@@ -65,6 +87,7 @@ function loadChatRooms() {
                     </div>`;
                 listArea.appendChild(li);
             });
+            return rooms;//return 추가
         })
         .catch(err => console.error("방 목록 로딩 실패:", err));
 }
