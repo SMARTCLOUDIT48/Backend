@@ -3,17 +3,18 @@ package com.scit48.recommend.controller;
 import com.scit48.chat.domain.dto.DirectRoomResponseDTO;
 import com.scit48.chat.service.ChatRoomMemberService;
 import com.scit48.common.dto.UserDTO;
+import com.scit48.recommend.domain.dto.MatchResponseDTO;
 import com.scit48.recommend.domain.dto.RecommendDTO;
+import com.scit48.recommend.service.MatchService;
 import com.scit48.recommend.service.RecommendService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,7 +25,13 @@ public class RecommendController {
 	
 	private  final RecommendService rs;
 	private  final ChatRoomMemberService chatRoomMemberService;
+	private  final MatchService matchService;
 	
+	@Getter
+	@Setter
+	public static class MatchStartRequest {
+		private String criteriaKey;
+	}
 	
 	@GetMapping("recommend") //임시
 	public String Recommend(){
@@ -54,5 +61,25 @@ public class RecommendController {
 		log.debug(userDetails.getUsername());
 		DirectRoomResponseDTO dto = chatRoomMemberService.createOrGetDirectRoom(myId,partnerId);
 		return dto;
+	}
+	
+	@ResponseBody
+	@PostMapping("/api/match/start")
+	public MatchResponseDTO start(@AuthenticationPrincipal UserDetails userDetails,
+								  @RequestBody(required = false) MatchStartRequest req){
+		
+		Long myId = rs.searchid(userDetails);
+		String criteriaKey = (req != null) ? req.getCriteriaKey() : null;
+		
+		return matchService.start(myId, criteriaKey);
+	}
+	
+	@ResponseBody
+	@GetMapping("/api/match/result")
+	public MatchResponseDTO result(
+			@AuthenticationPrincipal UserDetails userDetails
+	){
+		Long myId = rs.searchid(userDetails);
+		return matchService.getOrWaiting(myId);
 	}
 }
