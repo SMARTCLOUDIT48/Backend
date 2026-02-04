@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>관리자 대시보드 | TalkTribe</title>
+
+    <!-- 기존 공통 레이아웃(헤더/배경 톤) -->
+    <link rel="stylesheet" th:href="@{/css/layout.css}" />
+
+    <!-- 대시보드 전용 -->
+    <link rel="stylesheet" th:href="@{/css/admin/admin-dashboard.css}" />
+</head>
+<body>
+
+<!-- 공통 헤더 -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="admin-dashboard">
+
+    <!-- =========================
+         1) 상단 KPI 영역 (1번 구조)
+    ========================= -->
+    <section class="admin-kpi-section">
+        <div class="section-title-row">
+            <h2 class="section-title">관리자 대시보드</h2>
+            <p class="section-subtitle">서비스 운영 현황을 한눈에 확인합니다.</p>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card blue">
+                <div class="kpi-head">
+                    <p class="kpi-title">총 회원 수</p>
+                    <span class="kpi-badge">TOTAL</span>
+                </div>
+                <h3 class="kpi-value" th:text="${totalUsers}">0</h3>
+                <p class="kpi-desc">전체 누적 회원 수</p>
+            </div>
+
+            <div class="kpi-card green">
+                <div class="kpi-head">
+                    <p class="kpi-title">신규 회원</p>
+                    <span class="kpi-badge">TODAY</span>
+                </div>
+                <h3 class="kpi-value" th:text="${todayUsers}">0</h3>
+                <p class="kpi-desc">오늘 가입한 회원 수</p>
+            </div>
+
+            <div class="kpi-card orange">
+                <div class="kpi-head">
+                    <p class="kpi-title">게시글 수</p>
+                    <span class="kpi-badge">POSTS</span>
+                </div>
+                <h3 class="kpi-value" th:text="${noticeCount}">0</h3>
+                <p class="kpi-desc">공지/게시물 누적</p>
+            </div>
+
+            <div class="kpi-card red">
+                <div class="kpi-head">
+                    <p class="kpi-title">1:1 문의</p>
+                    <span class="kpi-badge">INQUIRY</span>
+                </div>
+                <h3 class="kpi-value" th:text="${inquiryCount}">0</h3>
+                <p class="kpi-desc">누적 접수 건수</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =========================
+         2) 중단 통계/차트 영역 (2번 공정도 느낌)
+         - 일/주/월 버튼을 누르면 차트 데이터가 즉시 변경(프론트 더미)
+         - KPI 값은 서버에서 실제 값 사용
+    ========================= -->
+    <section class="admin-stats-section">
+        <div class="stats-left glass-card">
+            <div class="stats-header">
+                <h3 class="stats-title">통계</h3>
+
+                <div class="stats-tabs">
+                    <button class="data-tab active" data-type="users">회원 수</button>
+                    <button class="data-tab" data-type="posts">게시글 수</button>
+                    <button class="data-tab" data-type="inquiries">문의 수</button>
+                </div>
+
+                <div class="stats-filter">
+                    <button class="filter-btn active" data-range="daily">일간</button>
+                    <button class="filter-btn" data-range="weekly">주간</button>
+                    <button class="filter-btn" data-range="monthly">월간</button>
+                </div>
+            </div>
+
+            <div class="chart-wrap">
+                <canvas id="adminChart" aria-label="통계 차트" role="img"></canvas>
+            </div>
+
+            <p class="stats-hint">
+                ※ 차트 데이터는 현재 프론트 임시 데이터입니다. 추후 API로 실데이터 연결 가능합니다.
+            </p>
+        </div>
+
+        <div class="stats-right">
+            <div class="summary-card glass-card">
+                <div class="summary-row">
+                    <p class="summary-title">신규 회원 가입</p>
+                    <span class="summary-tag">TODAY</span>
+                </div>
+                <p class="summary-value" th:text="${todayUsers}">0</p>
+                <p class="summary-desc">오늘 가입한 회원 수</p>
+            </div>
+
+            <div class="summary-card glass-card">
+                <div class="summary-row">
+                    <p class="summary-title">문의 접수</p>
+                    <span class="summary-tag">TOTAL</span>
+                </div>
+                <p class="summary-value" th:text="${inquiryCount}">0</p>
+                <p class="summary-desc">누적 문의 접수</p>
+            </div>
+
+            <div class="summary-card glass-card">
+                <div class="summary-row">
+                    <p class="summary-title">게시글</p>
+                    <span class="summary-tag">TOTAL</span>
+                </div>
+                <p class="summary-value" th:text="${noticeCount}">0</p>
+                <p class="summary-desc">누적 게시글 수</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =========================
+         3) 하단 관리 메뉴 영역 (1번 구조 하단 탭/카드)
+    ========================= -->
+    <section class="admin-manage-section">
+        <div class="manage-head">
+            <h3 class="manage-title">관리 메뉴</h3>
+            <p class="manage-subtitle">회원/게시물/문의 관리를 빠르게 이동합니다.</p>
+        </div>
+
+        <div class="manage-grid">
+            <article class="manage-card">
+                <div class="manage-card-top">
+                    <h4>회원 관리</h4>
+                    <span class="pill">MEMBER</span>
+                </div>
+                <p class="manage-desc">회원 조회, 정지, 권한 관리</p>
+                <a class="manage-link" href="/admin/members">관리하기</a>
+            </article>
+
+            <article class="manage-card">
+                <div class="manage-card-top">
+                    <h4>게시물 관리</h4>
+                    <span class="pill">POST</span>
+                </div>
+                <p class="manage-desc">공지/커뮤니티 게시글 관리</p>
+                <a class="manage-link" href="/admin/posts">관리하기</a>
+            </article>
+
+            <article class="manage-card">
+                <div class="manage-card-top">
+                    <h4>1:1 문의 관리</h4>
+                    <span class="pill">INQUIRY</span>
+                </div>
+                <p class="manage-desc">답변 대기/완료 문의 관리</p>
+                <a class="manage-link" href="/admin/inquiries">관리하기</a>
+            </article>
+        </div>
+    </section>
+
+</main>
+
+<!-- Chart.js (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- 대시보드 JS -->
+<script th:src="@{/js/admin/admin-dashboard.js}"></script>
+
+</body>
+</html>
