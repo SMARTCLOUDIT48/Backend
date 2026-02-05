@@ -27,12 +27,15 @@
 			ageMax.addEventListener("input", syncAge);
 
 			syncAge();
+			getSelectedInterests();
 
 			document.getElementById('filterForm')?.addEventListener('reset', () => {
 				setTimeout(() => {
 					syncAge();
 				}, 0);
 			});
+
+
 
 			document.getElementById('recommendTbody').addEventListener('click', async (e) => {
 				const chat_partner_btn = e.target.closest('.chat-btn');
@@ -111,6 +114,15 @@
 			});
 
 		});
+
+		function getSelectedInterests() {
+			const checked = document.querySelectorAll('input[name="interestTypes"]:checked');
+			if (checked.length === 0) return 'ANY';
+
+			return Array.from(checked)
+				.map(el => el.value)
+				.join(',');
+		}
 
 		function clampSwap(minEl, maxEl) {
 			let min = parseFloat(minEl.value);
@@ -352,136 +364,170 @@
 </head>
 
 <body>
-<header>
-	<div th:replace="~{fragments/header :: header}"></div>
-</header>
+	<header>
+		<div th:replace="~{fragments/header :: header}"></div>
+	</header>
 
-<section class="hero">
-	<h1 class="webTitle">무스비</h1>
-	<h1 class="SubTitle">추천 파트너 리스트</h1>
-	<p class="temp_context">언어 리스트부터 채팅 요청까지 서비스를 한눈에 확인하세요(임시)</p>
-</section>
-<section class="filter-panel" aria-label="추천 파트너 필터">
-	<div class="filter-header">
-		<h2 class="filter-title">조건 필터</h2>
-		<p class="filter-sub">원하는 조건을 선택해서 추천 리스트를 좁혀보세요.</p>
-	</div>
-
-	<form id="filterForm" class="filter-grid">
-		<!-- 1) 성별 -->
-		<div class="filter-item">
-			<label class="filter-label">성별</label>
-			<div class="segmented" role="group" aria-label="성별 선택">
-				<input type="radio" name="gender" id="g_all" value="ALL" checked>
-				<label for="g_all">모두</label>
-
-				<input type="radio" name="gender" id="g_male" value="MALE">
-				<label for="g_male">남</label>
-
-				<input type="radio" name="gender" id="g_female" value="FEMALE">
-				<label for="g_female">여</label>
-			</div>
+	<section class="hero">
+		<h1 class="webTitle">무스비</h1>
+		<h1 class="SubTitle">추천 파트너 리스트</h1>
+		<p class="temp_context">언어 리스트부터 채팅 요청까지 서비스를 한눈에 확인하세요(임시)</p>
+	</section>
+	<section class="filter-panel" aria-label="추천 파트너 필터">
+		<div class="filter-header">
+			<h2 class="filter-title">조건 필터</h2>
+			<p class="filter-sub">원하는 조건을 선택해서 추천 리스트를 좁혀보세요.</p>
 		</div>
 
-		<!-- 2) 학습언어 -->
-		<div class="filter-item">
-			<label class="filter-label">학습언어</label>
-			<div class="segmented" role="group" aria-label="학습언어 선택">
-				<input type="radio" name="studyLanguage" id="sl_all" value="ALL" checked>
-				<label for="sl_all">모두</label>
+		<form id="filterForm" class="filter-grid">
+			<!-- 1) 성별 -->
+			<div class="filter-item">
+				<label class="filter-label">성별</label>
+				<div class="segmented" role="group" aria-label="성별 선택">
+					<input type="radio" name="gender" id="g_all" value="ALL" checked>
+					<label for="g_all">모두</label>
 
-				<input type="radio" name="studyLanguage" id="sl_kor" value="KOREAN">
-				<label for="sl_kor">한국어</label>
+					<input type="radio" name="gender" id="g_male" value="MALE">
+					<label for="g_male">남</label>
 
-				<input type="radio" name="studyLanguage" id="sl_jpn" value="JAPANESE">
-				<label for="sl_jpn">일본어</label>
-			</div>
-		</div>
-
-
-
-		<!-- 3) 거주국가 -->
-		<div class="filter-item">
-			<label class="filter-label">거주국가</label>
-			<div class="segmented" role="group" aria-label="거주국가 선택">
-				<input type="radio" name="nation" id="n_all" value="ALL" checked>
-				<label for="n_all">모두</label>
-
-				<input type="radio" name="nation" id="n_kor" value="KOREA">
-				<label for="n_kor">한국</label>
-
-				<input type="radio" name="nation" id="n_jpn" value="JAPAN">
-				<label for="n_jpn">일본</label>
-			</div>
-		</div>
-
-
-		<!-- 4) 나이 (최소/최대) -->
-		<div class="filter-item">
-			<label class="filter-label">나이</label>
-
-			<div class="dual-range" data-range="age">
-				<div class="dual-track">
-					<span class="dual-fill" id="ageFill"></span>
-				</div>
-
-				<div class="dual-inputs">
-					<input id="ageMin" name="ageMin" type="range" min="18" max="60" value="20" step="1">
-					<input id="ageMax" name="ageMax" type="range" min="18" max="80" value="35" step="1">
-				</div>
-
-				<div class="range-meta">
-					<span class="chip"><b id="ageMinValue">20</b>세</span>
-					<span class="chip"><b id="ageMaxValue">35</b>세</span>
+					<input type="radio" name="gender" id="g_female" value="FEMALE">
+					<label for="g_female">여</label>
 				</div>
 			</div>
-		</div>
 
+			<!-- 2) 학습언어 -->
+			<div class="filter-item">
+				<label class="filter-label">학습언어</label>
+				<div class="segmented" role="group" aria-label="학습언어 선택">
+					<input type="radio" name="studyLanguage" id="sl_all" value="ALL" checked>
+					<label for="sl_all">모두</label>
 
-		<!-- 5) 학습레벨(복수 선택) -->
-		<div class="filter-item">
-			<label class="filter-label">학습레벨</label>
+					<input type="radio" name="studyLanguage" id="sl_kor" value="KOREAN">
+					<label for="sl_kor">한국어</label>
 
-			<div class="level-chips" role="group" aria-label="학습레벨 선택(복수)">
-				<input type="checkbox" name="levels" id="lv1" value="1">
-				<label for="lv1">1</label>
-
-				<input type="checkbox" name="levels" id="lv2" value="2">
-				<label for="lv2">2</label>
-
-				<input type="checkbox" name="levels" id="lv3" value="3">
-				<label for="lv3">3</label>
-
-				<input type="checkbox" name="levels" id="lv4" value="4">
-				<label for="lv4">4</label>
+					<input type="radio" name="studyLanguage" id="sl_jpn" value="JAPANESE">
+					<label for="sl_jpn">일본어</label>
+				</div>
 			</div>
 
-			<p class="help">원하는 레벨만 체크하세요. (미체크 시 전체로 간주)</p>
+
+
+			<!-- 3) 거주국가 -->
+			<div class="filter-item">
+				<label class="filter-label">거주국가</label>
+				<div class="segmented" role="group" aria-label="거주국가 선택">
+					<input type="radio" name="nation" id="n_all" value="ALL" checked>
+					<label for="n_all">모두</label>
+
+					<input type="radio" name="nation" id="n_kor" value="KOREA">
+					<label for="n_kor">한국</label>
+
+					<input type="radio" name="nation" id="n_jpn" value="JAPAN">
+					<label for="n_jpn">일본</label>
+				</div>
+			</div>
+
+
+			<!-- 4) 나이 (최소/최대) -->
+			<div class="filter-item">
+				<label class="filter-label">나이</label>
+
+				<div class="dual-range" data-range="age">
+					<div class="dual-track">
+						<span class="dual-fill" id="ageFill"></span>
+					</div>
+
+					<div class="dual-inputs">
+						<input id="ageMin" name="ageMin" type="range" min="18" max="60" value="20" step="1">
+						<input id="ageMax" name="ageMax" type="range" min="18" max="80" value="35" step="1">
+					</div>
+
+					<div class="range-meta">
+						<span class="chip"><b id="ageMinValue">20</b>세</span>
+						<span class="chip"><b id="ageMaxValue">35</b>세</span>
+					</div>
+				</div>
+			</div>
+
+
+			<!-- 5) 학습레벨(복수 선택) -->
+			<div class="filter-item">
+				<label class="filter-label">학습레벨</label>
+
+				<div class="level-chips" role="group" aria-label="학습레벨 선택(복수)">
+					<input type="checkbox" name="levels" id="lv1" value="1">
+					<label for="lv1">1</label>
+
+					<input type="checkbox" name="levels" id="lv2" value="2">
+					<label for="lv2">2</label>
+
+					<input type="checkbox" name="levels" id="lv3" value="3">
+					<label for="lv3">3</label>
+
+					<input type="checkbox" name="levels" id="lv4" value="4">
+					<label for="lv4">4</label>
+				</div>
+
+				<p class="help">원하는 레벨만 체크하세요. (미체크 시 전체로 간주)</p>
+			</div>
+
+			<!-- 6) 학습레벨(복수 선택) -->
+			<!-- 관심사 (대분류) -->
+			<div class="filter-item">
+				<label class="filter-label">관심사</label>
+
+				<div class="btn-group interest-group">
+					<input type="checkbox" name="interestTypes" id="it_culture" value="CULTURE_ART">
+					<label for="it_culture" class="filter-btn">문화 · 예술</label>
+
+					<input type="checkbox" name="interestTypes" id="it_hobby" value="HOBBY_LEISURE">
+					<label for="it_hobby" class="filter-btn">취미 · 여가</label>
+
+					<input type="checkbox" name="interestTypes" id="it_sport" value="SPORTS">
+					<label for="it_sport" class="filter-btn">운동 · 스포츠</label>
+
+					<input type="checkbox" name="interestTypes" id="it_travel" value="TRAVEL_LOCAL">
+					<label for="it_travel" class="filter-btn">여행 · 지역</label>
+
+					<input type="checkbox" name="interestTypes" id="it_food" value="FOOD_COOKING">
+					<label for="it_food" class="filter-btn">음식 · 요리</label>
+
+					<input type="checkbox" name="interestTypes" id="it_learning" value="LEARNING">
+					<label for="it_learning" class="filter-btn">학습 · 자기계발</label>
+
+					<input type="checkbox" name="interestTypes" id="it_tech" value="IT_TECH">
+					<label for="it_tech" class="filter-btn">IT · 기술</label>
+
+					<input type="checkbox" name="interestTypes" id="it_life" value="LIFESTYLE">
+					<label for="it_life" class="filter-btn">라이프스타일</label>
+				</div>
+
+				<p class="help">흥미가 있는 관심사를 선택하세요. (미체크 시 전체로 간주)</p>
+			</div>
+
+			<!-- ✅ 액션 버튼 3개 -->
+			<div class="filter-actions">
+				<button type="button" id="auto_matching" class="btn primary">
+					자동 매칭
+				</button>
+
+				<button type="reset" id="refreshBtn" class="btn ghost">
+					초기화? 새로고침?
+				</button>
+
+				<button type="submit" id="searchBtn" class="btn solid">
+					검색
+				</button>
+			</div>
+		</form>
+	</section>
+	<section class="content">
+		<div id="recommendTbody">
 		</div>
-
-		<!-- ✅ 액션 버튼 3개 -->
-		<div class="filter-actions">
-			<button type="button" id="auto_matching" class="btn primary">
-				자동 매칭
-			</button>
-
-			<button type="reset" id="refreshBtn" class="btn ghost">
-				초기화? 새로고침?
-			</button>
-
-			<button type="submit" id="searchBtn" class="btn solid">
-				검색
-			</button>
-		</div>
-	</form>
-</section>
-<section class="content">
-	<div id="recommendTbody">
-	</div>
-</section>
-<footer>
-	<div th:replace="~{fragments/footer :: footer}"></div>
-</footer>
+	</section>
+	<footer>
+		<div th:replace="~{fragments/footer :: footer}"></div>
+	</footer>
 </body>
 
 </html>
