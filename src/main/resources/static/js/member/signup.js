@@ -136,12 +136,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* 나이 검증 */
-    const age = Number(form.age.value);
-    if (Number.isNaN(age) || age <= 0) {
-      alert("나이를 올바르게 입력해주세요.");
-      return;
-    }
+  const age = Number(form.age.value);
 
+  if (Number.isNaN(age) || age < 18) {
+  alert("회원가입은 18세 이상만 가능합니다.");
+  return;
+}
     /* 학습 언어 선택 여부 */
     if (!studyLanguage.value) {
       alert("학습 언어를 선택해주세요.");
