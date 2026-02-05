@@ -9,4 +9,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
 	// 수정 전: findByRoomIdOrderByIdAsc
 	// 수정 후: findByRoomIdOrderByMsgIdAsc (Id -> MsgId)
 	List<ChatMessage> findByRoomIdOrderByMsgIdAsc(Long roomId);
+	// ✅ 특정 방의 메시지 총 개수 세기
+	long countByRoomId(Long roomId);
 }
