@@ -343,3 +343,22 @@ body {
         font-size: 28px;
     }
 }
+/* ==============================
+   헤더 채팅 안 읽음 🔴 표시
+   ============================== */
+.nav-chat-link {
+    position: relative;
+}
+
+#headerUnreadDot {
+    position: absolute;
+    top: -4px;
+    right: -10px;
+
+    width: 8px;
+    height: 8px;
+    background-color: #ff3b3b;
+    border-radius: 50%;
+
+    display: none; /* 기본은 숨김 */
+}
