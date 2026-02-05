@@ -12,6 +12,28 @@
 		window.addEventListener('DOMContentLoaded', () => {
 			loadRecommend();
 
+			const ageMin = document.getElementById("ageMin");
+			const ageMax = document.getElementById("ageMax");
+			const ageMinValue = document.getElementById("ageMinValue");
+			const ageMaxValue = document.getElementById("ageMaxValue");
+			const ageFill = document.getElementById("ageFill");
+
+			const fd = new FormData(document.getElementById('filterForm'));
+			const levels = fd.getAll('levels'); // ["1","3","4"] 처럼 복수
+			// 아무것도 체크 안 된 경우 levels.length === 0  → 서버에서 ALL 처리
+			const lv = levels.length ? levels.join(',') : '1,2,3,4';
+			
+			ageMin.addEventListener("input", syncAge);
+			ageMax.addEventListener("input", syncAge);
+
+			syncAge();
+
+			document.getElementById('filterForm')?.addEventListener('reset', () => {
+				setTimeout(() => {
+					syncAge();
+				}, 0);
+			});
+
 			document.getElementById('recommendTbody').addEventListener('click', async (e) => {
 				const chat_partner_btn = e.target.closest('.chat-btn');
 				if (!chat_partner_btn) return;
@@ -88,6 +110,57 @@
 				}
 			});
 
+		});
+
+		function clampSwap(minEl, maxEl) {
+			let min = parseFloat(minEl.value);
+			let max = parseFloat(maxEl.value);
+			if (min > max) {
+				[min, max] = [max, min];
+				minEl.value = min;
+				maxEl.value = max;
+			}
+			return { min, max };
+		}
+
+		function setFill(fillEl, min, max, minLimit, maxLimit) {
+			const left = ((min - minLimit) / (maxLimit - minLimit)) * 100;
+			const right = ((max - minLimit) / (maxLimit - minLimit)) * 100;
+			fillEl.style.left = left + "%";
+			fillEl.style.width = (right - left) + "%";
+		}
+
+		function syncAge() {
+			const { min, max } = clampSwap(ageMin, ageMax);
+			ageMinValue.textContent = String(min);
+			ageMaxValue.textContent = String(max);
+			setFill(ageFill, min, max, 18, 60);
+		}
+
+		// ✅ 새로고침 버튼: form reset 후 화면/리스트 갱신용 훅
+		document.getElementById('filterForm').addEventListener('reset', () => {
+			// reset은 값이 즉시 반영되므로, 표시값도 재동기화
+			setTimeout(() => {
+				ageValue.textContent = ageRange.value;
+				syncAge();
+				// 필요하면 추천 리스트도 다시 불러오세요:
+				// loadRecommend();
+			}, 0);
+		});
+
+		// ✅ 검색 버튼: submit 이벤트 (여기서 criteriaKey 생성해서 서버로 보내도록 확장)
+		document.getElementById('filterForm').addEventListener('submit', (e) => {
+			e.preventDefault();
+			// 여기서 필터 값 읽기 가능:
+			// const fd = new FormData(e.currentTarget);
+			// console.log(Object.fromEntries(fd.entries()));
+			// loadRecommendWithFilters(...);
+		});
+
+		// ✅ 자동 매칭 버튼: 기존 /api/match/start 연결
+		document.getElementById('auto_matching').addEventListener('click', async () => {
+			// 기존 매칭 로직 붙일 자리
+			// startMatching();
 		});
 
 		function startPollingForMatch(mathch_btn) {
@@ -288,20 +361,120 @@
 		<h1 class="SubTitle">추천 파트너 리스트</h1>
 		<p class="temp_context">언어 리스트부터 채팅 요청까지 서비스를 한눈에 확인하세요(임시)</p>
 	</section>
-	<section>
-		<button id="auto_matching">자동 매칭</button>
+	<section class="filter-panel" aria-label="추천 파트너 필터">
+		<div class="filter-header">
+			<h2 class="filter-title">조건 필터</h2>
+			<p class="filter-sub">원하는 조건을 선택해서 추천 리스트를 좁혀보세요.</p>
+		</div>
+
+		<form id="filterForm" class="filter-grid">
+			<!-- 1) 성별 -->
+			<div class="filter-item">
+				<label class="filter-label">성별</label>
+				<div class="segmented" role="group" aria-label="성별 선택">
+					<input type="radio" name="gender" id="g_all" value="ALL" checked>
+					<label for="g_all">모두</label>
+
+					<input type="radio" name="gender" id="g_male" value="MALE">
+					<label for="g_male">남</label>
+
+					<input type="radio" name="gender" id="g_female" value="FEMALE">
+					<label for="g_female">여</label>
+				</div>
+			</div>
+
+			<!-- 2) 학습언어 -->
+			<div class="filter-item">
+				<label class="filter-label">학습언어</label>
+				<div class="segmented" role="group" aria-label="학습언어 선택">
+					<input type="radio" name="studyLanguage" id="sl_all" value="ALL" checked>
+					<label for="sl_all">모두</label>
+
+					<input type="radio" name="studyLanguage" id="sl_kor" value="KOREAN">
+					<label for="sl_kor">한국어</label>
+
+					<input type="radio" name="studyLanguage" id="sl_jpn" value="JAPANESE">
+					<label for="sl_jpn">일본어</label>
+				</div>
+			</div>
+
+
+
+			<!-- 3) 거주국가 -->
+			<div class="filter-item">
+				<label class="filter-label">거주국가</label>
+				<div class="segmented" role="group" aria-label="거주국가 선택">
+					<input type="radio" name="nation" id="n_all" value="ALL" checked>
+					<label for="n_all">모두</label>
+
+					<input type="radio" name="nation" id="n_kor" value="KOREA">
+					<label for="n_kor">한국</label>
+
+					<input type="radio" name="nation" id="n_jpn" value="JAPAN">
+					<label for="n_jpn">일본</label>
+				</div>
+			</div>
+
+
+			<!-- 4) 나이 (최소/최대) -->
+			<div class="filter-item">
+				<label class="filter-label">나이</label>
+
+				<div class="dual-range" data-range="age">
+					<div class="dual-track">
+						<span class="dual-fill" id="ageFill"></span>
+					</div>
+
+					<div class="dual-inputs">
+						<input id="ageMin" name="ageMin" type="range" min="18" max="60" value="20" step="1">
+						<input id="ageMax" name="ageMax" type="range" min="18" max="80" value="35" step="1">
+					</div>
+
+					<div class="range-meta">
+						<span class="chip"><b id="ageMinValue">20</b>세</span>
+						<span class="chip"><b id="ageMaxValue">35</b>세</span>
+					</div>
+				</div>
+			</div>
+
+
+			<!-- 5) 학습레벨(복수 선택) -->
+			<div class="filter-item">
+				<label class="filter-label">학습레벨</label>
+
+				<div class="level-chips" role="group" aria-label="학습레벨 선택(복수)">
+					<input type="checkbox" name="levels" id="lv1" value="1">
+					<label for="lv1">1</label>
+
+					<input type="checkbox" name="levels" id="lv2" value="2">
+					<label for="lv2">2</label>
+
+					<input type="checkbox" name="levels" id="lv3" value="3">
+					<label for="lv3">3</label>
+
+					<input type="checkbox" name="levels" id="lv4" value="4">
+					<label for="lv4">4</label>
+				</div>
+
+				<p class="help">원하는 레벨만 체크하세요. (미체크 시 전체로 간주)</p>
+			</div>
+
+			<!-- ✅ 액션 버튼 3개 -->
+			<div class="filter-actions">
+				<button type="button" id="auto_matching" class="btn primary">
+					자동 매칭
+				</button>
+
+				<button type="reset" id="refreshBtn" class="btn ghost">
+					초기화? 새로고침?
+				</button>
+
+				<button type="submit" id="searchBtn" class="btn solid">
+					검색
+				</button>
+			</div>
+		</form>
 	</section>
-	<!-- <section class="filter">
-	<h3>조건 필터</h3>
-	<div class="filter-box">
-		<span class="tag">한국어</span>
-		<span class="tag">30km 이내</span>
-		<span class="tag green">칭찬</span>
-		<span class="tag orange">언제</span>
-		<button class="btn primary">필터 적용</button>
-		<button class="btn">초기화</button>
-	</div>
-	</section> -->
 	<section class="content">
 		<div id="recommendTbody">
 		</div>
