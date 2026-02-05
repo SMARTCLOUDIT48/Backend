@@ -711,6 +711,28 @@ body {
   box-shadow:
     0 20px 40px rgba(80, 100, 180, 0.18),
     inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+
+  text-decoration: none;
+  color: inherit;
+
+}
+
+.community-label-bar a {
+    text-decoration: none;
+    color: #666;
+    font-weight: 600;
+    padding-bottom: 6px;
+    transition: color .2s ease;
+}
+
+.community-label-bar a:hover {
+    color: #7b5cff;
+}
+
+/* 현재 선택된 탭 */
+.community-label-bar a.active {
+    color: #7b5cff;
+    font-weight: 700;
 }
 
 /* 개별 탭 */

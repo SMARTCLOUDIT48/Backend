@@ -53,4 +53,11 @@ public class InquiryEntity {
 	
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
+	
+	// ✅ 여기 추가 ⬇️⬇️⬇️
+	public boolean isActive() {
+		return isActive;
+	}
 }
+
+

@@ -92,7 +92,17 @@ function enterRoom(roomId, roomName, element) {
     connect(roomId);
 
     // ✅ [NEW] 오른쪽 사이드바에 상대방 프로필 불러오기
-    loadPartnerInfo(roomId);
+    loadPartnerInfo(roomId)
+        .catch(err => {
+        console.error("API 호출 에러:", err);
+
+        // 👇 [추가] 에러가 나도 일단 사이드바를 보여줍니다!
+        const sidebar = document.getElementById("partnerProfileArea");
+        if (sidebar) sidebar.style.display = "flex";
+
+        document.getElementById("partnerName").innerText = "(알 수 없음)";
+        document.getElementById("partnerIntro").innerText = "정보를 불러올 수 없습니다.";
+    });
 }
 
 // --- 5. 소켓 연결 ---
@@ -541,62 +551,82 @@ function checkPartnerActivity(partnerId) {
 
 
 // ==========================================================
-// ✅ [NEW] 16. 상대방 프로필 정보 로드 (사이드바용)
+// ✅ [NEW] 16. 상대방 프로필 정보 로드 (사이드바용) - 수정됨
 // ==========================================================
 function loadPartnerInfo(roomId) {
     const sidebar = document.getElementById("partnerProfileArea");
     if (!sidebar) return;
 
-    // 초기화 (로딩 중 표시)
+    // 1. 초기화 (로딩 중 표시)
+    // 기존 데이터가 잠깐 보이는 것을 방지하기 위해 초기화합니다.
     document.getElementById("partnerName").innerText = "Loading...";
-    document.getElementById("partnerIntro").innerText = "상대방 정보를 불러오고 있습니다...";
+    document.getElementById("partnerIntro").innerText = "...";
+    document.getElementById("partnerImg").src = "/images/profile/default.png";
+    document.getElementById("partnerNationText").innerText = "";
+    document.getElementById("partnerAge").innerText = "";
 
-    // API 호출: (서버 구현에 맞춰 엔드포인트 수정 필요)
-    // 예시: GET /api/chat/room/{roomId}/partner
-    fetch(`/api/chat/room/${roomId}/partner`)
+    // 2. 실제 API 호출
+    fetch(`/api/chat/room/${roomId}`)
         .then(res => {
-            if (!res.ok) throw new Error("API 호출 실패");
+            if (!res.ok) throw new Error("프로필 정보 로드 실패");
             return res.json();
         })
         .then(data => {
+            console.log("📌 상대방 정보:", data);
             updatePartnerProfileUI(data);
         })
         .catch(err => {
-            console.warn("파트너 정보 로드 실패 (테스트 데이터로 대체합니다):", err);
-
-            // 🚨 백엔드 API가 없을 경우를 대비한 [테스트용 가짜 데이터]
-            // 나중에 서버 API가 준비되면 이 부분을 제거하세요.
-            updatePartnerProfileUI({
-                nickname: "Global Friend",
-                profileImage: null, // null이면 기본값
-                nation: "USA",
-                flag: "🇺🇸",
-                languageMain: "EN",
-                languageLearn: "KR",
-                level: "Intermediate",
-                intro: "Hello! I am interested in K-Pop and Korean culture. Let's be friends!"
-            });
+            console.error("API 호출 에러:", err);
+            // 에러 발생 시 '알 수 없음' 처리
+            document.getElementById("partnerName").innerText = "(알 수 없음)";
+            document.getElementById("partnerIntro").innerText = "상대방 정보를 불러올 수 없습니다.";
         });
 }
 
-// UI 업데이트 함수
+// ==========================================================
+// UI 업데이트 함수 (최신 DTO 반영 완료)
+// ==========================================================
 function updatePartnerProfileUI(data) {
     const sidebar = document.getElementById("partnerProfileArea");
     if (sidebar) sidebar.style.display = "flex";
 
-    document.getElementById("partnerName").innerText = data.nickname || "Unknown";
-    document.getElementById("partnerImg").src = data.profileImage || "/images/profile/default.png";
+    // 1. 닉네임
+    document.getElementById("partnerName").innerText = data.opponentNickname || "알 수 없음";
 
-    document.getElementById("partnerNationText").innerText = data.nation || "Unknown";
-    document.getElementById("partnerNationFlag").innerText = data.flag || "🏳️";
+    // 2. 프로필 이미지
+    const imgPath = data.opponentProfileImg ? data.opponentProfileImg : "/images/profile/default.png";
+    const imgTag = document.getElementById("partnerImg");
+    if (imgTag) imgTag.src = imgPath;
 
-    document.getElementById("partnerLangMain").innerText = data.languageMain || "EN";
-    document.getElementById("partnerLangLearn").innerText = data.languageLearn || "KR";
-    document.getElementById("partnerLevel").innerText = data.level || "Beginner";
+    // 3. 국적 (DB에서 가져온 값 표시)
+    document.getElementById("partnerNationText").innerText = data.opponentNation || "Unknown";
+    document.getElementById("partnerNationFlag").innerText = "🏳️"; // 국기는 일단 고정 (추후 매핑 가능)
 
-    document.getElementById("partnerIntro").innerText = data.intro || "자기소개가 없습니다.";
+    // 4. 자기소개
+    document.getElementById("partnerIntro").innerText = data.opponentIntro || "자기소개가 없습니다.";
 
-    // 나이가 있다면 표시, 없으면 공백
-    const ageSpan = document.getElementById("partnerAge");
-    if (ageSpan) ageSpan.innerText = data.age ? `(${data.age})` : "";
+    // 5. [NEW] 나이 표시 (백엔드에서 가져옴!)
+    const ageElem = document.getElementById("partnerAge");
+    if (ageElem) {
+        if (data.opponentAge && data.opponentAge > 0) {
+            ageElem.innerText = data.opponentAge + "세";
+        } else {
+            ageElem.innerText = ""; // 나이 정보 없으면 공란
+        }
+    }
+
+    // 6. [NEW] '상대방 프로필 확인' 버튼 링크 걸기
+    const profileBtn = document.getElementById("opponentProfileBtn");
+    if (profileBtn) {
+        if (data.opponentId && data.opponentId !== 0) {
+            // 예: /member/profile/3 (상대방 ID로 이동)
+            profileBtn.href = "/member/profile/" + data.opponentId;
+            profileBtn.style.display = "inline-block";
+            profileBtn.innerText = "상대방 프로필 확인 >";
+        } else {
+            // 상대방 정보가 없으면 버튼 숨김
+            profileBtn.href = "#";
+            profileBtn.style.display = "none";
+        }
+    }
 }

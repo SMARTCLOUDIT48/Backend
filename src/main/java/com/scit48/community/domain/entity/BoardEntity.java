@@ -27,6 +27,7 @@ public class BoardEntity {
 	@Column(nullable = false)
 	private String title;
 	
+	
 	@Column(columnDefinition = "TEXT", nullable = false)
 	private String content;
 	

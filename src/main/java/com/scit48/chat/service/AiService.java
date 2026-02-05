@@ -68,6 +68,7 @@ public class AiService {
 		return callGroqChatApi(prompt, false);
 	}
 	
+	
 	// 3. 음성 -> 텍스트 변환 (STT)
 	public String stt(MultipartFile file) {
 		try {

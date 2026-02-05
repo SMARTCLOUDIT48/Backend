@@ -6,10 +6,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
 
 @Repository
 public interface BoardRepository
@@ -46,6 +51,22 @@ public interface BoardRepository
 	@EntityGraph(attributePaths = {"member", "category"})
 	Page<BoardEntity> findAll(Pageable pageable);
 	*/
+	
+	
+	@Query(
+			value = """
+    SELECT
+      DATE(created_at) AS label,
+      COUNT(*) AS value
+    FROM board
+    WHERE created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 6 DAY)
+    GROUP BY DATE(created_at)
+    ORDER BY DATE(created_at)
+  """,
+			nativeQuery = true
+	)
+	List<Object[]> countStatsDaily();
+	
 	
 	// 조회수 증가 (update 쿼리)
 	@Modifying
