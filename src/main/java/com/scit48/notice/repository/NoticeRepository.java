@@ -4,6 +4,7 @@ import com.scit48.notice.domain.entity.NoticeEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -29,4 +30,19 @@ public interface NoticeRepository extends JpaRepository<NoticeEntity, Long> {
 			String keyword,
 			Pageable pageable
 	);
+	
+	@Query(
+			value = """
+    SELECT
+      DATE(created_at) AS label,
+      COUNT(*) AS value
+    FROM notice
+    WHERE created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 6 DAY)
+    GROUP BY DATE(created_at)
+    ORDER BY DATE(created_at)
+  """,
+			nativeQuery = true
+	)
+	List<Object[]> countStatsDaily();
+	
 }
