@@ -19,14 +19,13 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMemberEn
 	List<ChatRoomMemberEntity> findMyMemberships(@Param("userId") Long userId);
 	
 	// ✅ [추가 2] 특정 방에서 내 멤버십 1개 찾기 (입장 시 lastReadMsgId 업데이트 용)
+	// ✅ [추가 2] 특정 방에서 내 멤버십 1개 찾기 (입장 시 lastReadMsgId 업데이트 용)
 	@Query("""
         SELECT m
         FROM ChatRoomMemberEntity m
         JOIN FETCH m.room
         JOIN FETCH m.user
-        WHERE m.user.id = :userId
+        WHERE m.user.id = :userId AND m.room.roomId = :roomId
     """)
-	
 	Optional<ChatRoomMemberEntity> findMyMembership(@Param("userId") Long userId,
 													@Param("roomId") Long roomId);
-}
