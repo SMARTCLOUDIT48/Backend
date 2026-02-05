@@ -1,15 +1,17 @@
 package com.scit48.chat.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalDateTime; // 날짜 타입 추가
 import java.util.UUID;
 
+
 @Entity
 @Getter @Setter
-@NoArgsConstructor
+@NoArgsConstructor // JPA 필수
+@AllArgsConstructor // Builder 사용 시 필수
+@Builder
 @Table(name = "chat_room")
 public class ChatRoom {
 	
@@ -34,7 +36,8 @@ public class ChatRoom {
 	
 	// 2. 점수 반영 여부 (중복 감점 방지용)
 	// 기본값 false로 설정
-	@Column(name = "is_evaluated", nullable = false)
+	@Column(name = "is_evaluated") // ✅ 이렇게만 적어도 됨
+	@Builder.Default
 	private boolean isEvaluated = false;
 	
 	// ==========================================
