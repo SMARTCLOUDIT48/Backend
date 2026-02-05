@@ -831,7 +831,7 @@ align-items: stretch;
 }
 
 .stat-head h3 {
-    font-size: 17px;
+    font-size: 14px;
     font-weight: 900;
 }
 
@@ -859,8 +859,8 @@ align-items: stretch;
 
 /* 통계 본문 */
 .stat-body {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+display: flex;
+    justify-content: center;
     gap: 14px;
 }
 
@@ -870,7 +870,7 @@ align-items: stretch;
     padding: 18px 12px;
     border-radius: 18px;
     text-align: center;
-
+    width: 140px;
     background: linear-gradient(180deg,
             rgba(255, 255, 255, 0.75),
             rgba(255, 255, 255, 0.55));
@@ -983,11 +983,16 @@ align-items: stretch;
 /* =========================
    POST STAT EXTRA
 ========================= */
+.extra-container {
+    display: flex;
+    justify-content: center;
+}
+
 .stat-extra {
-    margin-top: 18px;
+    margin-top: 30px;
     padding: 14px 16px;
     border-radius: 18px;
-
+    width: 450px;
     display: flex;
     align-items: center;
     gap: 8px;

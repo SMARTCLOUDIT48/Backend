@@ -14,42 +14,44 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 public class UserDTO {
-	
+
 	private Long id; // PK
 
 	private String memberId;
 
 	// 중요: 클라이언트 -> 서버 전송(입력) 시에는 동작하지만,
-// 서버 -> 클라이언트 응답(조회) 시에는 JSON에서 제외됩니다.
+	// 서버 -> 클라이언트 응답(조회) 시에는 JSON에서 제외됩니다.
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
-	
+
 	private String nickname;
-	
+
 	private Gender gender; // Enum
-	
+
 	private String intro;
-	
+
 	private Integer age;
-	
+
 	private String nation;
-	
+
 	private double manner;
-	
+
+	private int likeCount;
+
 	private String profileImageName;
-	
+
 	private String profileImagePath;
-	
+
 	private String nativeLanguage;
 
 	private String studyLanguage;
-	
+
 	private LanguageLevel levelLanguage;
 
 	private LocalDateTime createdAt;
 
-// --- DTO 변환 메서드 (편의성 제공) ---
-	
+	// --- DTO 변환 메서드 (편의성 제공) ---
+
 	/*
 	 * DTO -> Entity 변환
 	 * (비밀번호 암호화 처리는 Service 레이어에서 수행 후 별도로 주입하거나,
@@ -73,7 +75,7 @@ public class UserDTO {
 				.profileImagePath(this.profileImagePath)
 				.build();
 	}
-	
+
 	/*
 	 * Entity -> DTO 변환
 	 */
@@ -89,6 +91,7 @@ public class UserDTO {
 				.age(entity.getAge())
 				.nation(entity.getNation())
 				.manner(entity.getManner())
+				.likeCount(entity.getLikeCount())
 				.nativeLanguage(entity.getNativeLanguage())
 				.studyLanguage(entity.getStudyLanguage())
 				.levelLanguage(entity.getLevelLanguage())
@@ -97,6 +100,5 @@ public class UserDTO {
 				.createdAt(entity.getCreatedAt())
 				.build();
 	}
-	
-}
 
+}
