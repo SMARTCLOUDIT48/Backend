@@ -63,13 +63,16 @@ public class UserEntity {
 	@Column(name = "manner", nullable = false)
 	private double manner = 36.5;
 
+	@Column(name = "like_count", nullable = false)
+	private int likeCount = 0;
+
 	@Column(name = "native_language", nullable = false, length = 10)
 	private String nativeLanguage;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "level_language", nullable = false, length = 20)
 	private LanguageLevel levelLanguage;
-	
+
 	@Column(name = "study_language", nullable = false, length = 20)
 	private String studyLanguage;
 
@@ -123,16 +126,17 @@ public class UserEntity {
 			this.levelLanguage = levelLanguage;
 		}
 	}
+
 	// ==========================================================
-	// 👇 [추가할 부분] 매너 온도 감점 메서드
+	// [추가할 부분] 매너 온도 감점 메서드
 	// ==========================================================
 	public void decreaseManner(double amount) {
 		// 현재 점수에서 amount만큼 뺍니다.
 		// 단, 0점 미만으로 내려가지 않도록 Math.max 사용 (안전 장치)
 		this.manner = Math.max(0.0, this.manner - amount);
 	}
-	
-	// ✅ 2. [추가] 가산점 (최대 99.9도까지만 상승 제한)
+
+	// 2. [추가] 가산점 (최대 99.9도까지만 상승 제한)
 	public void increaseManner(double amount) {
 		// 현재 점수 + amount가 99.9를 넘지 않도록 설정
 		this.manner = Math.min(99.9, this.manner + amount);

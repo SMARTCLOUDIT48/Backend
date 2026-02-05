@@ -233,107 +233,75 @@
                     </div>
 
                     <!-- 중간 2단 카드 -->
-                    <div class="stats">
-
+                <!-- ===============================
+                  2. 중간 통계 (2단)
+                =============================== -->
+                <div class="stats">
+                
+                    <!-- 내 프로필을 본 사람 -->
                     <div class="glass card stat-card">
                         <div class="stat-head">
                             <h3>내 프로필을 본 사람</h3>
                             <span class="muted">최근 방문</span>
                         </div>
-
-                        <div class="profile-view-list">
-                            <!-- 1명 -->
-                            <div class="viewer-item">
-                                <div class="viewer-avatar">👤</div>
-                                <div class="viewer-info">
-                                    <strong>스라</strong>
-                                    <span class="viewer-time">10분 전</span>
-                                </div>
-                                <button class="btn-view">프로필</button>
-                            </div>
-
-                            <!-- 2명 -->
-                            <div class="viewer-item">
-                                <div class="viewer-avatar">👤</div>
-                                <div class="viewer-info">
-                                    <strong>유키</strong>
-                                    <span class="viewer-time">어제</span>
-                                </div>
-                                <button class="btn-view">프로필</button>
-                            </div>
-                                <div class="viewer-item">
-                                    <div class="viewer-avatar">👤</div>
-                                    <div class="viewer-info">
-                                        <strong>민석</strong>
-                                        <span class="viewer-time">어제</span>
-                                    </div>
-                                    <button class="btn-view">프로필</button>
-                                </div>
-                        </div>
-
-
-                    </div>
-
-<div class="glass card stat-card">
-    <div class="stat-head">
-        <h3>내 게시글 통계</h3>
-        <span class="muted">누적</span>
-    </div>
-
-    <!-- 기존 3컬럼 -->
-    <div class="stat-body">
-        <div class="stat-item posts">
-            <span class="stat-label">📝 게시글</span>
-            <span class="stat-value" id="totalPosts">0</span>
-        </div>
-
-        <div class="stat-item likes">
-            <span class="stat-label">❤️ 좋아요</span>
-            <span class="stat-value" id="totalLikes">0</span>
-        </div>
-
-        <div class="stat-item comments">
-            <span class="stat-label">💬 댓글</span>
-            <span class="stat-value" id="totalComments">0</span>
-        </div>
-    </div>
-
-
-    <div class="stat-extra">
-        <span class="extra-label">💌 현재 연락 중인 이성</span>
-        <strong class="extra-value" id="activeContacts">0</strong>
-        <span class="extra-unit">명</span>
-    </div>
-</div>
-
-
-
-                    </div>
-
-                    <!-- 하단 카드 -->
-                    <div class="glass card content-card">
-                        <div class="card-head">
-                            <div>
-                                <h2>계정 관리</h2>
-                                <p>알림/설정/로그아웃 등을 관리할 수 있어요.</p>
-                            </div>
-
-                        </div>
-
-                        <div class="account-grid">
-                            <button class="acc-item">
-                                <span class="acc-ico">🔔</span>
-                                <span class="acc-txt">알림 및 설정 변경</span>
-                                <span class="acc-go">›</span>
-                            </button>
-
-                            <button class="acc-item" type="button" onclick="logout()">
-                                <span class="acc-ico">🚪</span>
-                                <span class="acc-txt">로그아웃</span>
-                                <span class="acc-go">›</span>
-                            </button>
+                
+                        <div class="profile-view-list" id="profileViewList">
+                            <!-- JS로 렌더링 -->
+                            <p class="muted">아직 방문자가 없습니다.</p>
                         </div>
                     </div>
+                
+                    <!-- 내 프로필을 좋아요한 사람 -->
+                    <div class="glass card stat-card">
+                        <div class="stat-head">
+                            <h3>내 프로필을 좋아요한 사람</h3>
+                            <span class="muted">최근 좋아요</span>
+                        </div>
+                
+                        <div class="profile-view-list" id="likedMeList">
+                            <p class="muted">아직 좋아요가 없습니다.</p>
+                        </div>
+                    </div>
+                
+                </div>
+                
+                <!-- ===============================
+                  3. 게시글 통계 (하단 단일 카드)
+                =============================== -->
+                <div class="glass card content-card stat-card">
+                
+                    <div class="stat-head">
+                        <h3>내 게시글 통계</h3>
+                        <span class="muted">누적</span>
+                    </div>
+                
+                    <div class="stat-body">
+                        <div class="stat-item posts">
+                            <span class="stat-label">📝 게시글</span>
+                            <span class="stat-value" id="postCount">0</span>
+                        </div>
+                
+                        <div class="stat-item likes">
+                            <span class="stat-label">❤️ 좋아요</span>
+                            <span class="stat-value" id="likeCount">0</span>
+                        </div>
+                
+                        <div class="stat-item comments">
+                            <span class="stat-label">💬 댓글</span>
+                            <span class="stat-value" id="commentCount">0</span>
+                        </div>
+                    </div>
+                
+                    <div class="extra-container">
+                        <div class="stat-extra">
+                            <span class="extra-label">💌 현재 연락 중인 이성</span>
+                            <strong class="extra-value" id="chattingCount">0</strong>
+                            <span class="extra-unit">명</span>
+                        </div>
+                    </div>
+                
+                </div>
+
 
                 </section>
             </section>
