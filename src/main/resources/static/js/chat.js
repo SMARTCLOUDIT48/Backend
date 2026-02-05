@@ -75,9 +75,16 @@ function loadChatRooms() {
                 li.className = "room-item";
                 //roomId roomName 데이터를 삽입 li
                 li.dataset.roomId = realId;
+                li.dataset.roomId = String(roomId);
                 li.dataset.roomName = room.name;
                 //
+                //
+                
+                li.onclick = () => enterRoom(roomId, roomName, li);
                 li.onclick = () => enterRoom(realId, room.name, li);
+                const unreadDot = room.hasUnread ? `<span class="unread-dot"></span>` : ``;
+                //
+                
 
                 li.innerHTML = `
                     <div class="room-avatar">💬</div>
