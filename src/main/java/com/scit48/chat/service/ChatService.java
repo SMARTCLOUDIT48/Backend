@@ -154,9 +154,12 @@ public class ChatService {
 		
 		// 2️⃣ roomId → lastReadMsgId 맵으로 변환
 		Map<Long, Long> lastReadMap = memberships.stream()
+				.filter(m -> m.getRoom() != null)
+				.filter(m -> m.getRoom().getRoomId() != null)
 				.collect(Collectors.toMap(
-						m -> m.getRoom().getRoomId(), // ✅ 여기 수정
-						ChatRoomMemberEntity::getLastReadMsgId
+						m -> m.getRoom().getRoomId(),
+						m -> m.getLastReadMsgId() == null ? 0L : m.getLastReadMsgId(),
+						Math::max // ✅ 중복 키가 있으면 큰 값(가장 최근 읽음)으로 병합
 				));
 		
 		// 3️⃣ 실제 방 엔티티 목록 가져오기

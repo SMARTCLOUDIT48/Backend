@@ -22,9 +22,11 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMemberEn
 	@Query("""
         SELECT m
         FROM ChatRoomMemberEntity m
+        JOIN FETCH m.room
+        JOIN FETCH m.user
         WHERE m.user.id = :userId
-          AND m.room.roomId = :roomId
     """)
+	
 	Optional<ChatRoomMemberEntity> findMyMembership(@Param("userId") Long userId,
 													@Param("roomId") Long roomId);
 }
