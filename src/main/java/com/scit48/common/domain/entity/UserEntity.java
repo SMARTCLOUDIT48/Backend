@@ -123,4 +123,12 @@ public class UserEntity {
 			this.levelLanguage = levelLanguage;
 		}
 	}
+	// ==========================================================
+	// 👇 [추가할 부분] 매너 온도 감점 메서드
+	// ==========================================================
+	public void decreaseManner(double amount) {
+		// 현재 점수에서 amount만큼 뺍니다.
+		// 단, 0점 미만으로 내려가지 않도록 Math.max 사용 (안전 장치)
+		this.manner = Math.max(0.0, this.manner - amount);
+	}
 }
