@@ -6,11 +6,25 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMemberEntity, Long> {
 	
-	// ✅ 변경점: User 정보를 확실하게 같이 가져오도록 'JOIN FETCH' 사용
-	// 이렇게 하면 프로필 사진, 닉네임 등을 가져올 때 추가 쿼리가 발생하지 않아 빠르고 안전합니다.
+	// ✅ 기존: 방 안의 멤버들(상대 찾기용)
 	@Query("SELECT m FROM ChatRoomMemberEntity m JOIN FETCH m.user WHERE m.room.roomId = :roomId")
 	List<ChatRoomMemberEntity> findByChatRoomId(@Param("roomId") Long roomId);
+	
+	// ✅ [추가 1] 내(userId)가 속한 멤버십 목록 + room까지 같이 가져오기 (방 목록/lastReadMsgId 용)
+	@Query("SELECT m FROM ChatRoomMemberEntity m JOIN FETCH m.room WHERE m.user.id = :userId")
+	List<ChatRoomMemberEntity> findMyMemberships(@Param("userId") Long userId);
+	
+	// ✅ [추가 2] 특정 방에서 내 멤버십 1개 찾기 (입장 시 lastReadMsgId 업데이트 용)
+	@Query("""
+        SELECT m
+        FROM ChatRoomMemberEntity m
+        WHERE m.user.id = :userId
+          AND m.room.roomId = :roomId
+    """)
+	Optional<ChatRoomMemberEntity> findMyMembership(@Param("userId") Long userId,
+													@Param("roomId") Long roomId);
 }

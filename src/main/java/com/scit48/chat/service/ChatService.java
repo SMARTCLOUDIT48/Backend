@@ -17,6 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import com.scit48.chat.domain.dto.ChatRoomListDto;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -130,4 +134,60 @@ public class ChatService {
 				.opponentAge(oppAge)
 				.build();
 	}
+	// =================================================================
+// 4. 채팅방 목록 조회 (🔴 안 읽은 메시지 여부 포함)
+// =================================================================
+	@Transactional(readOnly = true)
+	public List<ChatRoomListDto> getMyChatRoomsWithUnread(Long userId) {
+		
+		// 1️⃣ 내가 속한 모든 방 멤버십 가져오기 (room + lastReadMsgId 포함)
+		List<ChatRoomMemberEntity> memberships =
+				chatRoomMemberRepository.findMyMemberships(userId);
+		
+		// 2️⃣ roomId → lastReadMsgId 맵으로 변환
+		Map<Long, Long> lastReadMap = memberships.stream()
+				.collect(Collectors.toMap(
+						m -> m.getRoom().getRoomId(), // ✅ 여기 수정
+						ChatRoomMemberEntity::getLastReadMsgId
+				));
+		
+		// 3️⃣ 실제 방 엔티티 목록 가져오기
+		List<ChatRoom> rooms = chatRoomRepository.findMyChatRooms(userId);
+		
+		// 4️⃣ 방마다 최신 msgId와 비교해서 DTO 생성
+		List<ChatRoomListDto> result = new ArrayList<>();
+		
+		for (ChatRoom room : rooms) {
+			Long roomId = room.getRoomId();
+			
+			Long lastMsgId = chatMessageRepository.findLastMessageId(roomId);
+			Long lastReadMsgId = lastReadMap.getOrDefault(roomId, 0L);
+			
+			boolean hasUnread = lastMsgId > lastReadMsgId;
+			
+			result.add(ChatRoomListDto.builder()
+					.roomId(roomId)
+					.roomName(room.getName())
+					.hasUnread(hasUnread)
+					.build());
+		}
+		
+		return result;
+	}
+	
+	// =================================================================
+// 5. 채팅방 읽음 처리 (입장 시 lastReadMsgId 최신으로 갱신)
+// =================================================================
+	@Transactional
+	public void markAsRead(Long roomId, Long userId) {
+		
+		ChatRoomMemberEntity member = chatRoomMemberRepository
+				.findMyMembership(userId, roomId)
+				.orElseThrow(() -> new RuntimeException("채팅방 멤버 정보를 찾을 수 없습니다."));
+		
+		Long lastMsgId = chatMessageRepository.findLastMessageId(roomId);
+		
+		member.updateLastReadMsgId(lastMsgId);
+	}
+	
 }

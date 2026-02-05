@@ -1,26 +1,26 @@
 package com.scit48.chat.controller;
 
 import com.scit48.auth.member.service.CustomUserDetails;
-import com.scit48.chat.domain.ChatRoom; // ✅ Import 확인
-import com.scit48.chat.repository.ChatRoomRepository; // ✅ Import 확인
-import com.scit48.common.domain.entity.UserEntity;
-import com.scit48.common.repository.UserRepository;
-import com.scit48.common.dto.ChatMessageDto;
+import com.scit48.chat.domain.ChatRoom;
+import com.scit48.chat.domain.ChatRoomMemberEntity;
+import com.scit48.chat.repository.ChatRoomMemberRepository;
+import com.scit48.chat.repository.ChatRoomRepository;
 import com.scit48.chat.service.ChatService;
 import com.scit48.chat.service.RedisService;
-
+import com.scit48.common.domain.entity.UserEntity;
+import com.scit48.common.dto.ChatMessageDto;
+import com.scit48.common.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,8 +34,8 @@ public class ChatController {
 	private final RedisService redisService;
 	private final UserRepository userRepository;
 	
-	// ✅ 추가: 방 목록을 불러오기 위해 Repository 주입
 	private final ChatRoomRepository chatRoomRepository;
+	private final ChatRoomMemberRepository chatRoomMemberRepository;
 	
 	/**
 	 * 1. 채팅 페이지 접속
@@ -43,18 +43,16 @@ public class ChatController {
 	@GetMapping("/chat")
 	public String chatPage(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
 		
-		// 로그인 안 된 경우 로그인 페이지로 리다이렉트
 		if (userDetails == null) {
 			return "redirect:/login";
 		}
 		
 		Long myId = userDetails.getUser().getId();
 		
-		// ✅ [핵심 수정] 내 방만 가져와서 화면으로 전달!
-		// 이전에 Repository에 만든 메서드 사용 (findAll() 아님)
+		// 내 방 목록(서버 렌더링용)
 		List<ChatRoom> myRooms = chatRoomRepository.findMyChatRooms(myId);
 		
-		model.addAttribute("roomList", myRooms); // HTML에서 th:each="room : ${roomList}"로 씀
+		model.addAttribute("roomList", myRooms);
 		model.addAttribute("myUserId", myId);
 		model.addAttribute("myNickname", userDetails.getUser().getNickname());
 		
@@ -68,7 +66,7 @@ public class ChatController {
 	public void message(ChatMessageDto message, SimpMessageHeaderAccessor headerAccessor) {
 		
 		Map<String, Object> sessionAttributes = headerAccessor.getSessionAttributes();
-		Object userIdObj = sessionAttributes.get("userId");
+		Object userIdObj = (sessionAttributes != null) ? sessionAttributes.get("userId") : null;
 		
 		if (userIdObj == null) {
 			log.error("❌ 웹소켓 세션에 유저 정보가 없습니다.");
@@ -87,25 +85,55 @@ public class ChatController {
 		if (ChatMessageDto.MessageType.ENTER.equals(message.getType())) {
 			redisService.userEnter(message.getRoomId());
 			message.setMessage(message.getSender() + "님이 입장하셨습니다.");
-		}
-		else if (ChatMessageDto.MessageType.QUIT.equals(message.getType())) {
+		} else if (ChatMessageDto.MessageType.QUIT.equals(message.getType())) {
 			redisService.userLeave(message.getRoomId());
 			message.setMessage(message.getSender() + "님이 퇴장하셨습니다.");
 		}
 		
 		// ✅ 메시지 저장 (Redis + DB)
-		// RedisService의 저장 메서드를 호출해야 채팅이 안 섞입니다!
-		// (현재 코드는 chatService.saveMessage만 호출 중인데, RedisService도 호출하는 게 좋습니다)
 		redisService.saveMessageToRedis(message);
-		chatService.saveMessage(message); // DB 저장용이라면 유지
+		chatService.saveMessage(message);
 		
+		// ✅ 현재 방 구독자들에게 메시지 전송
 		messagingTemplate.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
+		
+		// ==========================================================
+		// ✅ [NEW] 실시간 🔴 알림: 상대방에게 notify 보내기
+		// - TALK 메시지만 알림 보내도록(ENTER/QUIT 제외) 추천
+		// ==========================================================
+		if (ChatMessageDto.MessageType.TALK.equals(message.getType())) {
+			
+			// message.getRoomId()가 String이면 Long 변환 필요
+			Long roomIdLong;
+			try {
+				roomIdLong = Long.parseLong(message.getRoomId());
+			} catch (Exception e) {
+				// 만약 roomId가 이미 Long 구조면 여기 들어오지 않음
+				log.warn("⚠ roomId 파싱 실패: {}", message.getRoomId());
+				return;
+			}
+			
+			List<ChatRoomMemberEntity> members = chatRoomMemberRepository.findByChatRoomId(roomIdLong);
+			
+			for (ChatRoomMemberEntity m : members) {
+				Long targetUserId = m.getUser().getId();
+				
+				// 발신자 제외(나한테는 알림 보낼 필요 없음)
+				if (targetUserId.equals(userId)) continue;
+				
+				Map<String, Object> payload = new HashMap<>();
+				payload.put("roomId", roomIdLong);
+				payload.put("senderId", userId);
+				
+				// 상대방 개인 알림 채널
+				messagingTemplate.convertAndSend("/sub/chat/notify/" + targetUserId, payload);
+			}
+		}
 	}
 	
 	@GetMapping("/chat/history/{roomId}")
 	@ResponseBody
 	public List<ChatMessageDto> getChatHistory(@PathVariable String roomId) {
-		// ✅ Redis에서 먼저 가져오도록 수정 (속도 향상 + 방 분리 확실)
 		return redisService.getChatHistory(roomId);
 	}
 	
