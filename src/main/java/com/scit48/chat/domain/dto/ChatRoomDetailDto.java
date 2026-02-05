@@ -14,11 +14,14 @@ public class ChatRoomDetailDto {
 	private Long roomId;
 	private String roomName;
 	
-	// 프론트엔드 사이드바에 표시할 상대방 정보
-	private Long opponentId;          // 상대방 PK
-	private String opponentNickname;  // 닉네임
-	private String opponentProfileImg;// 프로필 사진 경로
-	private String opponentNation;    // 국적
-	private String opponentIntro;     // 자기소개
-	private Integer opponentAge;      // 나이
+	// 상대방 정보
+	private Long opponentId;
+	private String opponentNickname;
+	private String opponentProfileImg;
+	private String opponentNation;
+	private String opponentIntro;
+	private Integer opponentAge;
+	
+	// ✅ 매너 점수 (이게 없어서 안 뜬 것)
+	private Double opponentManner;
 }
