@@ -1,10 +1,12 @@
 package com.scit48.notice.repository;
 
+import com.scit48.admin.dto.AdminPostListDTO;
 import com.scit48.notice.domain.entity.NoticeEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -45,4 +47,35 @@ public interface NoticeRepository extends JpaRepository<NoticeEntity, Long> {
 	)
 	List<Object[]> countStatsDaily();
 	
+	
+	@Query("""
+        SELECT new com.scit48.admin.dto.AdminPostListDTO(
+            n.type,
+            n.noticeId,
+            n.title,
+            u.nickname,
+            n.createdAt,
+            CONCAT('/customer/notice/', n.noticeId)
+        )
+        FROM NoticeEntity n
+        JOIN UserEntity u ON u.id = n.createdBy
+        WHERE
+          (:board IS NULL OR n.type = :board)
+          AND (
+            :keyword IS NULL OR :keyword = ''
+            OR (
+              :searchType = 'TITLE' AND n.title LIKE %:keyword%
+            )
+            OR (
+              :searchType = 'AUTHOR' AND u.nickname LIKE %:keyword%
+            )
+          )
+        ORDER BY n.createdAt DESC
+    """)
+	Page<AdminPostListDTO> findAdminNoticePosts(
+			@Param("board") String board,            // NOTICE / FAQ
+			@Param("searchType") String searchType,  // TITLE / AUTHOR
+			@Param("keyword") String keyword,
+			Pageable pageable
+	);
 }

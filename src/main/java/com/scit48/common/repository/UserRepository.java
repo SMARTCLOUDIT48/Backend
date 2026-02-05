@@ -1,11 +1,15 @@
 package com.scit48.common.repository;
 
+import com.scit48.admin.dto.AdminUserListDTO;
 import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.enums.Gender;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.scit48.common.domain.entity.UserEntity;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +39,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	// 오늘 가입한 회원 수
 	long countByCreatedAtAfter(LocalDateTime time);
 	
+	// 회원 조회용
 	@Query(
 			value = """
     SELECT
@@ -48,7 +53,34 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 			nativeQuery = true
 	)
 	List<Object[]> countStatsDaily();
+	
+	// 회원 조회용
+	@Query("""
+    SELECT new com.scit48.admin.dto.AdminUserListDTO(
+        u.id,
+        u.memberId,
+        u.nickname,
+        u.nation,
+        u.manner,
+        u.createdAt
+    )
+    FROM UserEntity u
+    WHERE
+        u.role <> 'ADMIN'
+        AND (
+            :keyword IS NULL
+            OR u.nickname LIKE %:keyword%
+            OR u.memberId LIKE %:keyword%
+        )
+        AND (
+            :nation IS NULL
+            OR u.nation = :nation
+        )
+""")
+	Page<AdminUserListDTO> findAdminUsers(
+			@Param("keyword") String keyword,
+			@Param("nation") String nation,
+			Pageable pageable
+	);
 
-	
-	
 }
