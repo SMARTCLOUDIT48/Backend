@@ -4,6 +4,7 @@ import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.dto.UserDTO;
 import com.scit48.common.repository.UserRepository;
 import com.scit48.community.domain.dto.BoardDTO;
+import com.scit48.community.domain.dto.CommentDTO;
 import com.scit48.community.domain.entity.BoardEntity;
 import com.scit48.community.domain.entity.CategoryEntity;
 import com.scit48.community.repository.BoardRepository;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -208,5 +210,47 @@ public class BoardService {
 				.writerNickname(board.getUser().getNickname())
 				.build());
 	}
+	
+	@Transactional
+	public BoardDTO readUpdate(Long boardId) {
+		// 1. 조회수 증가
+		br.updateHits(boardId);
+		
+		// 2. 게시글 조회
+		BoardEntity board = br.findById(boardId)
+				.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다"));
+		
+		// 3. 프로필 이미지 경로 처리 (앞선 답변 참고)
+		String profileName = board.getUser().getProfileImageName();
+		String profilePath = (profileName != null) ? "/files/" + profileName : "/images/default_profile.png";
+		
+		// 4. Entity -> DTO 변환
+		return BoardDTO.builder()
+				.id(board.getUser().getId())
+				.boardId(board.getBoardId())
+				.title(board.getTitle())
+				.content(board.getContent())
+				.viewCount(board.getViewCount())
+				.createdDate(board.getCreatedAt())
+				.categoryId(board.getCategory().getCategoryId())
+				.categoryName(board.getCategory().getName())
+				.writerNickname(board.getUser().getNickname())
+				.profileImagePath(profilePath) // 프로필 경로
+				.manner(board.getUser().getManner()) // 매너온도 (있다면)
+				.filePath(board.getFilePath()) // 첨부파일(이미지)
+				.fileName(board.getFileName())
+				// 댓글 리스트 변환 (CommentEntity -> CommentDTO)
+				.comments(board.getComments().stream().map(c -> CommentDTO.builder()
+						.commentId(c.getCommentId())
+						.content(c.getContent())
+						.writerNickname(c.getUser().getNickname())
+						.writerProfileImage(c.getUser().getProfileImageName() != null ? "/files/" + c.getUser().getProfileImageName() : "/images/default_profile.png")
+						.createdDate(c.getCreatedAt())
+						.build()).collect(Collectors.toList()))
+				.likeCnt(board.getLikeCnt())
+				.build();
+	}
+	
+	
 }
 

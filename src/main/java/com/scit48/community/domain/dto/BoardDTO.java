@@ -35,7 +35,7 @@ public class BoardDTO {
 	private String writerNickname;     //
 	private String profileImagePath;
 	private String profileImageName;//
-	private BigDecimal manner;  //
+	private double manner;  //
 	private String nation;
 	
 	

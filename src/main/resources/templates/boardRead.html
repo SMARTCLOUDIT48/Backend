@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>MUSUBI - 상세 보기</title>
+    <link rel="stylesheet" th:href="@{/css/boardRead.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header th:replace="~{boardList :: header}"></header>
+
+<main class="read-container">
+
+    <div class="read-wrapper">
+
+        <div class="post-header">
+            <span class="category-badge" th:text="${board.categoryName}">카테고리</span>
+            <h1 class="post-title" th:text="${board.title}">게시글 제목입니다.</h1>
+
+            <div class="writer-info">
+                <img th:src="${board.profileImageName}" class="profile-img-sm" alt="프로필">
+                <div class="info-text">
+                    <span class="nickname" th:text="${board.writerNickname}">작성자</span>
+                    <span class="meta-date">
+                        <span th:text="${#temporals.format(board.createdDate, 'yyyy-MM-dd HH:mm')}">2026-01-22</span>
+                        &nbsp;·&nbsp; 조회 <span th:text="${board.viewCount}">10</span>
+                    </span>
+                </div>
+
+                <div class="post-actions" th:if="${session.loginUserId != null}">
+                    <button class="action-btn">수정</button>
+                    <button class="action-btn delete">삭제</button>
+                </div>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="post-content">
+            <div class="image-area" th:if="${board.filePath != null}">
+                <img th:src="${board.filePath}" alt="첨부 이미지">
+            </div>
+
+            <div class="text-area" th:utext="${#strings.replace(board.content, '
+', '&lt;br&gt;')}">
+                본문 내용이 들어갑니다.
+            </div>
+        </div>
+
+        <div class="reaction-area">
+            <button class="like-btn">
+                ❤️ 좋아요 <span th:text="${board.likeCnt}">0</span>
+            </button>
+        </div>
+
+        <hr class="divider">
+
+        <div class="comment-section">
+            <h3>댓글 <span th:text="${board.comments.size()}">2</span></h3>
+
+            <form action="/comment/save" method="post" class="comment-form">
+                <input type="hidden" name="boardId" th:value="${board.id}">
+                <input type="text" name="content" placeholder="따뜻한 댓글을 남겨주세요..." required>
+                <button type="submit">등록</button>
+            </form>
+
+            <div class="comment-list">
+                <div class="comment-item" th:each="comment : ${board.comments}">
+                    <img th:src="${comment.writerProfileImage}" class="cmt-profile" alt="P">
+                    <div class="cmt-content">
+                        <div class="cmt-header">
+                            <span class="cmt-writer" th:text="${comment.writerNickname}">닉네임</span>
+                            <span class="cmt-date" th:text="${#temporals.format(comment.createdDate, 'MM.dd HH:mm')}">날짜</span>
+                        </div>
+                        <p class="cmt-text" th:text="${comment.content}">댓글 내용</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{boardList :: footer}"></footer>
+
+</body>
+</html>

@@ -10,6 +10,7 @@ import com.scit48.community.repository.BoardRepository;
 import com.scit48.community.repository.CategoryRepository;
 import com.scit48.community.service.BoardService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -227,6 +228,22 @@ public class BoardController {
 		model.addAttribute("feedList", feedList);
 		
 		return "feedView";
+	}
+	
+	@GetMapping("/{boardId}")
+	public String read(@PathVariable Long boardId, Model model, HttpSession session) {
+		// 서비스에서 데이터 가져오기
+		BoardDTO boardDTO = bs.readUpdate(boardId);
+		
+		// 현재 로그인한 사용자 ID (수정/삭제 버튼 표시 여부 확인용)
+		Long loginUserId = (Long) session.getAttribute("loginUserId");
+		
+		// (선택 사항) 좋아요 여부 확인 로직이 있다면 여기서 boolean isLiked 등을 모델에 담음
+		
+		model.addAttribute("board", boardDTO);
+		model.addAttribute("loginUserId", loginUserId); // 뷰에서 본인 확인용
+		
+		return "boardRead";
 	}
 	
 }
