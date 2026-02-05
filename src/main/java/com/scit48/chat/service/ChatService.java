@@ -172,9 +172,12 @@ public class ChatService {
 			Long roomId = room.getRoomId();
 			
 			Long lastMsgId = chatMessageRepository.findLastMessageId(roomId);
+			if (lastMsgId == null) lastMsgId = 0L;
+			
 			Long lastReadMsgId = lastReadMap.getOrDefault(roomId, 0L);
 			
 			boolean hasUnread = lastMsgId > lastReadMsgId;
+			
 			
 			result.add(ChatRoomListDto.builder()
 					.roomId(roomId)
@@ -197,8 +200,13 @@ public class ChatService {
 				.orElseThrow(() -> new RuntimeException("채팅방 멤버 정보를 찾을 수 없습니다."));
 		
 		Long lastMsgId = chatMessageRepository.findLastMessageId(roomId);
+		if (lastMsgId == null) lastMsgId = 0L;
 		
 		member.updateLastReadMsgId(lastMsgId);
+		
+		// ✅ 즉시 반영을 확실히 하고 싶으면(권장)
+		chatRoomMemberRepository.save(member);
 	}
+	
 	
 }
