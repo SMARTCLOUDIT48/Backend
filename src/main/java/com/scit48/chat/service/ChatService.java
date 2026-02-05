@@ -2,6 +2,7 @@ package com.scit48.chat.service;
 
 import com.scit48.chat.domain.ChatMessage;
 import com.scit48.chat.domain.ChatRoom;
+import com.scit48.chat.domain.ChatRoomMemberEntity;
 import com.scit48.chat.domain.dto.ChatRoomDetailDto;
 import com.scit48.chat.repository.ChatMessageRepository;
 import com.scit48.chat.repository.ChatRoomRepository;
@@ -12,11 +13,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils; // 문자열 체크용
-
+import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
@@ -79,34 +80,45 @@ public class ChatService {
 		ChatRoom room = chatRoomRepository.findById(roomId)
 				.orElseThrow(() -> new RuntimeException("존재하지 않는 채팅방입니다."));
 		
-		// 2) 이 방의 참여자 중 '나(myId)'가 아닌 '상대방' 찾기
-		Optional<UserEntity> opponentOpt = chatRoomMemberRepository.findOpponent(roomId, myId);
+		// 2) ✅ 변경점: 방 멤버 리스트를 통째로 가져옴 (Repository 변경사항 반영)
+		List<ChatRoomMemberEntity> members = chatRoomMemberRepository.findByChatRoomId(roomId);
 		
-		// 3) 기본값 설정 (상대방이 나갔거나 없을 경우)
-		Long oppId = 0L;
-		String oppName = "(알 수 없음)";
-		String oppNation = "";
-		String oppIntro = "대화 상대가 없습니다.";
-		String oppProfileImg = "/images/profile/default.png"; // 기본 이미지 경로
-		Integer oppAge = null;
+		UserEntity opponent = null;
 		
-		// 4) 상대방 정보가 있다면 덮어쓰기
-		if (opponentOpt.isPresent()) {
-			UserEntity user = opponentOpt.get();
-			
-			oppId = user.getId();
-			oppName = user.getNickname();
-			oppIntro = user.getIntro();
-			oppNation = user.getNation();  // ✅ UserDTO 필드 참고: DB의 nation 값
-			oppAge = user.getAge();        // ✅ UserDTO 필드 참고: DB의 age 값
-			
-			// 프로필 이미지가 DB에 있으면 그것을 사용, 없으면 기본 이미지 유지
-			if (StringUtils.hasText(user.getProfileImagePath())) {
-				oppProfileImg = user.getProfileImagePath();
+		// 3) ✅ 변경점: Java 반복문으로 안전하게 상대방 찾기
+		// (리스트에서 내 아이디가 아닌 사람을 찾음)
+		for (ChatRoomMemberEntity member : members) {
+			if (!member.getUser().getId().equals(myId)) {
+				opponent = member.getUser();
+				break;
 			}
 		}
 		
-		// 5) DTO 생성 및 반환
+		// 4) 기본값 설정 (상대방 데이터가 꼬였거나 없을 때를 대비)
+		Long oppId = 0L;
+		String oppName = "(알 수 없음)";
+		String oppNation = "Unknown";
+		String oppIntro = "대화 상대가 없습니다.";
+		String oppProfileImg = "/images/profile/default.png";
+		Integer oppAge = null;
+		
+		// 5) 상대방 정보가 있다면 덮어쓰기
+		if (opponent != null) {
+			oppId = opponent.getId();
+			oppName = opponent.getNickname();
+			oppIntro = opponent.getIntro();
+			oppNation = opponent.getNation();
+			oppAge = opponent.getAge();
+			
+			if (StringUtils.hasText(opponent.getProfileImagePath())) {
+				oppProfileImg = opponent.getProfileImagePath();
+			}
+		} else {
+			// 로그를 남겨서 디버깅을 돕습니다.
+			log.warn("⚠ 방번호 {}에서 상대방을 찾을 수 없음. (내 ID: {}, 멤버 수: {})", roomId, myId, members.size());
+		}
+		
+		// 6) DTO 반환
 		return ChatRoomDetailDto.builder()
 				.roomId(roomId)
 				.roomName(room.getName())
