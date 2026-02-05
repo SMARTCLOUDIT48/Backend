@@ -63,7 +63,8 @@ public class BoardService {
 		// 첨부파일이 있는 경우
 		if (upload != null && !upload.isEmpty()) {
 			String fileName = fm.saveFile(uploadPath, upload);
-			boardEntity.setFileName("/files/" + fileName);
+			boardEntity.setFileName(fileName);
+			boardEntity.setFilePath("/files/" + fileName);
 			boardEntity.setFileOriginalName(upload.getOriginalFilename());
 			
 		}
@@ -97,7 +98,8 @@ public class BoardService {
 		// 첨부파일이 있는 경우
 		if (upload != null && !upload.isEmpty()) {
 			String fileName = fm.saveFile(uploadPath, upload);
-			boardEntity.setFileName("/files/" + fileName);
+			boardEntity.setFileName(fileName);
+			boardEntity.setFilePath("/files/" + fileName);
 			boardEntity.setFileOriginalName(upload.getOriginalFilename());
 			
 		}
@@ -230,11 +232,14 @@ public class BoardService {
 				.boardId(board.getBoardId())
 				.title(board.getTitle())
 				.content(board.getContent())
+				.profileImageName(board.getUser().getProfileImageName())
 				.viewCount(board.getViewCount())
 				.createdDate(board.getCreatedAt())
 				.categoryId(board.getCategory().getCategoryId())
 				.categoryName(board.getCategory().getName())
 				.writerNickname(board.getUser().getNickname())
+				.memberId(board.getUser().getMemberId())
+				.nation(board.getUser().getNation())
 				.profileImagePath(profilePath) // 프로필 경로
 				.manner(board.getUser().getManner()) // 매너온도 (있다면)
 				.filePath(board.getFilePath()) // 첨부파일(이미지)

@@ -1,104 +1,569 @@
-/* 전역 설정 및 배경 (boardList.css, feedView.css와 동일) */
+/* =========================================================
+   1. 전역 설정 및 오로라 배경 (boardList.css와 동일)
+========================================================= */
+* {
+    box-sizing: border-box;
+}
+
 body {
-    margin: 0; padding: 0;
-    font-family: 'Noto Sans KR', sans-serif;
-    background-color: #f8faff;
-    color: #333;
-    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
     min-height: 100vh;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: #333;
+    background-color: #f8faff;
+    overflow-x: hidden;
+    display: block;
 }
+
+/* 배경의 오로라 메쉬 그라데이션 */
 body::before {
-    content: ""; position: fixed; inset: 0; z-index: -1;
-    background: radial-gradient(circle at 15% 15%, rgba(255, 174, 214, 0.45) 0%, transparent 40%),
-                radial-gradient(circle at 85% 20%, rgba(182, 193, 255, 0.45) 0%, transparent 40%);
-    filter: blur(80px); opacity: 0.8;
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(circle at 15% 15%, rgba(255, 174, 214, 0.45) 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(182, 193, 255, 0.45) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(142, 211, 255, 0.45) 0%, transparent 45%),
+        radial-gradient(circle at 20% 85%, rgba(200, 160, 255, 0.45) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.6) 0%, transparent 50%);
+    filter: blur(80px);
+    opacity: 0.8;
 }
 
-/* 컨테이너 */
-.read-container {
-    max-width: 800px;
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* =========================================================
+   2. HEADER STYLES (boardList.css 그대로 적용)
+========================================================= */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 85px;
+
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    transition: background 0.35s ease, backdrop-filter 0.35s ease;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-inner {
+    max-width: 1200px;
+    height: 100%;
     margin: 0 auto;
-    padding-top: 130px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-weight: 800;
+    font-size: 1.2rem;
+    display: flex;
+    gap: 8px;
+    cursor: pointer;
+    color: #333;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.nav a {
+    position: relative;
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+
+.nav a:hover {
+    color: #222;
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 18px rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+}
+
+.auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.login-btn {
+    background: linear-gradient(135deg, #ff6f91, #ff9f7f);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-weight: 700;
+    box-shadow: 0 12px 30px rgba(255, 120, 150, 0.45);
+    cursor: pointer;
+    transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    filter: brightness(1.05);
+}
+
+.signup-btn {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(40, 60, 120, 0.8);
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.signup-btn:hover {
+    background: rgba(255, 255, 255, 0.75);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(80, 100, 180, 0.25);
+}
+
+
+/* =========================================================
+   3. 상세 페이지 컨테이너 및 카드 스타일
+========================================================= */
+.read-container {
+    max-width: 900px; /* 읽기 편하도록 목록보다 약간 좁게 설정 */
+    margin: 0 auto;
+    padding-top: 130px; /* 헤더 높이 + 여백 */
     padding-bottom: 80px;
-    padding-left: 20px; padding-right: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
-/* 글래스모피즘 카드 */
 .read-wrapper {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(30px);
+    /* boardList-wrapper와 동일한 글래스모피즘 효과 */
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(30px) saturate(120%);
+    -webkit-backdrop-filter: blur(30px) saturate(120%);
+
     border-radius: 24px;
-    padding: 40px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.6);
+    padding: 50px;
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.05),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* 헤더 영역 */
-.category-badge {
-    background: #5e5ce6; color: white;
-    padding: 5px 12px; border-radius: 15px;
-    font-size: 13px; font-weight: 700;
+/* --- 게시글 헤더 --- */
+.post-header {
+    margin-bottom: 30px;
 }
+
+.category-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    background-color: rgba(94, 92, 230, 0.1); /* boardList와 동일한 연한 보라 */
+    color: #5e5ce6;
+    margin-bottom: 15px;
+}
+
 .post-title {
-    font-size: 28px; margin: 15px 0 20px; color: #222;
+    font-size: 32px;
+    font-weight: 800;
+    color: #222;
+    margin: 0 0 25px 0;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
 }
 
 .writer-info {
-    display: flex; align-items: center; gap: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
+
 .profile-img-sm {
-    width: 45px; height: 45px; border-radius: 50%;
-    object-fit: cover; border: 2px solid white;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
-.info-text { display: flex; flex-direction: column; flex-grow: 1; }
-.nickname { font-weight: 700; font-size: 15px; }
-.meta-date { font-size: 13px; color: #888; }
+
+.info-text {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.nickname {
+    font-weight: 700;
+    font-size: 16px;
+    color: #333;
+}
+
+.meta-date {
+    font-size: 13px;
+    color: #888;
+    margin-top: 3px;
+}
+
+/* 수정/삭제 버튼 */
+.post-actions {
+    display: flex;
+    gap: 8px;
+}
 
 .action-btn {
-    background: none; border: 1px solid #ddd;
-    padding: 5px 10px; border-radius: 8px;
-    font-size: 12px; cursor: pointer; color: #666;
+    background: white;
+    border: 1px solid #e1e1e1;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
 }
-.action-btn:hover { background: #f5f5f5; }
-.action-btn.delete { color: #ff6f91; border-color: #ff6f91; }
 
-.divider { border: 0; height: 1px; background: rgba(0,0,0,0.08); margin: 30px 0; }
+.action-btn:hover {
+    background: #f1f3f5;
+    color: #333;
+    border-color: #ccc;
+}
 
-/* 본문 영역 */
-.post-content { min-height: 200px; font-size: 16px; line-height: 1.7; color: #333; }
-.image-area { margin-bottom: 20px; text-align: center; }
-.image-area img { max-width: 100%; border-radius: 12px; }
+.action-btn.delete {
+    color: #ff6f91;
+    border-color: rgba(255, 111, 145, 0.3);
+}
 
-/* 좋아요 버튼 */
-.reaction-area { text-align: center; margin: 40px 0 20px; }
+.action-btn.delete:hover {
+    background: #fff0f3;
+    border-color: #ff6f91;
+}
+
+.divider {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(0,0,0,0.1), transparent);
+    margin: 30px 0;
+}
+
+/* --- 본문 및 첨부파일 --- */
+.post-content {
+    min-height: 250px;
+    font-size: 17px;
+    line-height: 1.8;
+    color: #333;
+}
+
+.attachment-area {
+    margin-bottom: 30px;
+}
+
+/* 이미지 첨부 스타일 */
+.image-display {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.image-display img {
+    max-width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* 일반 파일 첨부 스타일 */
+.file-display {
+    display: inline-block;
+}
+
+.file-box {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: white;
+    padding: 15px 25px;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    transition: transform 0.2s, box-shadow 0.2s;
+    min-width: 320px;
+}
+
+.file-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    border-color: #5e5ce6;
+}
+
+.file-icon { font-size: 24px; }
+
+.file-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.file-label {
+    font-size: 11px;
+    color: #999;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.file-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 15px;
+}
+
+.download-btn {
+    font-size: 18px;
+    padding: 8px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    transition: background 0.2s;
+}
+
+.download-btn:hover { background: #e9ecef; }
+
+/* --- 좋아요 버튼 --- */
+.reaction-area {
+    margin-top: 50px;
+    text-align: center;
+}
+
 .like-btn {
-    background: white; border: 2px solid #ff6f91;
-    color: #ff6f91; padding: 10px 25px;
-    border-radius: 30px; font-weight: 700;
-    font-size: 15px; cursor: pointer; transition: all 0.2s;
+    /* boardList의 작성 버튼과 유사한 그라데이션 */
+    background: linear-gradient(135deg, #ff6f91, #ff9f7f);
+    color: white;
+    border: none;
+    padding: 12px 35px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(255, 111, 145, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
-.like-btn:hover { background: #ff6f91; color: white; }
 
-/* 댓글 영역 */
-.comment-section h3 { margin-bottom: 20px; font-size: 18px; }
+.like-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(255, 111, 145, 0.45);
+}
 
+.like-btn span {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+/* --- 댓글 영역 --- */
+.comment-section {
+    margin-top: 20px;
+}
+
+.comment-section h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* 댓글 작성 폼 */
 .comment-form {
-    display: flex; gap: 10px; margin-bottom: 30px;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+    /* 필터/검색바와 유사한 스타일 */
+    background: rgba(255, 255, 255, 0.6);
+    padding: 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.6);
 }
+
 .comment-form input {
-    flex-grow: 1; padding: 12px; border: 1px solid #ddd;
-    border-radius: 12px; outline: none; background: rgba(255,255,255,0.5);
+    flex-grow: 1;
+    border: none;
+    background: transparent;
+    padding: 12px 15px;
+    font-size: 15px;
+    outline: none;
+    font-family: inherit;
 }
+
 .comment-form button {
-    background: #333; color: white; border: none;
-    padding: 0 20px; border-radius: 12px; font-weight: 700; cursor: pointer;
+    background: #333;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.comment-form button:hover {
+    background: #555;
+}
+
+/* 댓글 목록 */
+.comment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .comment-item {
-    display: flex; gap: 12px; margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
 }
-.cmt-profile { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-.cmt-content { background: rgba(255,255,255,0.5); padding: 12px 16px; border-radius: 12px; flex-grow: 1; }
-.cmt-header { margin-bottom: 5px; font-size: 13px; display: flex; justify-content: space-between; }
-.cmt-writer { font-weight: 700; }
-.cmt-date { color: #999; }
-.cmt-text { margin: 0; font-size: 14px; }
+
+.cmt-profile {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.cmt-content {
+    background: rgba(255, 255, 255, 0.6);
+    padding: 15px 20px;
+    border-radius: 0 16px 16px 16px; /* 말풍선 스타일 */
+    flex-grow: 1;
+    border: 1px solid rgba(255,255,255,0.4);
+}
+
+.cmt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.cmt-writer {
+    font-weight: 700;
+    font-size: 14px;
+    color: #333;
+}
+
+.cmt-date {
+    font-size: 12px;
+    color: #999;
+}
+
+.cmt-text {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #444;
+}
+
+/* =========================================================
+   4. FOOTER STYLES (boardList.css 그대로 적용)
+========================================================= */
+.site-footer {
+    padding: 64px 0 40px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(30px);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    width: 100%;
+}
+
+.footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.footer-links {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 48px;
+    margin-bottom: 48px;
+}
+
+.footer-col h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: rgba(30, 40, 60, 0.85);
+}
+
+.footer-col a {
+    display: block;
+    font-size: 13px;
+    color: rgba(60, 70, 90, 0.65);
+    text-decoration: none;
+    margin-bottom: 8px;
+    transition: color 0.2s ease;
+}
+
+.footer-col a:hover {
+    color: rgba(30, 40, 60, 0.9);
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: rgba(60, 70, 90, 0.6);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding-top: 24px;
+}
+
+.footer-meta span {
+    margin-right: 6px;
+}
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .read-container {
+        padding-top: 110px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .read-wrapper {
+        padding: 30px 20px;
+    }
+    .footer-links {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+    }
+    .footer-bottom {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+
+}

@@ -230,7 +230,7 @@ public class BoardController {
 		return "feedView";
 	}
 	
-	@GetMapping("/{boardId}")
+	@GetMapping("/read/{boardId}")
 	public String read(@PathVariable Long boardId, Model model, HttpSession session) {
 		// 서비스에서 데이터 가져오기
 		BoardDTO boardDTO = bs.readUpdate(boardId);

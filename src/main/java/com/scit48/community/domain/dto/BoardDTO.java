@@ -20,7 +20,7 @@ public class BoardDTO {
 	private String content;    //
 	private int viewCount;     //
 	private LocalDateTime createdDate;
-	private Long id;
+	
 	
 	
 	
@@ -31,6 +31,7 @@ public class BoardDTO {
 	
 	
 	// 3. 작성자 정보 (User 연동)
+	private Long id;
 	private String memberId;
 	private String writerNickname;     //
 	private String profileImagePath;

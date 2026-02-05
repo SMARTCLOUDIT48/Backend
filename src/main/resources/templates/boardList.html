@@ -113,7 +113,7 @@
                     <span class="category-badge" th:text="${board.categoryName}">질문</span>
                 </td>
                 <td class="title-cell">
-                    <a th:href="@{|/board/${board.boardId}|}" th:text="${board.title}">제목입니다</a>
+                    <a th:href="@{|/board/read/${board.boardId}|}" th:text="${board.title}">제목입니다</a>
                     <span class="comment-count" th:if="${board.comments != null and board.comments.size() > 0}"
                           th:text="'[' + ${board.comments.size()} + ']'">[2]</span>
                 </td>

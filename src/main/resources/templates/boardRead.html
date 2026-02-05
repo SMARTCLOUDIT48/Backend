@@ -8,7 +8,56 @@
 </head>
 <body>
 
-<header th:replace="~{boardList :: header}"></header>
+<header th:fragment="header" xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="header">
+
+    <div class="header-inner">
+
+        <!-- 로고 -->
+        <div class="logo" th:onclick="|location.href='@{/}'|">
+            💬 MUSUBI
+        </div>
+
+        <!-- 네비게이션 -->
+        <nav class="nav">
+            <a th:href="@{/community}">커뮤니티</a>
+            <a th:href="@{/recommend}">파트너찾기</a>
+            <a th:href="@{/chat}">채팅</a>
+            <a th:href="@{/support}">고객센터</a>
+        </nav>
+
+        <!-- 인증 버튼 영역 -->
+        <div class="auth-buttons">
+
+            <!-- =========================
+                 비로그인 상태
+            ========================= -->
+            <div sec:authorize="isAnonymous()">
+                <button class="login-btn" type="button" th:onclick="|location.href='@{/login}'|">
+                    로그인
+                </button>
+
+                <button class="signup-btn" type="button" th:onclick="|location.href='@{/member/signup}'|">
+                    회원가입
+                </button>
+            </div>
+
+            <!-- =========================
+                 로그인 상태
+            ========================= -->
+            <div sec:authorize="isAuthenticated()">
+                <button class="login-btn" type="button" onclick="logout()">
+                    로그아웃
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 로그아웃 JS (공통) -->
+    <script th:src="@{/js/member/logout.js}"></script>
+
+</header>
 
 <main class="read-container">
 
@@ -19,16 +68,19 @@
             <h1 class="post-title" th:text="${board.title}">게시글 제목입니다.</h1>
 
             <div class="writer-info">
-                <img th:src="${board.profileImageName}" class="profile-img-sm" alt="프로필">
+                <img th:src="${board.profileImageName != null ? '/images/profile/upload/' + board.profileImageName : '/images/default_profile.png'}" class="profile-img-sm" alt="프로필">
                 <div class="info-text">
                     <span class="nickname" th:text="${board.writerNickname}">작성자</span>
+                    <span class="location" th:text="${board.nation}"
+                          style="font-size: 11px; color: #666; margin-top: 2px; display: inline-block;"></span>
                     <span class="meta-date">
                         <span th:text="${#temporals.format(board.createdDate, 'yyyy-MM-dd HH:mm')}">2026-01-22</span>
                         &nbsp;·&nbsp; 조회 <span th:text="${board.viewCount}">10</span>
                     </span>
                 </div>
 
-                <div class="post-actions" th:if="${session.loginUserId != null}">
+                <div class="post-actions"
+                     th:if="${#authorization.expression('isAuthenticated()') and #authentication.name == board.memberId}">
                     <button class="action-btn">수정</button>
                     <button class="action-btn delete">삭제</button>
                 </div>
@@ -38,10 +90,30 @@
         <hr class="divider">
 
         <div class="post-content">
-            <div class="image-area" th:if="${board.filePath != null}">
-                <img th:src="${board.filePath}" alt="첨부 이미지">
-            </div>
+            <div class="attachment-area" th:if="${board.filePath != null and board.fileName != null}"
+                 th:with="lowerName=${#strings.toLowerCase(board.fileName)},
+                  isImage=${#strings.endsWith(lowerName, '.jpg') or
+                            #strings.endsWith(lowerName, '.jpeg') or
+                            #strings.endsWith(lowerName, '.png') or
+                            #strings.endsWith(lowerName, '.gif') or
+                            #strings.endsWith(lowerName, '.webp')}">
 
+                <div class="image-display" th:if="${isImage}">
+                    <img th:src="${board.filePath}" alt="첨부 이미지">
+                </div>
+
+                <div class="file-display" th:unless="${isImage}">
+                    <div class="file-box">
+                        <span class="file-icon">📁</span> <div class="file-info">
+                        <span class="file-label">첨부파일</span>
+                        <a th:href="${board.filePath}" th:download="${board.fileName}" class="file-name" th:text="${board.fileName}">
+                            files.zip
+                        </a>
+                    </div>
+                        <a th:href="${board.filePath}" th:download="${board.fileName}" class="download-btn">⬇️</a>
+                    </div>
+                </div>
+            </div>
             <div class="text-area" th:utext="${#strings.replace(board.content, '
 ', '&lt;br&gt;')}">
                 본문 내용이 들어갑니다.
@@ -82,7 +154,53 @@
     </div>
 </main>
 
-<footer th:replace="~{boardList :: footer}"></footer>
+<footer th:fragment="footer" class="site-footer">
+    <div class="footer-inner">
+
+        <div class="footer-links">
+            <div class="footer-col">
+                <h4>소개</h4>
+                <a href="#">서비스 소개</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>제품</h4>
+                <a href="#">커뮤니티</a>
+                <a href="#">파트너 찾기</a>
+                <a href="#">채팅</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>가이드</h4>
+                <a href="#">이용 안내</a>
+                <a href="#">자주 하는 질문</a>
+                <a href="#">이용 가이드</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>지원</h4>
+                <a href="#">공지사항</a>
+                <a href="#">1:1 문의</a>
+                <a href="#">고객센터</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-meta">
+                <span>이용약관</span>
+                <span>·</span>
+                <span>개인정보 처리방침</span>
+                <span>·</span>
+                <span>고객센터</span>
+            </div>
+
+            <div class="footer-copy">
+                © 2026 MUSUBI. All rights reserved.
+            </div>
+        </div>
+
+    </div>
+</footer>
 
 </body>
 </html>
