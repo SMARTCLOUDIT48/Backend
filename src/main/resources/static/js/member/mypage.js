@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function getMannerTextColor(percent) {
     const p = Math.max(0, Math.min(100, percent)) / 100;
     const start = { r: 50, g: 90, b: 210 };
-    const end   = { r: 255, g: 0,  b: 0 };
+    const end   = { r: 255, g: 0, b: 0 };
     const r = Math.round(start.r + (end.r - start.r) * p);
     const g = Math.round(start.g + (end.g - start.g) * p);
     const b = Math.round(start.b + (end.b - start.b) * p);
@@ -54,7 +54,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const res = await authFetch(`${CONTEXT_PATH}api/members/me`);
     const result = await res.json();
-
     if (result.status !== "SUCCESS") return;
 
     const user = result.data;
@@ -84,16 +83,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* ===============================
-     관심사 chip 최초 로드
+     관심사 / 좋아요 로드
   =============================== */
   await loadInterestChips();
+  await loadLikedMeList();
 
-  /* ===============================
-     관심사 즉시 갱신 이벤트
-  =============================== */
-  window.addEventListener("interest:updated", async () => {
-    await loadInterestChips();
-  });
+  window.addEventListener("interest:updated", loadInterestChips);
 
   /* ===============================
      프로필 이미지 변경
@@ -116,25 +111,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   /* ===============================
-     모달 열고 닫기
+     모달 제어
   =============================== */
-  openModalBtn.addEventListener("click", () => {
-    modal.classList.remove("hidden");
-  });
-  closeModalBtn.addEventListener("click", () => {
-    modal.classList.add("hidden");
-  });
+  openModalBtn.addEventListener("click", () => modal.classList.remove("hidden"));
+  closeModalBtn.addEventListener("click", () => modal.classList.add("hidden"));
 
   /* ===============================
-     프로필 수정 저장
+     프로필 수정
   =============================== */
   profileForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const formData = new FormData(profileForm);
 
     const res = await authFetch(
       `${CONTEXT_PATH}api/members/me/profile`,
-      { method: "PUT", body: formData }
+      { method: "PUT", body: new FormData(profileForm) }
     );
 
     if (res.ok) {
@@ -147,31 +137,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 /* ===============================
-   관심사 API 로드
+   관심사 로드
 =============================== */
 async function loadInterestChips() {
   try {
-    const res = await authFetch(
-      `${CONTEXT_PATH}api/members/me/interests`
-    );
+    const res = await authFetch(`${CONTEXT_PATH}api/members/me/interests`);
     if (!res.ok) return;
 
     const result = await res.json();
     renderInterestChips(result.data ?? []);
-
   } catch (e) {
-    console.error("관심사 불러오기 실패", e);
+    console.error(e);
   }
 }
 
-/* ===============================
-   chip 렌더링
-=============================== */
 function renderInterestChips(interests) {
   const wrap = document.getElementById("interestChips");
   if (!wrap) return;
 
-  wrap.innerHTML = ""; // 화면  초기화
+  wrap.innerHTML = "";
 
   if (interests.length === 0) {
     wrap.innerHTML = `<span class="chip empty">관심사 없음</span>`;
@@ -187,10 +171,81 @@ function renderInterestChips(interests) {
 }
 
 /* ===============================
-   enum → 한글
+   나를 좋아요한 사람
 =============================== */
+async function loadLikedMeList() {
+  const wrap = document.getElementById("likedMeList");
+  if (!wrap) return;
+
+  try {
+    const res = await authFetch(`${CONTEXT_PATH}api/reactions/liked-me`);
+    if (!res.ok) {
+      wrap.innerHTML = `<p class="muted">불러오기 실패</p>`;
+      return;
+    }
+
+    const result = await res.json();
+    const list = result.data ?? [];
+    wrap.innerHTML = "";
+
+    if (list.length === 0) {
+      wrap.innerHTML = `<p class="muted">아직 좋아요가 없습니다.</p>`;
+      return;
+    }
+
+    list.forEach(user => {
+      const imgSrc = user.profileImagePath && user.profileImageName
+        ? `${user.profileImagePath}/${user.profileImageName}`
+        : "/images/profile/default.png";
+
+      const item = document.createElement("div");
+      item.className = "viewer-item";
+      item.innerHTML = `
+        <div class="viewer-avatar">
+          <img src="${imgSrc}" alt="profile">
+        </div>
+        <div class="viewer-info">
+          <strong>${user.nickname}</strong>
+          <span class="viewer-time">${formatTime(user.likedAt)}</span>
+        </div>
+        <button class="btn-view" data-user-id="${user.userId}">프로필</button>
+      `;
+      wrap.appendChild(item);
+    });
+
+  } catch (e) {
+    console.error(e);
+    wrap.innerHTML = `<p class="muted">오류 발생</p>`;
+  }
+}
+
 /* ===============================
-   enum → 한글 매핑 (전역)
+   시간 포맷
+=============================== */
+function formatTime(isoString) {
+  if (!isoString) return "";
+  const diff = (Date.now() - new Date(isoString)) / 1000;
+  if (diff < 60) return "방금 전";
+  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+  return `${Math.floor(diff / 86400)}일 전`;
+}
+
+/* ===============================
+   프로필 이동
+=============================== */
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".btn-view");
+  if (!btn) return;
+
+  const userId = btn.dataset.userId;
+  if (userId) {
+    location.href = `${CONTEXT_PATH}members/${userId}`;
+  }
+});
+
+/* ===============================
+   enum → 한글
 =============================== */
 const INTEREST_DETAIL_LABEL = {
   MOVIE: "영화",
@@ -198,43 +253,36 @@ const INTEREST_DETAIL_LABEL = {
   MUSIC: "음악",
   EXHIBITION: "전시·미술관",
   PERFORMANCE: "공연·연극",
-
   PHOTO: "사진",
   GAME: "게임",
   BOARD_GAME: "보드게임",
   DIY: "DIY·만들기",
   COLLECT: "수집",
-
   FITNESS: "헬스·피트니스",
   RUNNING: "러닝·조깅",
   YOGA: "요가·필라테스",
   BALL_SPORTS: "구기 스포츠",
   HIKING: "등산·하이킹",
-
   DOMESTIC_TRAVEL: "국내 여행",
   OVERSEAS_TRAVEL: "해외 여행",
   BACKPACKING: "배낭여행",
   FOOD_TRIP: "맛집 탐방",
   LOCAL_TOUR: "지역 산책·로컬 투어",
-
   COOKING: "요리",
   BAKING: "베이킹",
   CAFE: "카페 투어",
   ALCOHOL: "술·와인",
   GOURMET: "미식 탐방",
-
   LANGUAGE_STUDY: "언어 학습",
   CERTIFICATE: "자격증 준비",
   READING: "독서",
   STUDY_GROUP: "스터디 모임",
   CAREER: "커리어 개발",
-
   PROGRAMMING: "프로그래밍",
   WEB_APP: "웹·앱 개발",
   GAME_DEV: "게임 개발",
   AI_DATA: "AI·데이터",
   IT_TREND: "IT 트렌드",
-
   DAILY: "일상 공유",
   PET: "반려동물",
   FASHION: "패션",
@@ -242,12 +290,8 @@ const INTEREST_DETAIL_LABEL = {
   WELLNESS: "건강·웰빙"
 };
 
-/* ===============================
-   enum → 한글 변환 함수
-=============================== */
 function convertInterestToLabel(item) {
   return INTEREST_DETAIL_LABEL[item.interestDetail]
       ?? INTEREST_DETAIL_LABEL[item.interest]
       ?? "알 수 없음";
 }
-
