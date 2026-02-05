@@ -24,16 +24,16 @@ public class ChatScoreScheduler {
 	private final ChatMessageRepository chatMessageRepository;
 	private final ChatRoomMemberRepository chatRoomMemberRepository;
 	
-	// ✅ 1시간마다 실행(cron = "0 0 * * * *"), (테스트할 땐 "0 */1 * * * *" 로 1분마다 설정 가능)
-	@Scheduled(cron = "0 */1 * * * *")
-	@Transactional // 트랜잭션이 끝나면 변경된 점수가 DB에 자동 저장됨 (Dirty Checking)
+	// ✅ [변경 1] 실행 주기: 매 시간 정각마다 실행 (예: 1시 0분, 2시 0분...)
+	@Scheduled(cron = "0 0 * * * *")
+	@Transactional
 	public void checkChatActivityAndPenalty() {
-		log.info("⏰ [매너 점수 정산] 스케줄러 시작...");
+		log.info("⏰ [매너 점수 정산] 스케줄러 시작 (기준: 6시간)...");
 		
-		// 1. 기준 시간: 현재 시간 - 24시간minusHours(24),  테스트용 minusSeconds(60); 1분마다 체크하여 감점
-		LocalDateTime limitTime = LocalDateTime.now().minusSeconds(60);
+		// ✅ [변경 2] 판단 기준: 생성된 지 6시간이 지난 방
+		LocalDateTime limitTime = LocalDateTime.now().minusHours(6);
 		
-		// 2. 조건에 맞는 방 조회 (24시간 지남 + 정산 안 함)
+		// 6시간 지났고(Before limitTime), 아직 정산 안 된(False) 방 조회
 		List<ChatRoom> targetRooms = chatRoomRepository.findByCreatedAtBeforeAndIsEvaluatedFalse(limitTime);
 		
 		if (targetRooms.isEmpty()) {
@@ -42,35 +42,40 @@ public class ChatScoreScheduler {
 		}
 		
 		for (ChatRoom room : targetRooms) {
-			// 3. 대화 수 카운트
 			long msgCount = chatMessageRepository.countByRoomId(room.getRoomId());
 			
-			// 4. 대화가 5번 미만이면 감점
 			if (msgCount < 5) {
-				log.info("📉 감점 대상 발견: 방ID={}, 대화수={}", room.getRoomId(), msgCount);
+				// 📉 5회 미만 -> 감점 (-0.1)
+				log.info("📉 감점 대상: 방ID={}, 대화수={}", room.getRoomId(), msgCount);
 				penaltyMembers(room.getRoomId());
 			} else {
-				log.info("✅ 정상 활동 방: 방ID={}, 대화수={}", room.getRoomId(), msgCount);
+				// 📈 5회 이상 -> 가산점 (+0.1)
+				log.info("📈 가산점 대상: 방ID={}, 대화수={}", room.getRoomId(), msgCount);
+				rewardMembers(room.getRoomId());
 			}
 			
-			// 5. 정산 완료 처리 (다시는 조회 안 됨)
+			// 정산 완료 처리 (중복 정산 방지)
 			room.markAsEvaluated();
 		}
 	}
 	
-	// 감점 수행 메서드
+	// [감점 메서드]
 	private void penaltyMembers(Long roomId) {
-		// 방 멤버(2명) 조회
 		List<ChatRoomMemberEntity> members = chatRoomMemberRepository.findByChatRoomId(roomId);
-		
 		for (ChatRoomMemberEntity member : members) {
 			UserEntity user = member.getUser();
-			
-			// 🔥 여기서 점수 깎임! (Entity 메서드 호출)
 			user.decreaseManner(0.1);
-			
-			log.info("   -> 유저[{}] 점수 차감 완료. ({} -> {})",
-					user.getNickname(), user.getManner() + 0.1, user.getManner());
+			log.info("   -> [감점] 유저: {}, 현재점수: {}", user.getNickname(), user.getManner());
+		}
+	}
+	
+	// [가산점 메서드]
+	private void rewardMembers(Long roomId) {
+		List<ChatRoomMemberEntity> members = chatRoomMemberRepository.findByChatRoomId(roomId);
+		for (ChatRoomMemberEntity member : members) {
+			UserEntity user = member.getUser();
+			user.increaseManner(0.1);
+			log.info("   -> [가산] 유저: {}, 현재점수: {}", user.getNickname(), user.getManner());
 		}
 	}
 }

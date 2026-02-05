@@ -131,4 +131,10 @@ public class UserEntity {
 		// 단, 0점 미만으로 내려가지 않도록 Math.max 사용 (안전 장치)
 		this.manner = Math.max(0.0, this.manner - amount);
 	}
+	
+	// ✅ 2. [추가] 가산점 (최대 99.9도까지만 상승 제한)
+	public void increaseManner(double amount) {
+		// 현재 점수 + amount가 99.9를 넘지 않도록 설정
+		this.manner = Math.min(99.9, this.manner + amount);
+	}
 }
