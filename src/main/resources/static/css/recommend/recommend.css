@@ -17,7 +17,8 @@ body {
 ========================================================= */
 
 .content {
-  max-width: 1200px; /* layout.css header-inner와 폭 통일감 */
+  max-width: 1200px;
+  /* layout.css header-inner와 폭 통일감 */
   margin: 0 auto;
   padding: 28px 24px 40px;
 }
@@ -590,7 +591,10 @@ input[type="range"] {
 }
 
 .btn.ghost {
-  background: rgba(255, 255, 255, 0.44);
+  border: none;
+    color: rgba(19, 29, 53, 0.9);
+    background: rgba(255, 255, 255, 0.70);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
 }
 
 /* 검색 버튼(필터 적용) — primary보다 덜 강하지만 강조 */
@@ -647,4 +651,144 @@ input[type="range"] {
   border: none;
   background: linear-gradient(135deg, #ff6f91, #ff9f7f);
   box-shadow: 0 14px 28px rgba(255, 120, 150, 0.34);
+}
+
+/* ===== 관심사 칩 UI ===== */
+.filter-item {
+  margin-top: 14px;
+}
+
+.filter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.filter-label {
+  font-weight: 800;
+  font-size: 14px;
+  color: rgba(19, 29, 53, 0.92);
+}
+
+.chip-clear {
+  border: 1px solid rgba(255, 255, 255, .7);
+  background: rgba(255, 255, 255, .45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.interest-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 920px) {
+  .interest-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.interest-grid input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .7);
+  background: rgba(255, 255, 255, .35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(19, 29, 53, 0.85);
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+  user-select: none;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.interest-grid input[type="checkbox"]:checked+.chip {
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, .10);
+  transform: translateY(-1px);
+}
+
+.help {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(60, 70, 90, 0.68);
+}
+
+/* ===== 버튼 영역(있다면) ===== */
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.btn.secondary {
+  background: rgba(255, 255, 255, .55);
+  border: 1px solid rgba(255, 255, 255, .75);
+  color: rgba(19, 29, 53, .9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* 버튼 그룹 공통 */
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 실제 체크박스 숨김 */
+.btn-group input[type="checkbox"] {
+  display: none;
+}
+
+/* 기본 버튼 상태 (성별/국가와 동일) */
+.filter-btn {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(19, 29, 53, 0.85);
+
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+/* ✅ 선택됨 상태 */
+.btn-group input[type="checkbox"]:checked+.filter-btn {
+  background: linear-gradient(135deg, #ff6f91, #ff9f7f);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 10px 24px rgba(255, 120, 150, 0.35);
+  transform: translateY(-1px);
+}
+
+/* hover */
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.55);
 }
