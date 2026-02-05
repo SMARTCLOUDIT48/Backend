@@ -84,21 +84,20 @@ public class ChatService {
 		ChatRoom room = chatRoomRepository.findById(roomId)
 				.orElseThrow(() -> new RuntimeException("존재하지 않는 채팅방입니다."));
 		
-		// 2) ✅ 변경점: 방 멤버 리스트를 통째로 가져옴 (Repository 변경사항 반영)
+		// 2) 방 멤버 리스트 조회
 		List<ChatRoomMemberEntity> members = chatRoomMemberRepository.findByChatRoomId(roomId);
 		
 		UserEntity opponent = null;
 		
-		// 3) ✅ 변경점: Java 반복문으로 안전하게 상대방 찾기
-		// (리스트에서 내 아이디가 아닌 사람을 찾음)
+		// 3) 상대방 찾기
 		for (ChatRoomMemberEntity member : members) {
-			if (!member.getUser().getId().equals(myId)) {
+			if (member.getUser() != null && !member.getUser().getId().equals(myId)) {
 				opponent = member.getUser();
 				break;
 			}
 		}
 		
-		// 4) 기본값 설정 (상대방 데이터가 꼬였거나 없을 때를 대비)
+		// 4) 기본값
 		Long oppId = 0L;
 		String oppName = "(알 수 없음)";
 		String oppNation = "Unknown";
@@ -106,7 +105,10 @@ public class ChatService {
 		String oppProfileImg = "/images/profile/default.png";
 		Integer oppAge = null;
 		
-		// 5) 상대방 정보가 있다면 덮어쓰기
+		// ✅ [NEW] 매너 점수 기본값
+		Double oppManner = null;
+		
+		// 5) 상대방 정보 세팅
 		if (opponent != null) {
 			oppId = opponent.getId();
 			oppName = opponent.getNickname();
@@ -117,9 +119,13 @@ public class ChatService {
 			if (StringUtils.hasText(opponent.getProfileImagePath())) {
 				oppProfileImg = opponent.getProfileImagePath();
 			}
+			
+			// ✅ [NEW] 매너 점수 세팅 (getter 이름 확인!)
+			// 예: opponent.getManner(), opponent.getMannerScore(), opponent.getMannerPoint() 등
+			oppManner = opponent.getManner();
 		} else {
-			// 로그를 남겨서 디버깅을 돕습니다.
-			log.warn("⚠ 방번호 {}에서 상대방을 찾을 수 없음. (내 ID: {}, 멤버 수: {})", roomId, myId, members.size());
+			log.warn("⚠ 방번호 {}에서 상대방을 찾을 수 없음. (내 ID: {}, 멤버 수: {})",
+					roomId, myId, members.size());
 		}
 		
 		// 6) DTO 반환
@@ -132,8 +138,10 @@ public class ChatService {
 				.opponentIntro(oppIntro)
 				.opponentProfileImg(oppProfileImg)
 				.opponentAge(oppAge)
+				.opponentManner(oppManner) // ✅ [NEW]
 				.build();
 	}
+	
 	// =================================================================
 // 4. 채팅방 목록 조회 (🔴 안 읽은 메시지 여부 포함)
 // =================================================================

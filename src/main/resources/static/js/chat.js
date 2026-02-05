@@ -605,6 +605,8 @@ function loadPartnerInfo(roomId) {
     document.getElementById("partnerImg").src = "/images/profile/default.png";
     document.getElementById("partnerNationText").innerText = "";
     document.getElementById("partnerAge").innerText = "";
+    const levelEl = document.getElementById("partnerLevel");
+    if (levelEl) levelEl.innerText = "";
 
     // 2. 실제 API 호출
     fetch(`/api/chat/room/${roomId}`)
@@ -670,6 +672,21 @@ function updatePartnerProfileUI(data) {
             profileBtn.style.display = "none";
         }
     }
+    // ✅ [NEW] 매너 점수 표시 (partnerLevel 영역 사용)
+    const levelEl = document.getElementById("partnerLevel");
+    if (levelEl) {
+        const manner = data.opponentManner; // 🔥 백엔드에서 내려오는 키 이름
+
+        if (manner === null || manner === undefined) {
+            levelEl.innerText = "";
+        } else {
+            const score = Number(manner);
+            levelEl.innerText = isNaN(score)
+                ? `매너 ${manner}`
+                : `매너 ${score.toFixed(1)}점`;
+        }
+    }
+
 }
 function addUnreadDotToRoom(roomId) {
     const roomItem = document.querySelector(`.room-item[data-room-id="${String(roomId)}"]`);
@@ -732,4 +749,3 @@ function hideHeaderUnreadDot() {
     if (!dot) return;
     dot.style.display = "none";
 }
-
