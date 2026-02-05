@@ -6,6 +6,7 @@
 const myNativeLanguage = 'KO'; // 나의 모국어 (KO: 한국어)
 var stompClient = null;
 var currentRoomId = null;
+var notifySubscription = null;
 
 // 내 정보 가져오기
 var mySenderId = document.getElementById("myUserId").value;
@@ -15,7 +16,7 @@ var subscription = null;
 var aiData = {};
 
 // --- 2. 페이지 로드 시 실행 ---
-// 함수를 async()로 변경  
+// 함수를 async()로 변경
 document.addEventListener('DOMContentLoaded', async () => {
     console.log(`✅ 채팅 초기화 완료 (내 ID: ${mySenderId}, 닉네임: ${mySenderName})`);
     createLoadingOverlay();
@@ -69,29 +70,35 @@ function loadChatRooms() {
 
             const listArea = document.getElementById("roomListArea");
             listArea.innerHTML = "";
+
+            // ✅ 헤더 dot 초기화 후, unread 있으면 켜기
+            hideHeaderUnreadDot();
+            const anyUnread = rooms.some(r => r.hasUnread === true);
+            if (anyUnread) showHeaderUnreadDot();
+
             rooms.forEach(room => {
-                const realId = room.roomId || room.id || room.chatRoomId;
+                const roomId = room.roomId;
+                const roomName = room.roomName;
+
                 const li = document.createElement("li");
                 li.className = "room-item";
-                //roomId roomName 데이터를 삽입 li
-                li.dataset.roomId = realId;
                 li.dataset.roomId = String(roomId);
-                li.dataset.roomName = room.name;
-                //
-                //
-                
+                li.dataset.roomName = roomName; // ✅ 추가
                 li.onclick = () => enterRoom(roomId, roomName, li);
-                li.onclick = () => enterRoom(realId, room.name, li);
+
                 const unreadDot = room.hasUnread ? `<span class="unread-dot"></span>` : ``;
-                //
-                
 
                 li.innerHTML = `
                     <div class="room-avatar">💬</div>
                     <div class="room-info">
-                        <div class="room-name">${room.name}</div>
-                        <div class="room-last-msg">ID: ${realId}</div>
-                    </div>`;
+                        <div class="room-name">
+                            ${roomName}
+                            ${unreadDot}
+                        </div>
+                        <div class="room-last-msg">ID: ${roomId}</div>
+                    </div>
+                `;
+
                 listArea.appendChild(li);
             });
             return rooms;//return 추가
@@ -99,13 +106,25 @@ function loadChatRooms() {
         .catch(err => console.error("방 목록 로딩 실패:", err));
 }
 
-// --- 4. 방 입장 (핵심 수정 부분) ---
+
+
+// --- 4. 방 입장 (🔴 읽음 처리 추가) ---
 function enterRoom(roomId, roomName, element) {
     if (currentRoomId === roomId) return;
 
     currentRoomId = roomId;
-
     document.getElementById("roomTitle").innerText = roomName;
+
+    // ✅ 읽음 처리 API 호출
+    fetch(`/api/chat/rooms/${roomId}/read`, { method: "POST" })
+        .catch(err => console.error("읽음 처리 API 호출 실패:", err));
+
+    // ✅ UI에서 해당 방 🔴 제거
+    removeUnreadDotFromRoom(roomId);
+
+    // ✅ 헤더 🔴는 "다른 방에 unread가 남아있는지" 보고 결정
+    const stillUnreadExists = document.querySelector(".room-item .unread-dot") !== null;
+    if (!stillUnreadExists) hideHeaderUnreadDot();
 
     // 활동 배지 숨김
     const badge = document.getElementById('activityBadge');
@@ -121,12 +140,10 @@ function enterRoom(roomId, roomName, element) {
     // 소켓 연결
     connect(roomId);
 
-    // ✅ [NEW] 오른쪽 사이드바에 상대방 프로필 불러오기
-    loadPartnerInfo(roomId)
-        .catch(err => {
+    // 오른쪽 사이드바
+    loadPartnerInfo(roomId).catch(err => {
         console.error("API 호출 에러:", err);
 
-        // 👇 [추가] 에러가 나도 일단 사이드바를 보여줍니다!
         const sidebar = document.getElementById("partnerProfileArea");
         if (sidebar) sidebar.style.display = "flex";
 
@@ -135,10 +152,18 @@ function enterRoom(roomId, roomName, element) {
     });
 }
 
+
+
+
+
 // --- 5. 소켓 연결 ---
 function connect(roomId) {
     if (stompClient && stompClient.connected) {
         subscribeToRoom(roomId);
+
+        // ✅ [NEW] 실시간 🔴 알림 구독 (한 번만)
+        subscribeToNotifications();
+
         return;
     }
 
@@ -149,11 +174,17 @@ function connect(roomId) {
         console.log('Connected: ' + frame);
         document.getElementById("connectionStatus").innerText = "🟢 실시간 연결됨";
         document.getElementById("connectionStatus").style.color = "green";
+
         subscribeToRoom(roomId);
+
+        // ✅ [NEW] 실시간 🔴 알림 구독 (한 번만)
+        subscribeToNotifications();
+
     }, function (error) {
         console.error("연결 실패:", error);
     });
 }
+
 
 // --- 6. 방 구독 ---
 function subscribeToRoom(roomId) {
@@ -594,6 +625,8 @@ function loadPartnerInfo(roomId) {
     document.getElementById("partnerImg").src = "/images/profile/default.png";
     document.getElementById("partnerNationText").innerText = "";
     document.getElementById("partnerAge").innerText = "";
+    const levelEl = document.getElementById("partnerLevel");
+    if (levelEl) levelEl.innerText = "";
 
     // 2. 실제 API 호출
     fetch(`/api/chat/room/${roomId}`)
@@ -659,4 +692,80 @@ function updatePartnerProfileUI(data) {
             profileBtn.style.display = "none";
         }
     }
+    // ✅ [NEW] 매너 점수 표시 (partnerLevel 영역 사용)
+    const levelEl = document.getElementById("partnerLevel");
+    if (levelEl) {
+        const manner = data.opponentManner; // 🔥 백엔드에서 내려오는 키 이름
+
+        if (manner === null || manner === undefined) {
+            levelEl.innerText = "";
+        } else {
+            const score = Number(manner);
+            levelEl.innerText = isNaN(score)
+                ? `매너 ${manner}`
+                : `매너 ${score.toFixed(1)}점`;
+        }
+    }
+
+}
+function addUnreadDotToRoom(roomId) {
+    const roomItem = document.querySelector(`.room-item[data-room-id="${String(roomId)}"]`);
+    if (!roomItem) return;
+
+    // 이미 있으면 중복 생성 X
+    if (roomItem.querySelector(".unread-dot")) return;
+
+    const nameDiv = roomItem.querySelector(".room-name");
+    if (!nameDiv) return;
+
+    const dot = document.createElement("span");
+    dot.className = "unread-dot";
+    nameDiv.appendChild(dot);
+}
+
+function removeUnreadDotFromRoom(roomId) {
+    const roomItem = document.querySelector(`.room-item[data-room-id="${String(roomId)}"]`);
+    if (!roomItem) return;
+
+    const dot = roomItem.querySelector(".unread-dot");
+    if (dot) dot.remove();
+}
+
+function subscribeToNotifications() {
+    // 이미 구독했으면 중복 방지
+    if (notifySubscription) return;
+
+    const topic = `/sub/chat/notify/${mySenderId}`;
+
+    notifySubscription = stompClient.subscribe(topic, function (message) {
+        try {
+            const payload = JSON.parse(message.body); // { roomId: 1, senderId: 2 }
+            if (!payload || !payload.roomId) return;
+
+            // 내가 현재 보고 있는 방이면 🔴 필요 없음
+            if (String(payload.roomId) === String(currentRoomId)) return;
+
+            // ✅ 방 목록 🔴
+            addUnreadDotToRoom(payload.roomId);
+
+            // ✅ 헤더 🔴
+            showHeaderUnreadDot();
+
+        } catch (e) {
+            console.error("notify payload parse 실패:", e, message.body);
+        }
+    });
+
+    console.log("✅ notify 구독 완료:", topic);
+}
+
+function showHeaderUnreadDot() {
+    const dot = document.getElementById("headerUnreadDot");
+    if (!dot) return;
+    dot.style.display = "inline-block";
+}
+function hideHeaderUnreadDot() {
+    const dot = document.getElementById("headerUnreadDot");
+    if (!dot) return;
+    dot.style.display = "none";
 }
