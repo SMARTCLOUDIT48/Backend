@@ -7,7 +7,6 @@
 	<link rel="stylesheet" th:href="@{/css/layout.css}">
 	<link rel="stylesheet" th:href="@{/css/recommend/recommend.css}" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.1/css/flag-icons.min.css" />
-
 	<script>
 		window.addEventListener('DOMContentLoaded', () => {
 			loadRecommend();
@@ -18,16 +17,10 @@
 			const ageMaxValue = document.getElementById("ageMaxValue");
 			const ageFill = document.getElementById("ageFill");
 
-			const fd = new FormData(document.getElementById('filterForm'));
-			const levels = fd.getAll('levels'); // ["1","3","4"] 처럼 복수
-			// 아무것도 체크 안 된 경우 levels.length === 0  → 서버에서 ALL 처리
-			const lv = levels.length ? levels.join(',') : '1,2,3,4';
-
 			ageMin.addEventListener("input", syncAge);
 			ageMax.addEventListener("input", syncAge);
 
 			syncAge();
-			getSelectedInterests();
 
 			document.getElementById('filterForm')?.addEventListener('reset', () => {
 				setTimeout(() => {
@@ -36,7 +29,7 @@
 			});
 
 
-
+			//채팅 신청 버튼으로 채팅방 입장
 			document.getElementById('recommendTbody').addEventListener('click', async (e) => {
 				const chat_partner_btn = e.target.closest('.chat-btn');
 				if (!chat_partner_btn) return;
@@ -61,25 +54,24 @@
 					chat_partner_btn.disabled = false;
 				}
 			});
-
+			//자동 매칭 버튼
 			const mathch_btn = document.getElementById('auto_matching');
 
 			mathch_btn.addEventListener('click', async () => {
 				mathch_btn.disabled = true;
 
 				try {
+					const criteriaKey = buildCriteriaKey();
+					// criteriaKey: "g=FEMALE|n=JAPAN|s=KOREAN|l=ANY"
+					const payload = criteriaKey ? { criteriaKey } : {};
 					// ✅ 필요하면 여기서 필터 조건을 같이 보냅니다.
 					// 서버에서 로그인 유저 기준으로 자동 계산한다면 body 없이 보내도 됩니다.
-					const payload = {
-						// 예시(선택): 서버가 criteriaKey를 요구한다면 전달
-						// criteriaKey: "g=FEMALE|n=JAPAN|s=KOREAN|l=ANY"
-						criteriaKey: "g=ANY|n=ANY" //임시 매칭 전체 범위
-					};
-
+					console.log("Filtering Key");
+					console.log(payload);
 					const res = await fetch('/api/match/start', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(payload) // payload가 필요 없으면 이 줄 제거 가능
+						body: JSON.stringify(payload) 
 					});
 
 					if (!res.ok) {
@@ -90,8 +82,8 @@
 					console.log("match Start Data");
 					console.log(data);
 					// data 예시:
-					// { status: "WAITING" }
-					// { status: "MATCHED", roomId: 10, roomUuid: "....", partnerId: 2 }
+					// {status: "WAITING" }
+					// {status: "MATCHED", roomId: 10, roomUuid: "....", partnerId: 2 }
 
 					if (data.status === 'MATCHED') {
 						// ✅ 채팅방 페이지 규칙에 맞게 수정
@@ -113,15 +105,44 @@
 				}
 			});
 
-		});
+		}); //window.addEventListener('DOMContentLoaded' 끝나는 지점
 
-		function getSelectedInterests() {
-			const checked = document.querySelectorAll('input[name="interestTypes"]:checked');
-			if (checked.length === 0) return 'ANY';
 
-			return Array.from(checked)
-				.map(el => el.value)
-				.join(',');
+		//데이터 일관성을 위해서 ALL > ANY로 바꿈
+		function toAny(v) {
+				if (!v) return 'ANY';
+				const up = String(v).toUpperCase();
+				return (up === 'ALL') ? 'ANY' : up;
+		}
+
+		//필터링을 form 안에 담아서 필터링키를 만듬
+		function buildCriteriaKey() {
+			const form = document.getElementById('filterForm');
+			if (!form) return null;
+			const fd = new FormData(form);
+
+			const g = toAny(fd.get('gender')); // MALE/FEMALE/ANY
+			const n = toAny(fd.get('nation')); // KOREA/JAPAN/ANY
+			const lang = toAny(fd.get('studyLanguage')); // KOREAN/JAPANESE/ANY
+			
+			// ageMin/ageMax input이 없으면 기본값
+			const ageMinEl = document.getElementById('ageMin');
+			const ageMaxEl = document.getElementById('ageMax');
+			let ageMin = ageMinEl ? parseInt(ageMinEl.value, 10) : 18;
+			let ageMax = ageMaxEl ? parseInt(ageMaxEl.value, 10) : 80;
+			if (Number.isNaN(ageMin)) ageMin = 18;
+			if (Number.isNaN(ageMax)) ageMax = 80;
+			if (ageMin > ageMax) [ageMin, ageMax] = [ageMax, ageMin];
+
+			const levels = fd.getAll('levels');
+			const lv = levels.length ? levels.join(',') : 'ANY';
+
+			// interests: 체크된 대분류 InterestType(CULTURE, IT...), 없으면 ANY
+			const interests = fd.getAll('interestTypes');
+			const interest = interests.length ? interests.join(',') : 'ANY';
+
+			// 서버 파서가 기대하는 키: g, age, n, lang, lv, interest
+			return `g=${g}|age=${ageMin}-${ageMax}|n=${n}|lang=${lang}|lv=${lv}|interest=${interest}`;
 		}
 
 		function clampSwap(minEl, maxEl) {
@@ -148,32 +169,6 @@
 			ageMaxValue.textContent = String(max);
 			setFill(ageFill, min, max, 18, 60);
 		}
-
-		// ✅ 새로고침 버튼: form reset 후 화면/리스트 갱신용 훅
-		document.getElementById('filterForm').addEventListener('reset', () => {
-			// reset은 값이 즉시 반영되므로, 표시값도 재동기화
-			setTimeout(() => {
-				ageValue.textContent = ageRange.value;
-				syncAge();
-				// 필요하면 추천 리스트도 다시 불러오세요:
-				// loadRecommend();
-			}, 0);
-		});
-
-		// ✅ 검색 버튼: submit 이벤트 (여기서 criteriaKey 생성해서 서버로 보내도록 확장)
-		document.getElementById('filterForm').addEventListener('submit', (e) => {
-			e.preventDefault();
-			// 여기서 필터 값 읽기 가능:
-			// const fd = new FormData(e.currentTarget);
-			// console.log(Object.fromEntries(fd.entries()));
-			// loadRecommendWithFilters(...);
-		});
-
-		// ✅ 자동 매칭 버튼: 기존 /api/match/start 연결
-		document.getElementById('auto_matching').addEventListener('click', async () => {
-			// 기존 매칭 로직 붙일 자리
-			// startMatching();
-		});
 
 		function startPollingForMatch(mathch_btn) {
 			const intervalMs = 1000;
@@ -206,7 +201,7 @@
 					if (Date.now() - startedAt > maxMs) {
 						clearInterval(timer);
 						alert('매칭 대기 시간이 초과되었습니다. 다시 시도해주세요.');
-						btn.disabled = false;
+						mathch_btn.disabled = false;
 					}
 
 				} catch (err) {
@@ -307,38 +302,38 @@
 
 
 				html += `
-            	<div class="member-card">
-			<div class="profile-wrap">
-				<img src="${imagePath}" class="profile-img" alt="">
-				<span class="${flagStatus}" aria-label="Japan"></span>
-			</div>
+    <div class="member-card">
+        <div class="profile-wrap">
+            <img src="${imagePath}" class="profile-img" alt="">
+                <span class="${flagStatus}" aria-label="Japan"></span>
+        </div>
 
-			<!-- 정보 영역 -->
-			<div class="info">
-				<div class="nickname">${item.nickname}</div>
+        <!-- 정보 영역 -->
+        <div class="info">
+            <div class="nickname">${item.nickname}</div>
 
-				<div class="row">
-					<span class="label">거주국가</span>
-					<span class="value">${nation}</span>
-				</div>
+            <div class="row">
+                <span class="label">거주국가</span>
+                <span class="value">${nation}</span>
+            </div>
 
-				<div class="row">
-					<span class="label">학습언어</span>
-					<span class="lang">
-						<span class="${study}"></span>
-						<span class="level">${languageLevel}</span>
-					</span>
-				</div>
-			</div>
+            <div class="row">
+                <span class="label">학습언어</span>
+                <span class="lang">
+                    <span class="${study}"></span>
+                    <span class="level">${languageLevel}</span>
+                </span>
+            </div>
+        </div>
 
-			<!-- 우측 영역 -->
-			<div class="right">
-				<span class="chatting-text">"인기 멤버예요! 🔥 답장이 늦을 수 있어요."</span>
-				<div class="temp">${item.manner}℃</div>
-				<button class="chat-btn" data-user-id="${item.id}">채팅 신청</button>
-			</div>
-		</div>
-        		`;
+        <!-- 우측 영역 -->
+        <div class="right">
+            <span class="chatting-text">"인기 멤버예요! 🔥 답장이 늦을 수 있어요."</span>
+            <div class="temp">${item.manner}℃</div>
+            <button class="chat-btn" data-user-id="${item.id}">채팅 신청</button>
+        </div>
+    </div>
+    `;
 			});
 
 			recommendList.innerHTML = html;
@@ -359,6 +354,8 @@
 		// 		console.log(e);
 		// 	}
 		// }
+
+
 
 	</script>
 </head>
@@ -471,31 +468,30 @@
 				<p class="help">원하는 레벨만 체크하세요. (미체크 시 전체로 간주)</p>
 			</div>
 
-			<!-- 6) 학습레벨(복수 선택) -->
-			<!-- 관심사 (대분류) -->
+			<!-- 6) 관심사 (대분류) -->
 			<div class="filter-item">
 				<label class="filter-label">관심사</label>
 
 				<div class="btn-group interest-group">
-					<input type="checkbox" name="interestTypes" id="it_culture" value="CULTURE_ART">
+					<input type="checkbox" name="interestTypes" id="it_culture" value="CULTURE">
 					<label for="it_culture" class="filter-btn">문화 · 예술</label>
 
-					<input type="checkbox" name="interestTypes" id="it_hobby" value="HOBBY_LEISURE">
+					<input type="checkbox" name="interestTypes" id="it_hobby" value="HOBBY">
 					<label for="it_hobby" class="filter-btn">취미 · 여가</label>
 
 					<input type="checkbox" name="interestTypes" id="it_sport" value="SPORTS">
 					<label for="it_sport" class="filter-btn">운동 · 스포츠</label>
 
-					<input type="checkbox" name="interestTypes" id="it_travel" value="TRAVEL_LOCAL">
+					<input type="checkbox" name="interestTypes" id="it_travel" value="TRAVEL">
 					<label for="it_travel" class="filter-btn">여행 · 지역</label>
 
-					<input type="checkbox" name="interestTypes" id="it_food" value="FOOD_COOKING">
+					<input type="checkbox" name="interestTypes" id="it_food" value="FOOD">
 					<label for="it_food" class="filter-btn">음식 · 요리</label>
 
-					<input type="checkbox" name="interestTypes" id="it_learning" value="LEARNING">
+					<input type="checkbox" name="interestTypes" id="it_learning" value="STUDY">
 					<label for="it_learning" class="filter-btn">학습 · 자기계발</label>
 
-					<input type="checkbox" name="interestTypes" id="it_tech" value="IT_TECH">
+					<input type="checkbox" name="interestTypes" id="it_tech" value="IT">
 					<label for="it_tech" class="filter-btn">IT · 기술</label>
 
 					<input type="checkbox" name="interestTypes" id="it_life" value="LIFESTYLE">
@@ -510,11 +506,9 @@
 				<button type="button" id="auto_matching" class="btn primary">
 					자동 매칭
 				</button>
-
 				<button type="reset" id="refreshBtn" class="btn ghost">
 					초기화? 새로고침?
 				</button>
-
 				<button type="submit" id="searchBtn" class="btn solid">
 					검색
 				</button>

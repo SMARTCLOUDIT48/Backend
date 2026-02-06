@@ -33,6 +33,10 @@ public class RecommendController {
 		private String criteriaKey;
 	}
 	
+	/**
+	 * Recommend 페이지로 이동
+	 * @return
+	 */
 	@GetMapping("recommend") //임시
 	public String Recommend(){
 		
@@ -44,10 +48,8 @@ public class RecommendController {
 	public List<RecommendDTO> recommend(
 			@AuthenticationPrincipal UserDetails user
 	){
-		
 		Long user_id = rs.searchid(user);
 		List<RecommendDTO> userDTO= rs.firstRecommend(user_id);
-		
 		return userDTO;
 	}
 	
@@ -58,16 +60,15 @@ public class RecommendController {
 			@PathVariable Long partnerId
 	){
 		Long myId = rs.searchid(userDetails);
-		log.debug(userDetails.getUsername());
 		DirectRoomResponseDTO dto = chatRoomMemberService.createOrGetDirectRoom(myId,partnerId);
 		return dto;
 	}
 	
 	@ResponseBody
 	@PostMapping("/api/match/start")
-	public MatchResponseDTO start(@AuthenticationPrincipal UserDetails userDetails,
-								  @RequestBody(required = false) MatchStartRequest req){
-		
+	public MatchResponseDTO start(
+			@AuthenticationPrincipal UserDetails userDetails,
+			@RequestBody(required = false) MatchStartRequest req){
 		Long myId = rs.searchid(userDetails);
 		String criteriaKey = (req != null) ? req.getCriteriaKey() : null;
 		
