@@ -1,36 +1,55 @@
 /* =========================================================
-   1. 전역 설정 및 오로라 배경 (feedWrite.css와 동일)
+   1. 전역 설정 및 오로라 배경 (boardWrite.css와 동일)
 ========================================================= */
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
+    font-family: Pretendard, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+/* THEME VARIABLES (boardWrite.css 테마 변수 활용) */
+:root {
+  --bg:
+    radial-gradient(1200px 800px at 10% 10%, rgba(255, 90, 150, 0.75), transparent 55%),
+    radial-gradient(1000px 700px at 90% 20%, rgba(120, 140, 255, 0.75), transparent 55%),
+    radial-gradient(900px 800px at 50% 90%, rgba(120, 220, 200, 0.75), transparent 55%),
+    linear-gradient(180deg, #eceeff 0%, #e6ebff 100%);
+
+  --hero-text: rgba(19, 29, 53, 0.88);
+  --muted: #555;
+  --header-h: 72px; /* 헤더 높이 통일 */
+  --blue: #4a6cff;
+  --red: #ff6f91;
+
+  /* Glass 효과 변수 */
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
     color: #333;
-    background-color: #f8faff;
+    padding-top: var(--header-h); /* 헤더 높이만큼 상단 여백 */
+    min-height: 100vh;
     overflow-x: hidden;
-    /* 스크롤바가 생겨도 배경이 고정되도록 */
-    display: block;
 }
 
-/* 배경의 오로라 메쉬 그라데이션 */
+/* 배경의 오로라 메쉬 그라데이션 (boardWrite.css와 동일) */
 body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background:
-        radial-gradient(circle at 15% 15%, rgba(255, 174, 214, 0.45) 0%, transparent 40%),
-        radial-gradient(circle at 85% 20%, rgba(182, 193, 255, 0.45) 0%, transparent 40%),
-        radial-gradient(circle at 80% 80%, rgba(142, 211, 255, 0.45) 0%, transparent 45%),
-        radial-gradient(circle at 20% 85%, rgba(200, 160, 255, 0.45) 0%, transparent 45%),
-        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.6) 0%, transparent 50%);
-    filter: blur(80px);
-    opacity: 0.8;
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+
+  background:
+    radial-gradient(circle at 20% 30%, rgba(130, 180, 255, 0.6), transparent 40%),
+    radial-gradient(circle at 70% 40%, rgba(255, 150, 200, 0.6), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(180, 255, 220, 0.6), transparent 50%);
+
+  filter: blur(40px);
+  opacity: 0.6;
 }
 
 /* 링크 기본 스타일 제거 */
@@ -40,116 +59,171 @@ a {
 }
 
 /* =========================
-   HEADER STYLES (feedWrite.css 그대로)
+   HEADER STYLES (boardWrite.css와 완벽 일치)
 ========================= */
 .header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 85px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-h); /* 72px로 통일 */
 
-    background: rgba(255, 255, 255, 0.35);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 
-    transition: background 0.35s ease, backdrop-filter 0.35s ease;
-    z-index: 1000;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  transition:
+    background 0.35s ease,
+    backdrop-filter 0.35s ease,
+    box-shadow 0.35s ease;
+
+  z-index: 1000;
+  border-bottom: none; /* Home 스타일과 동일하게 */
 }
 
 .header-inner {
-    max-width: 1200px;
-    height: 100%;
-    margin: 0 auto;
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  max-width: 1200px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .logo {
-    font-weight: 800;
-    font-size: 1.2rem;
-    display: flex;
-    gap: 8px;
-    cursor: pointer;
-    color: #333;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #222;
+  letter-spacing: -0.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .nav {
-    display: flex;
-    align-items: center;
-    gap: 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
 .nav a {
-    position: relative;
-    padding: 8px 14px;
-    border-radius: 999px;
-    color: #666;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.25s ease;
+  position: relative;
+  padding: 8px 14px;
+  border-radius: 999px;
+
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
 }
 
+/* ✨ hover glass glow */
 .nav a:hover {
-    color: #222;
-    background: rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 6px 18px rgba(255, 255, 255, 0.6);
-    transform: translateY(-1px);
+  color: #222;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 6px 18px rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+
+  transform: translateY(-1px);
 }
 
+.nav a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ff8fb1, #4a6cff);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: width 0.25s ease;
+}
+
+.nav a:hover::after {
+  width: 100%;
+}
+
+/* 인증 버튼 영역 */
 .auth-buttons {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 .login-btn {
-    background: linear-gradient(135deg, #ff6f91, #ff9f7f);
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 999px;
-    font-weight: 700;
-    box-shadow: 0 12px 30px rgba(255, 120, 150, 0.45);
-    cursor: pointer;
-    transition: transform 0.25s ease, filter 0.25s ease;
+  background: linear-gradient(135deg, #ff6f91, #ff9f7f);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 12px 30px rgba(255, 120, 150, 0.45);
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
 }
 
 .login-btn:hover {
-    transform: translateY(-2px) scale(1.03);
-    filter: brightness(1.05);
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.05);
 }
 
 .signup-btn {
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.65);
-    padding: 10px 18px;
-    border-radius: 999px;
-    font-size: 14px;
-    font-weight: 600;
-    color: rgba(40, 60, 120, 0.8);
-    cursor: pointer;
-    transition: all 0.25s ease;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(40, 60, 120, 0.8);
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(80, 100, 180, 0.15);
+  transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .signup-btn:hover {
-    background: rgba(255, 255, 255, 0.75);
-    transform: translateY(-1px);
-    box-shadow: 0 12px 26px rgba(80, 100, 180, 0.25);
+  background: rgba(255, 255, 255, 0.75);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(80, 100, 180, 0.25);
+}
+
+/* 헤더 CTA (오로라 효과) - 필요시 사용 */
+.header-cta {
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  color: #4a6cff;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(80, 100, 180, 0.15);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
 /* =========================
    MAIN CONTENT STYLES (Board List)
 ========================= */
 .container {
-    max-width: 1200px; /* 헤더 inner와 동일하게 */
+    max-width: 1200px;
     margin: 0 auto;
-    padding-top: 130px; /* 헤더 높이(85px) + 여유공간 */
+    padding-top: 60px; /* 헤더 높이 제외하고 추가 여백 */
     padding-bottom: 80px;
     padding-left: 24px;
     padding-right: 24px;
@@ -166,7 +240,7 @@ a {
 .hero-content h2 {
     font-size: 32px;
     font-weight: 800;
-    color: #222;
+    color: #111;
     margin: 0 0 10px 0;
     letter-spacing: -0.5px;
 }
@@ -178,23 +252,25 @@ a {
 }
 
 .write-btn {
-    /* 로그인 버튼과 같은 그라데이션 사용으로 통일감 부여 */
-    background: linear-gradient(135deg, #ff6f91, #ff9f7f);
+    /* boardWrite의 submit-btn과 동일한 스타일 */
+    background: linear-gradient(135deg, #7b8cff, #7be0cf);
     color: white;
-    padding: 12px 24px;
+    padding: 12px 28px;
     border-radius: 999px;
     font-weight: 700;
     font-size: 15px;
-    box-shadow: 0 10px 25px rgba(255, 120, 150, 0.4);
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 20px rgba(123, 140, 255, 0.3);
+    transition: transform 0.3s, box-shadow 0.3s, filter 0.3s;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    text-decoration: none;
 }
 
 .write-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 30px rgba(255, 120, 150, 0.5);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 28px rgba(123, 140, 255, 0.45);
+    filter: brightness(1.05);
 }
 
 /* 2. 필터 & 검색 바 */
@@ -208,21 +284,22 @@ a {
 }
 
 .filter-select, .search-select, .search-input {
-    padding: 10px 16px;
+    padding: 12px 16px;
     border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.6);
-    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
     backdrop-filter: blur(10px);
     font-size: 14px;
     color: #444;
     outline: none;
     transition: all 0.2s;
     font-family: inherit;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .filter-select:hover, .search-input:focus {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: #ff9f7f;
+    background: rgba(255, 255, 255, 0.85);
+    border-color: #7b8cff;
 }
 
 .search-form {
@@ -235,58 +312,61 @@ a {
 }
 
 .search-btn {
-    background: #5e5ce6; /* 보라색 포인트 */
-    color: white;
-    border: none;
+    background: rgba(255, 255, 255, 0.6);
+    color: #555;
+    border: 1px solid rgba(255, 255, 255, 0.8);
     padding: 10px 20px;
     border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
 }
 
 .search-btn:hover {
-    background: #4b49c7;
+    background: rgba(255, 255, 255, 0.9);
+    color: #222;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* 3. 게시글 리스트 테이블 (유리 카드 효과 적용) */
+/* 3. 게시글 리스트 테이블 (Glassmorphism 적용) */
 .board-list-wrapper {
     width: 100%;
-    /* feedWrite.css의 feed-card와 동일한 글래스모피즘 효과 */
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(30px) saturate(120%);
-    -webkit-backdrop-filter: blur(30px) saturate(120%);
+    /* boardWrite의 write-card와 동일한 Glass 스타일 */
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
 
-    border-radius: 24px;
+    border-radius: 32px;
     padding: 30px;
-    box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.05),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
 
     margin-bottom: 40px;
-    overflow-x: auto; /* 모바일 대응 */
+    overflow-x: auto;
 }
 
 .board-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px; /* 테이블 최소 너비 */
+    min-width: 800px;
 }
 
 .board-table th {
     text-align: center;
-    padding: 15px;
-    color: #666;
-    font-weight: 600;
-    font-size: 14px;
-    border-bottom: 2px solid rgba(0,0,0,0.05);
+    padding: 18px 15px;
+    color: #555;
+    font-weight: 700;
+    font-size: 15px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
 .board-table td {
-    padding: 18px 15px;
+    padding: 20px 15px;
     text-align: center;
-    border-bottom: 1px solid rgba(0,0,0,0.03);
-    font-size: 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: 15px;
     color: #333;
 }
 
@@ -303,7 +383,7 @@ a {
 }
 
 .title-cell a:hover {
-    color: #ff6f91; /* 메인 컬러로 호버 */
+    color: #7b8cff; /* 포인트 컬러 */
     text-decoration: underline;
 }
 
@@ -317,19 +397,19 @@ a {
 /* 카테고리 뱃지 */
 .category-badge {
     display: inline-block;
-    padding: 4px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    background-color: rgba(94, 92, 230, 0.1); /* 연한 보라 */
+    font-size: 13px;
+    font-weight: 600;
+    background-color: rgba(123, 140, 255, 0.15); /* 연한 블루/보라 */
     color: #5e5ce6;
 }
 
 /* 게시글 없음 메시지 */
 .empty-message {
-    padding: 50px !important;
+    padding: 60px !important;
     color: #888;
-    font-size: 15px;
+    font-size: 16px;
 }
 
 /* 4. 페이징 */
@@ -338,93 +418,101 @@ a {
     justify-content: center;
     align-items: center;
     gap: 8px;
+    margin-top: 20px;
 }
 
 .page-btn, .page-number {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-width: 36px;
-    height: 36px;
+    min-width: 40px;
+    height: 40px;
     padding: 0 5px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.6);
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+
     color: #666;
     font-size: 14px;
     font-weight: 500;
     transition: all 0.2s;
-    border: 1px solid transparent;
+    text-decoration: none;
 }
 
 .page-btn:hover, .page-number:hover {
-    background: white;
+    background: rgba(255, 255, 255, 0.85);
+    transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     color: #333;
 }
 
 .page-number.current {
-    background: #ff6f91;
+    background: linear-gradient(135deg, #7b8cff, #7be0cf);
     color: white;
     font-weight: 700;
-    box-shadow: 0 4px 12px rgba(255, 111, 145, 0.4);
+    border: none;
+    box-shadow: 0 4px 12px rgba(123, 140, 255, 0.3);
 }
 
 /* =========================
-   FOOTER STYLES (feedWrite.css 그대로)
+   FOOTER STYLES (boardWrite.css와 완벽 일치)
 ========================= */
 .site-footer {
-    padding: 64px 0 40px;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(30px);
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    width: 100%;
+  margin-top: 80px;
+  padding: 64px 0 40px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(30px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  width: 100%;
 }
 
 .footer-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
 .footer-links {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 48px;
-    margin-bottom: 48px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 48px;
+  margin-bottom: 48px;
 }
 
 .footer-col h4 {
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 14px;
-    color: rgba(30, 40, 60, 0.85);
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: rgba(30, 40, 60, 0.85);
 }
 
 .footer-col a {
-    display: block;
-    font-size: 13px;
-    color: rgba(60, 70, 90, 0.65);
-    text-decoration: none;
-    margin-bottom: 8px;
-    transition: color 0.2s ease;
+  display: block;
+  font-size: 13px;
+  color: rgba(60, 70, 90, 0.65);
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: color 0.2s ease;
 }
 
 .footer-col a:hover {
-    color: rgba(30, 40, 60, 0.9);
+  color: rgba(30, 40, 60, 0.9);
 }
 
 .footer-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    color: rgba(60, 70, 90, 0.6);
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: rgba(60, 70, 90, 0.6);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 24px;
 }
 
 .footer-meta span {
-    margin-right: 6px;
+  margin-right: 6px;
 }
 
 @media (max-width: 900px) {
@@ -443,5 +531,10 @@ a {
     }
     .search-input {
         width: 100%;
+    }
+    .hero-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
     }
 }
