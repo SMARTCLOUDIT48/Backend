@@ -71,7 +71,7 @@
 					const res = await fetch('/api/match/start', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(payload) 
+						body: JSON.stringify(payload)
 					});
 
 					if (!res.ok) {
@@ -91,17 +91,35 @@
 						console.log(data);
 						console.log("데이터. roomId" + data.roomId);
 						sessionStorage.setItem('openRoomId', data.roomId);
+						closeMatchOverlay(); // 혹시 열려있을 수 있으니 닫기
 						location.href = `/chat`;
 						return;
 					}
 
 					// WAITING이면 폴링 시작(1초마다 매칭 결과 확인)
+					openMatchOverlay();
 					startPollingForMatch(mathch_btn);
 
 				} catch (err) {
 					console.error(err);
 					alert('매칭 시작 실패');
+					closeMatchOverlay(); // 혹시 열려있을 수 있으니 닫기
 					mathch_btn.disabled = false;
+				}
+			});
+
+			// ✅ 매칭 취소 버튼
+			document.getElementById('matchCancelBtn')?.addEventListener('click', async () => {
+				stopMatchPolling();
+				closeMatchOverlay();
+
+				const mathch_btn = document.getElementById('auto_matching');
+				if (mathch_btn) mathch_btn.disabled = false;
+
+				try {
+					await fetch('/api/match/cancel', { method: 'POST' });
+				} catch (e) {
+					console.error('cancel failed', e);
 				}
 			});
 
@@ -110,9 +128,9 @@
 
 		//데이터 일관성을 위해서 ALL > ANY로 바꿈
 		function toAny(v) {
-				if (!v) return 'ANY';
-				const up = String(v).toUpperCase();
-				return (up === 'ALL') ? 'ANY' : up;
+			if (!v) return 'ANY';
+			const up = String(v).toUpperCase();
+			return (up === 'ALL') ? 'ANY' : up;
 		}
 
 		//필터링을 form 안에 담아서 필터링키를 만듬
@@ -124,7 +142,7 @@
 			const g = toAny(fd.get('gender')); // MALE/FEMALE/ANY
 			const n = toAny(fd.get('nation')); // KOREA/JAPAN/ANY
 			const lang = toAny(fd.get('studyLanguage')); // KOREAN/JAPANESE/ANY
-			
+
 			// ageMin/ageMax input이 없으면 기본값
 			const ageMinEl = document.getElementById('ageMin');
 			const ageMaxEl = document.getElementById('ageMax');
@@ -171,6 +189,8 @@
 		}
 
 		function startPollingForMatch(mathch_btn) {
+			stopMatchPolling(); // ✅ 혹시 남아있던 폴링 제거
+
 			const intervalMs = 1000;
 			const maxMs = 60_000; // 60초
 			const startedAt = Date.now();
@@ -231,6 +251,28 @@
 			}
 		}
 
+		let matchPollingTimer = null;
+
+		function openMatchOverlay() {
+			const overlay = document.getElementById('matchOverlay');
+			overlay.classList.add('is-open');
+			overlay.setAttribute('aria-hidden', 'false');
+			document.body.style.overflow = 'hidden'; // 스크롤 잠금
+		}
+
+		function closeMatchOverlay() {
+			const overlay = document.getElementById('matchOverlay');
+			overlay.classList.remove('is-open');
+			overlay.setAttribute('aria-hidden', 'true');
+			document.body.style.overflow = ''; // 스크롤 복구
+		}
+
+		function stopMatchPolling() {
+			if (matchPollingTimer) {
+				clearInterval(matchPollingTimer);
+				matchPollingTimer = null;
+			}
+		}
 
 
 		function renderRecommend(list) {
@@ -522,6 +564,16 @@
 	<footer>
 		<div th:replace="~{fragments/footer :: footer}"></div>
 	</footer>
+	<div id="matchOverlay" class="match-overlay" aria-hidden="true">
+		<div class="match-modal" role="dialog" aria-modal="true" aria-labelledby="matchTitle">
+			<h3 id="matchTitle" class="match-title">매칭중입니다…</h3>
+			<p class="match-sub">잠시만 기다려 주세요. (최대 60초)</p>
+
+			<div class="match-actions">
+				<button type="button" id="matchCancelBtn" class="btn ghost">취소</button>
+			</div>
+		</div>
+	</div>
 </body>
 
 </html>

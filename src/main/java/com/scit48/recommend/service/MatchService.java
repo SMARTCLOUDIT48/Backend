@@ -40,7 +40,7 @@ public class MatchService {
 	private final RedisTemplate<String, Object> redisObjectTemplate;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	
-	private static final long RESULT_TTL_MIN = 10;
+	private static final long RESULT_TTL_MIN = 1;
 	
 	// pop 후보를 너무 오래 뒤지지 않도록 제한(실무에서는 대기열 크기/트래픽에 맞춰 조절)
 	private static final int TRY_POP_LIMIT = 30;
@@ -72,7 +72,7 @@ public class MatchService {
 		}
 		
 		// 5) 내 관심사(대분류) 로드
-		Set<InterestType> myInterestTypes = loadInterestTypes(myId);
+		//Set<InterestType> myInterestTypes = loadInterestTypes(myId);
 		
 		// 6) partner를 pop 하면서 “상호 조건 만족” 찾기
 		List<Long> poppedButNotMatched = new ArrayList<>();
@@ -97,11 +97,19 @@ public class MatchService {
 			}
 			
 			Criteria partnerCriteria = Criteria.parse(candCriteriaKey);
-			Set<InterestType> partnerInterests = loadInterestTypes(candId);
+			
+			//Set<InterestType> partnerInterests = loadInterestTypes(candId);
+			
+			//boolean mutual 교체
+//			boolean mutual =
+//					accepts(myCriteria, partner, partnerInterests) &&
+//							accepts(partnerCriteria, me, myInterestTypes);
 			
 			boolean mutual =
-					accepts(myCriteria, partner, partnerInterests) &&
-							accepts(partnerCriteria, me, myInterestTypes);
+					acceptsUserFilters(myCriteria, partner) &&
+							acceptsUserFilters(partnerCriteria, me) &&
+							interestCompatibleSoft(myCriteria, partnerCriteria); // ✅ 완화 모드
+			
 			
 			if (mutual) {
 				partnerId = candId;
@@ -143,8 +151,8 @@ public class MatchService {
 		setResult(partnerId, partnerRes);
 		
 		// (선택) criteria는 남겨도 되지만, 깔끔하게 지우고 싶으면 삭제
-		// redisMatchQueueService.clearCriteria(myId);
-		// redisMatchQueueService.clearCriteria(partnerId);
+		redisMatchQueueService.clearCriteria(myId);
+		redisMatchQueueService.clearCriteria(partnerId);
 		
 		return myRes;
 	}
@@ -165,24 +173,65 @@ public class MatchService {
 		}
 		return raw.trim();
 	}
-	
-	private Set<InterestType> loadInterestTypes(Long userId) {
-		List<UserInterestEntity> list = userInterestRepository.findByUser_Id(userId);
-		if (list == null || list.isEmpty()) return Set.of();
-		return list.stream()
-				.map(UserInterestEntity::getInterest)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toSet());
-	}
+	//DB 관심사 조회 메서드
+//	private Set<InterestType> loadInterestTypes(Long userId) {
+//		List<UserInterestEntity> list = userInterestRepository.findByUser_Id(userId);
+//		if (list == null || list.isEmpty()) return Set.of();
+//		return list.stream()
+//				.map(UserInterestEntity::getInterest)
+//				.filter(Objects::nonNull)
+//				.collect(Collectors.toSet());
+//	}
 	
 	/**
 	 * criteria가 target(상대)에게 허용되는지
 	 */
-	private boolean accepts(Criteria c, UserEntity target, Set<InterestType> targetInterests) {
+//	private boolean accepts(Criteria c, UserEntity target, Set<InterestType> targetInterests) {
+//
+//		// gender
+//		if (!"ANY".equals(c.gender)) {
+//			// c.gender는 MALE/FEMALE 문자열로 들어온다고 가정
+//			if (!target.getGender().name().equals(c.gender)) return false;
+//		}
+//
+//		// age range
+//		if (target.getAge() == null) return false;
+//		if (target.getAge() < c.ageMin || target.getAge() > c.ageMax) return false;
+//
+//		// nation
+//		if (!"ANY".equals(c.nation)) {
+//			if (!c.nation.equals(target.getNation())) return false; // KOREA/JAPAN
+//		}
+//
+//		// study language
+//		if (!"ANY".equals(c.studyLang)) {
+//			if (!c.studyLang.equals(target.getStudyLanguage())) return false; // KOREAN/JAPANESE
+//		}
+//
+//		// level (1~4 or ANY)
+//		if (!c.levelsAny) {
+//			int targetLv = levelToInt(target.getLevelLanguage());
+//			if (!c.levels.contains(targetLv)) return false;
+//		}
+//
+//		// interest (대분류) - ANY면 통과
+//		if (!c.interestsAny) {
+//			if (targetInterests == null || targetInterests.isEmpty()) return false;
+//			boolean anyMatch = targetInterests.stream().anyMatch(c.interests::contains);
+//			if (!anyMatch) return false;
+//		}
+//
+//		return true;
+//	}
+	
+	/**
+	 * criteria가 target(상대)에게 허용되는지 (관심사 제외: 관심사는 criteria끼리 비교)
+	 */
+	private boolean acceptsUserFilters(Criteria c, UserEntity target) {
 		
 		// gender
 		if (!"ANY".equals(c.gender)) {
-			// c.gender는 MALE/FEMALE 문자열로 들어온다고 가정
+			if (target.getGender() == null) return false;
 			if (!target.getGender().name().equals(c.gender)) return false;
 		}
 		
@@ -192,12 +241,14 @@ public class MatchService {
 		
 		// nation
 		if (!"ANY".equals(c.nation)) {
-			if (!c.nation.equals(target.getNation())) return false; // KOREA/JAPAN
+			if (target.getNation() == null) return false;
+			if (!c.nation.equals(target.getNation())) return false;
 		}
 		
 		// study language
 		if (!"ANY".equals(c.studyLang)) {
-			if (!c.studyLang.equals(target.getStudyLanguage())) return false; // KOREAN/JAPANESE
+			if (target.getStudyLanguage() == null) return false;
+			if (!c.studyLang.equals(target.getStudyLanguage())) return false;
 		}
 		
 		// level (1~4 or ANY)
@@ -206,15 +257,9 @@ public class MatchService {
 			if (!c.levels.contains(targetLv)) return false;
 		}
 		
-		// interest (대분류) - ANY면 통과
-		if (!c.interestsAny) {
-			if (targetInterests == null || targetInterests.isEmpty()) return false;
-			boolean anyMatch = targetInterests.stream().anyMatch(c.interests::contains);
-			if (!anyMatch) return false;
-		}
-		
 		return true;
 	}
+	
 	
 	private int levelToInt(LanguageLevel lv) {
 		if (lv == null) return 1;
@@ -224,6 +269,31 @@ public class MatchService {
 			case ADVANCED -> 3;
 			case NATIVE -> 4;
 		};
+	}
+	
+	/**
+	 * ✅ 완화(Soft) 모드 관심사 매칭
+	 * - 둘 다 ANY: 통과
+	 * - 한쪽만 ANY: 통과 (관심사로는 제한하지 않음)
+	 * - 둘 다 선택: 교집합이 있으면 통과, 없으면 실패
+	 */
+	private boolean interestCompatibleSoft(Criteria a, Criteria b) {
+		if (a == null || b == null) return true;
+		
+		// 둘 다 ANY면 통과
+		if (a.interestsAny && b.interestsAny) return true;
+		
+		// 한쪽만 ANY면 통과(완화 모드)
+		if (a.interestsAny || b.interestsAny) return true;
+		
+		// 둘 다 선택했으면 교집합 검사
+		if (a.interests == null || a.interests.isEmpty()) return true; // 안전장치(파싱 실패시 완화)
+		if (b.interests == null || b.interests.isEmpty()) return true;
+		
+		for (InterestType t : a.interests) {
+			if (b.interests.contains(t)) return true;
+		}
+		return false;
 	}
 	
 	// ===== redis result helpers =====
@@ -246,6 +316,10 @@ public class MatchService {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+	public void cancel(Long myId) {
+		// 대기열/큐/criteria/result 정리
+		redisMatchQueueService.cancelWaiting(myId);
 	}
 	
 	// ===== Criteria class =====

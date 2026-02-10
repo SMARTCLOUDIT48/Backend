@@ -1,5 +1,6 @@
 package com.scit48.recommend.controller;
 
+import com.scit48.auth.member.service.CustomUserDetails;
 import com.scit48.chat.domain.dto.DirectRoomResponseDTO;
 import com.scit48.chat.service.ChatRoomMemberService;
 import com.scit48.common.dto.UserDTO;
@@ -11,12 +12,14 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @Slf4j
@@ -82,6 +85,13 @@ public class RecommendController {
 	){
 		Long myId = rs.searchid(userDetails);
 		return matchService.getOrWaiting(myId);
+	}
+	
+	@PostMapping("/api/match/cancel")
+	public ResponseEntity<?> cancel(@AuthenticationPrincipal UserDetails userDetails) {
+		Long myId = rs.searchid(userDetails);
+		matchService.cancel(myId);
+		return ResponseEntity.ok(Map.of("status", "CANCELED"));
 	}
 	
 	//new git test commit 주석
