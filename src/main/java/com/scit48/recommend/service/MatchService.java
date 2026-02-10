@@ -6,11 +6,8 @@ import com.scit48.chat.domain.ChatRoomMemberEntity;
 import com.scit48.chat.repository.ChatRoomMemberRepository;
 import com.scit48.chat.repository.ChatRoomRepository;
 import com.scit48.common.domain.entity.UserEntity;
-import com.scit48.common.domain.entity.UserInterestEntity;
-import com.scit48.common.enums.Gender;
 import com.scit48.common.enums.InterestType;
 import com.scit48.common.enums.LanguageLevel;
-import com.scit48.common.repository.UserInterestRepository;
 import com.scit48.common.repository.UserRepository;
 import com.scit48.recommend.domain.dto.MatchResponseDTO;
 import jakarta.transaction.Transactional;
@@ -21,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,7 +26,6 @@ import java.util.stream.Collectors;
 public class MatchService {
 	
 	private final UserRepository userRepository;
-	private final UserInterestRepository userInterestRepository;
 	
 	private final ChatRoomRepository chatRoomRepository;
 	private final ChatRoomMemberRepository chatRoomMemberRepository;
@@ -71,10 +66,7 @@ public class MatchService {
 			return MatchResponseDTO.waiting();
 		}
 		
-		// 5) 내 관심사(대분류) 로드
-		//Set<InterestType> myInterestTypes = loadInterestTypes(myId);
-		
-		// 6) partner를 pop 하면서 “상호 조건 만족” 찾기
+		// 5) partner를 pop 하면서 “상호 조건 만족” 찾기
 		List<Long> poppedButNotMatched = new ArrayList<>();
 		Long partnerId = null;
 		
@@ -98,18 +90,10 @@ public class MatchService {
 			
 			Criteria partnerCriteria = Criteria.parse(candCriteriaKey);
 			
-			//Set<InterestType> partnerInterests = loadInterestTypes(candId);
-			
-			//boolean mutual 교체
-//			boolean mutual =
-//					accepts(myCriteria, partner, partnerInterests) &&
-//							accepts(partnerCriteria, me, myInterestTypes);
-			
 			boolean mutual =
 					acceptsUserFilters(myCriteria, partner) &&
 							acceptsUserFilters(partnerCriteria, me) &&
-							interestCompatibleSoft(myCriteria, partnerCriteria); // ✅ 완화 모드
-			
+							interestCompatibleSoft(myCriteria, partnerCriteria); // ✅ 관심사는 criteria끼리(완화 모드)
 			
 			if (mutual) {
 				partnerId = candId;
@@ -119,18 +103,18 @@ public class MatchService {
 			}
 		}
 		
-		// 7) 매칭 실패한 후보들은 다시 대기열로 복귀
+		// 6) 매칭 실패한 후보들은 다시 대기열로 복귀
 		for (Long uid : poppedButNotMatched) {
 			redisMatchQueueService.enqueueIfAbsent(uid);
 		}
 		
-		// 8) 매칭 실패 → 나는 대기열로 들어가고 WAITING
+		// 7) 매칭 실패 → 나는 대기열로 들어가고 WAITING
 		if (partnerId == null) {
 			redisMatchQueueService.enqueueIfAbsent(myId);
 			return MatchResponseDTO.waiting();
 		}
 		
-		// 9) 매칭 성공 → 방 생성 + 멤버 insert
+		// 8) 매칭 성공 → 방 생성 + 멤버 insert
 		UserEntity partner = userRepository.findById(partnerId)
 				.orElseThrow(() -> new IllegalArgumentException("파트너 유저 없음 "));
 		
@@ -143,14 +127,14 @@ public class MatchService {
 		chatRoomMemberRepository.save(ChatRoomMemberEntity.builder()
 				.room(room).user(partner).roomName(null).build());
 		
-		// 10) 결과 저장(양쪽)
+		// 9) 결과 저장(양쪽)
 		MatchResponseDTO myRes = MatchResponseDTO.matched(room.getRoomId(), room.getRoomUuid(), partnerId);
 		MatchResponseDTO partnerRes = MatchResponseDTO.matched(room.getRoomId(), room.getRoomUuid(), myId);
 		
 		setResult(myId, myRes);
 		setResult(partnerId, partnerRes);
 		
-		// (선택) criteria는 남겨도 되지만, 깔끔하게 지우고 싶으면 삭제
+		// (선택) criteria 삭제
 		redisMatchQueueService.clearCriteria(myId);
 		redisMatchQueueService.clearCriteria(partnerId);
 		
@@ -162,67 +146,19 @@ public class MatchService {
 		return (res != null) ? res : MatchResponseDTO.waiting();
 	}
 	
+	public void cancel(Long myId) {
+		redisMatchQueueService.cancelWaiting(myId);
+	}
+	
 	// ===== criteria / matching helpers =====
 	
 	private String normalizeCriteriaKey(String raw, UserEntity me) {
 		// 프론트에서 안 보내면: “조건 완화(ANY)” 기본
 		if (raw == null || raw.isBlank()) {
-			// 기본값은 전부 ANY(=필터 없음)
-			// 단, “상호 조건”에서 의미 있으려면 최소 성별만 반대로 두고 싶다면 여기서 조절 가능
 			return "g=ANY|age=18-80|n=ANY|lang=ANY|lv=ANY|interest=ANY";
 		}
 		return raw.trim();
 	}
-	//DB 관심사 조회 메서드
-//	private Set<InterestType> loadInterestTypes(Long userId) {
-//		List<UserInterestEntity> list = userInterestRepository.findByUser_Id(userId);
-//		if (list == null || list.isEmpty()) return Set.of();
-//		return list.stream()
-//				.map(UserInterestEntity::getInterest)
-//				.filter(Objects::nonNull)
-//				.collect(Collectors.toSet());
-//	}
-	
-	/**
-	 * criteria가 target(상대)에게 허용되는지
-	 */
-//	private boolean accepts(Criteria c, UserEntity target, Set<InterestType> targetInterests) {
-//
-//		// gender
-//		if (!"ANY".equals(c.gender)) {
-//			// c.gender는 MALE/FEMALE 문자열로 들어온다고 가정
-//			if (!target.getGender().name().equals(c.gender)) return false;
-//		}
-//
-//		// age range
-//		if (target.getAge() == null) return false;
-//		if (target.getAge() < c.ageMin || target.getAge() > c.ageMax) return false;
-//
-//		// nation
-//		if (!"ANY".equals(c.nation)) {
-//			if (!c.nation.equals(target.getNation())) return false; // KOREA/JAPAN
-//		}
-//
-//		// study language
-//		if (!"ANY".equals(c.studyLang)) {
-//			if (!c.studyLang.equals(target.getStudyLanguage())) return false; // KOREAN/JAPANESE
-//		}
-//
-//		// level (1~4 or ANY)
-//		if (!c.levelsAny) {
-//			int targetLv = levelToInt(target.getLevelLanguage());
-//			if (!c.levels.contains(targetLv)) return false;
-//		}
-//
-//		// interest (대분류) - ANY면 통과
-//		if (!c.interestsAny) {
-//			if (targetInterests == null || targetInterests.isEmpty()) return false;
-//			boolean anyMatch = targetInterests.stream().anyMatch(c.interests::contains);
-//			if (!anyMatch) return false;
-//		}
-//
-//		return true;
-//	}
 	
 	/**
 	 * criteria가 target(상대)에게 허용되는지 (관심사 제외: 관심사는 criteria끼리 비교)
@@ -260,17 +196,6 @@ public class MatchService {
 		return true;
 	}
 	
-	
-	private int levelToInt(LanguageLevel lv) {
-		if (lv == null) return 1;
-		return switch (lv) {
-			case BEGINNER -> 1;
-			case INTERMEDIATE -> 2;
-			case ADVANCED -> 3;
-			case NATIVE -> 4;
-		};
-	}
-	
 	/**
 	 * ✅ 완화(Soft) 모드 관심사 매칭
 	 * - 둘 다 ANY: 통과
@@ -286,14 +211,25 @@ public class MatchService {
 		// 한쪽만 ANY면 통과(완화 모드)
 		if (a.interestsAny || b.interestsAny) return true;
 		
-		// 둘 다 선택했으면 교집합 검사
-		if (a.interests == null || a.interests.isEmpty()) return true; // 안전장치(파싱 실패시 완화)
+		// 둘 다 선택했는데 파싱 결과가 비면(이상 케이스) 완화 정책상 통과 처리
+		if (a.interests == null || a.interests.isEmpty()) return true;
 		if (b.interests == null || b.interests.isEmpty()) return true;
 		
+		// 교집합 검사
 		for (InterestType t : a.interests) {
 			if (b.interests.contains(t)) return true;
 		}
 		return false;
+	}
+	
+	private int levelToInt(LanguageLevel lv) {
+		if (lv == null) return 1;
+		return switch (lv) {
+			case BEGINNER -> 1;
+			case INTERMEDIATE -> 2;
+			case ADVANCED -> 3;
+			case NATIVE -> 4;
+		};
 	}
 	
 	// ===== redis result helpers =====
@@ -316,10 +252,6 @@ public class MatchService {
 		} catch (Exception e) {
 			return null;
 		}
-	}
-	public void cancel(Long myId) {
-		// 대기열/큐/criteria/result 정리
-		redisMatchQueueService.cancelWaiting(myId);
 	}
 	
 	// ===== Criteria class =====
@@ -390,7 +322,10 @@ public class MatchService {
 					if (name.isEmpty()) continue;
 					try {
 						c.interests.add(InterestType.valueOf(name));
-					} catch (Exception ignored) { }
+					} catch (Exception ignored) {
+						// 디버깅 필요하면 아래 주석 해제
+						// log.warn("Invalid interest token: {}", name);
+					}
 				}
 				if (c.interests.isEmpty()) c.interestsAny = true;
 			}

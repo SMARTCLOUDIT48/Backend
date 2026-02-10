@@ -159,6 +159,8 @@
 			const interests = fd.getAll('interestTypes');
 			const interest = interests.length ? interests.join(',') : 'ANY';
 
+			console.log("[criteriaKey]", `g=${g}|age=${ageMin}-${ageMax}|n=${n}|lang=${lang}|lv=${lv}|interest=${interest}`);
+
 			// 서버 파서가 기대하는 키: g, age, n, lang, lv, interest
 			return `g=${g}|age=${ageMin}-${ageMax}|n=${n}|lang=${lang}|lv=${lv}|interest=${interest}`;
 		}
@@ -195,11 +197,11 @@
 			const maxMs = 60_000; // 60초
 			const startedAt = Date.now();
 
-			const timer = setInterval(async () => {
+			matchPollingTimer = setInterval(async () => {
 				try {
 					const res = await fetch('/api/match/result');
 					if (!res.ok) {
-						const body = await res.text(); // ✅ 서버가 준 에러 내용
+						const body = await res.text();
 						console.error('match/result failed:', res.status, body);
 						throw new Error('HTTP ' + res.status);
 					}
@@ -207,23 +209,22 @@
 					const data = await res.json();
 
 					if (data.status === 'MATCHED') {
-						clearInterval(timer);
-						//roomId를 어디서 받아와야함
-						console.log("Polling Data 전체")
-						console.log(data);
-						console.log("데이터. roomId" + data.roomId);
+						stopMatchPolling();
+						closeMatchOverlay(); // ✅ 매칭 성공 시 모달 닫기
 						sessionStorage.setItem('openRoomId', data.roomId);
 						location.href = `/chat`;
 						return;
 					}
 
-					// ✅ 타임아웃 처리
+					// ✅ 타임아웃 처리: 모달 닫고 알럿 띄우기
 					if (Date.now() - startedAt > maxMs) {
-						clearInterval(timer);
+						stopMatchPolling();
+						closeMatchOverlay(); // ✅ 여기 추가
 						alert('매칭 대기 시간이 초과되었습니다. 다시 시도해주세요.');
 						mathch_btn.disabled = false;
+						return;
 					}
-
+					
 				} catch (err) {
 					console.error(err);
 					// 폴링 중 에러가 나도 계속 시도할지/중단할지 선택 가능
