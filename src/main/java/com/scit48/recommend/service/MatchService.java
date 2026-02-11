@@ -118,8 +118,19 @@ public class MatchService {
 		UserEntity partner = userRepository.findById(partnerId)
 				.orElseThrow(() -> new IllegalArgumentException("파트너 유저 없음 "));
 		
-		String roomName = "direct:" + Math.min(myId, partnerId) + ":" + Math.max(myId, partnerId);
+		//방이름 제작하 때 수정 필요
+		String myNickname = me.getNickname();
+		String partnerNickname = partner.getNickname();
+
+		// 순서 고정 (사전순)
+			String roomName = " "
+				+ (myNickname.compareTo(partnerNickname) <= 0
+				? myNickname + "&" + partnerNickname
+				: partnerNickname + "&" + myNickname);
 		ChatRoom room = chatRoomRepository.save(new ChatRoom(roomName));
+		
+//		String roomName = "direct:" + Math.min(myId, partnerId) + ":" + Math.max(myId, partnerId);
+//		ChatRoom room = chatRoomRepository.save(new ChatRoom(roomName));
 		
 		chatRoomMemberRepository.save(ChatRoomMemberEntity.builder()
 				.room(room).user(me).roomName(null).build());

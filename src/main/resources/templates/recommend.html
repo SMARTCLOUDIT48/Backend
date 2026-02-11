@@ -224,7 +224,7 @@
 						mathch_btn.disabled = false;
 						return;
 					}
-					
+
 				} catch (err) {
 					console.error(err);
 					// 폴링 중 에러가 나도 계속 시도할지/중단할지 선택 가능
@@ -397,9 +397,6 @@
 		// 		console.log(e);
 		// 	}
 		// }
-
-
-
 	</script>
 </head>
 
@@ -568,7 +565,7 @@
 	<div id="matchOverlay" class="match-overlay" aria-hidden="true">
 		<div class="match-modal" role="dialog" aria-modal="true" aria-labelledby="matchTitle">
 			<h3 id="matchTitle" class="match-title">매칭중입니다…</h3>
-			<p class="match-sub">잠시만 기다려 주세요. (최대 60초)</p>
+			<p class="match-sub">잠시만 기다려 주세요.<br> (매칭시간이 60초가 넘어가면 자동으로 취소됩니다.)</p>
 
 			<div class="match-actions">
 				<button type="button" id="matchCancelBtn" class="btn ghost">취소</button>

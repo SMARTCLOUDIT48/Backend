@@ -53,7 +53,7 @@ public class RedisMatchQueueService {
         -- criteria 삭제
         redis.call('DEL', criteriaKey)
 
-        -- result 삭제(선택)
+        -- result 삭제
         redis.call('DEL', resultKey)
 
         return 1
@@ -92,6 +92,7 @@ public class RedisMatchQueueService {
 		script.setScriptText(LUA_POP_ONE);
 		script.setResultType(Long.class);
 		
+		//LUA 스크립트 실행  > execute
 		Long result = redisTemplate.execute(script, List.of(QUEUE_KEY, WAITING_SET_KEY));
 		if (result == null || result == 0L) return null;
 		return result;
