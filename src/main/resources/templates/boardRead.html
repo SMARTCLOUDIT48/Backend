@@ -34,7 +34,8 @@
 
                 <div class="post-actions"
                      th:if="${#authorization.expression('isAuthenticated()') and #authentication.name == board.memberId}">
-                    <button class="action-btn">수정</button>
+                    <button class="action-btn"
+                            th:onclick="|location.href='@{/board/update/}' + ${board.boardId}|">수정</button>
                     <button class="action-btn delete">삭제</button>
                 </div>
             </div>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>MUSUBI - 글 수정</title>
+    <link rel="stylesheet" th:href="@{/css/boardUpdate.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+    <div th:replace="~{fragments/header :: header}"></div>
+</header>
+
+<main class="container">
+    <section class="hero-section">
+        <div class="category-display">
+            <!--<span class="hero-icon">✏️</span>-->
+            <div class="hero-text">
+                <h2>게시글 수정</h2>
+                <p>내용과 첨부파일만 수정할 수 있습니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <form action="/board/update" method="post" enctype="multipart/form-data" class="write-card">
+
+        <input type="hidden" name="boardId" th:value="${board.boardId}">
+
+        <div class="writer-info">
+            <div class="avatar">
+                <img th:src="${board.profileImageName != null ? '/images/profile/upload/' + board.profileImageName : '/images/default_profile.png'}" alt="프로필">
+            </div>
+            <div class="info-text">
+                <span class="nickname" th:text="${board.writerNickname}">닉네임</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label class="label-text">카테고리</label>
+            <input type="text" class="input-readonly" th:value="${board.categoryName}" readonly>
+        </div>
+
+        <div class="input-group">
+            <label class="label-text">제목</label>
+            <input type="text" name="title" class="input-readonly" th:value="${board.title}" readonly>
+        </div>
+
+        <hr class="divider">
+
+        <div class="input-group content-area">
+            <textarea name="content" class="input-content" required th:text="${board.content}"></textarea>
+        </div>
+
+        <div class="current-file" th:if="${board.fileOriginalName != null}">
+            <span>현재 파일: </span>
+            <span th:text="${board.fileOriginalName}">file.jpg</span>
+        </div>
+
+        <div class="bottom-toolbar">
+            <div class="attach-buttons">
+                <label for="file-upload" class="attach-btn">
+                    <span>📎</span> 파일 변경
+                </label>
+                <input type="file" id="file-upload" name="file" style="display: none;">
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="cancel-btn" onclick="history.back()">취소</button>
+                <button type="submit" class="submit-btn">수정 완료</button>
+            </div>
+        </div>
+    </form>
+</main>
+
+<footer>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</footer>
+
+<script>
+    // 파일 변경 시 알림
+    document.getElementById('file-upload').addEventListener('change', function(e) {
+        if(e.target.files.length > 0) {
+            alert("새로운 파일이 선택되었습니다: " + e.target.files[0].name);
+        }
+    });
+</script>
+</body>
+</html>

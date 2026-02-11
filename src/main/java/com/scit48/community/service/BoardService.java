@@ -256,6 +256,72 @@ public class BoardService {
 				.build();
 	}
 	
+	@Transactional
+	public BoardDTO findById(Long boardId) {
+		// 1. 조회수 증가 기능은 제거
+		
+		// 2. 게시글 조회
+		BoardEntity board = br.findById(boardId)
+				.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다"));
+		
+		// 3. 프로필 이미지 경로 처리 (앞선 답변 참고)
+		String profileName = board.getUser().getProfileImageName();
+		String profilePath = (profileName != null) ? "/files/" + profileName : "/images/default_profile.png";
+		
+		// 4. Entity -> DTO 변환
+		return BoardDTO.builder()
+				.id(board.getUser().getId())
+				.boardId(board.getBoardId())
+				.title(board.getTitle())
+				.content(board.getContent())
+				.profileImageName(board.getUser().getProfileImageName())
+				.viewCount(board.getViewCount())
+				.createdDate(board.getCreatedAt())
+				.categoryId(board.getCategory().getCategoryId())
+				.categoryName(board.getCategory().getName())
+				.writerNickname(board.getUser().getNickname())
+				.memberId(board.getUser().getMemberId())
+				.nation(board.getUser().getNation())
+				.profileImagePath(profilePath) // 프로필 경로
+				.manner(board.getUser().getManner()) // 매너온도 (있다면)
+				.filePath(board.getFilePath()) // 첨부파일(이미지)
+				.fileName(board.getFileName())
+				// 댓글 리스트 변환 (CommentEntity -> CommentDTO)
+				.comments(board.getComments().stream().map(c -> CommentDTO.builder()
+						.commentId(c.getCommentId())
+						.content(c.getContent())
+						.writerNickname(c.getUser().getNickname())
+						.writerProfileImage(c.getUser().getProfileImageName() != null ? "/files/" + c.getUser().getProfileImageName() : "/images/default_profile.png")
+						.createdDate(c.getCreatedAt())
+						.build()).collect(Collectors.toList()))
+				.likeCnt(board.getLikeCnt())
+				.build();
+	}
 	
+	
+	public void update(BoardDTO boardDTO, String uploadPath, MultipartFile file) throws IOException {
+		// 1. 기존 게시글 엔티티 조회
+		BoardEntity boardEntity = br.findById(boardDTO.getBoardId())
+				.orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
+		
+		// 2. 내용 수정 (제목, 카테고리는 수정하지 않음)
+		boardEntity.setContent(boardDTO.getContent());
+		
+		// 3. 파일 수정 (새 파일이 올라왔을 때만 처리)
+		if (file != null && !file.isEmpty()) {
+			// 기존 파일 삭제 로직이 필요하다면 여기에 추가 (선택사항)
+			
+			// 새 파일 저장
+			String fileName = fm.saveFile(uploadPath, file); // 기존에 사용하시던 FileManager 활용
+			String filePath = "/files/" + fileName;
+			
+			// 엔티티 정보 갱신
+			boardEntity.setFileName(fileName);
+			boardEntity.setFilePath(filePath);
+			boardEntity.setFileOriginalName(file.getOriginalFilename());
+		}
+		
+		// @Transactional이 걸려있으므로 메서드 종료 시 자동 update 됩니다.
+	}
 }
 

@@ -246,4 +246,24 @@ public class BoardController {
 		return "boardRead";
 	}
 	
+	
+	@GetMapping("/update/{boardId}")
+	public String update(@PathVariable Long boardId, Model model) {
+		// 기존 데이터를 조회해서 폼에 채워넣기 위해 DTO를 가져옵니다.
+		BoardDTO boardDTO = bs.findById(boardId);
+		model.addAttribute("board", boardDTO);
+		return "boardUpdate";
+	}
+	
+	@PostMapping("/update")
+	public String update(@ModelAttribute BoardDTO boardDTO,
+						 @RequestParam(name = "file", required = false) MultipartFile file) throws IOException {
+		
+		// 서비스의 수정 메서드 호출
+		bs.update(boardDTO, uploadPath, file);
+		
+		// 수정 완료 후 상세 페이지로 리다이렉트
+		return "redirect:/board/read/" + boardDTO.getBoardId();
+	}
+	
 }
