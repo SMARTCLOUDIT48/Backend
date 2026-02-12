@@ -23,13 +23,18 @@
 
         <div class="feed-header">
             <div class="user-profile">
-                <img th:src="${feed.profileImageName != null ? feed.profileImageName : '/images/default_profile.png'}"
+                <img th:src="${feed.ProfileImageName != null ? feed.ProfileImageName : '/images/default_profile.png'}"
                      class="profile-img-sm" alt="프로필">
                 <div class="user-info">
                     <span class="username" th:text="${feed.writerNickname}">nickname</span>
-                    <span class="location" th:text="${feed.nation}"></span> </div>
+                    <span class="location" th:text="${feed.nation}">Seoul</span>
+                </div>
             </div>
-            <button class="more-btn">•••</button>
+
+            <button type="button" class="more-btn"
+                    th:data-id="${feed.boardId}"
+                    th:data-writer="${feed.memberId}"
+                    onclick="openFeedModal(this)">•••</button>
         </div>
 
         <div class="feed-image-area" th:if="${feed.filePath != null}">
@@ -83,6 +88,103 @@
 <footer>
     <div th:replace="~{fragments/footer :: footer}"></div>
 </footer>
+
+<div id="feedModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div id="ownerActions" style="display: none;">
+            <button type="button" class="modal-btn" onclick="updateFeed()">수정</button>
+            <button type="button" class="modal-btn delete" onclick="deleteFeed()">삭제</button>
+        </div>
+
+        <button type="button" class="modal-btn" onclick="viewUserInfo()">이 계정 정보</button>
+        <button type="button" class="modal-btn cancel" onclick="closeFeedModal()">취소</button>
+    </div>
+</div>
+
+<input type="hidden" id="selectedFeedId">
+<input type="hidden" id="selectedFeedWriter">
+
+<input type="hidden" id="loginUserId"
+       th:value="${#authentication.name}"
+       th:if="${#authorization.expression('isAuthenticated()')}">
+
+<script>
+    // 1. 모달 열기
+    function openFeedModal(btn) {
+        const feedId = btn.getAttribute('data-id');
+        const writerId = btn.getAttribute('data-writer');
+
+        // 선택된 피드 정보 저장
+        document.getElementById('selectedFeedId').value = feedId;
+        document.getElementById('selectedFeedWriter').value = writerId;
+
+        // 로그인 사용자 ID 가져오기 (비로그인 시 빈 값)
+        const loginInput = document.getElementById('loginUserId');
+        const currentUserId = loginInput ? loginInput.value : "";
+
+        // 본인 글인지 확인 후 버튼 노출 제어
+        const ownerActions = document.getElementById('ownerActions');
+        if (currentUserId && currentUserId === writerId) {
+            ownerActions.style.display = 'block'; // 본인이면 보이기
+        } else {
+            ownerActions.style.display = 'none';  // 아니면 숨기기
+        }
+
+        // 모달 표시
+        document.getElementById('feedModal').style.display = 'flex';
+        // 스크롤 방지
+        document.body.style.overflow = 'hidden';
+    }
+
+    // 2. 모달 닫기
+    function closeFeedModal() {
+        document.getElementById('feedModal').style.display = 'none';
+        document.body.style.overflow = 'auto'; // 스크롤 복구
+    }
+
+    // 3. 모달 배경 클릭 시 닫기
+    document.getElementById('feedModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeFeedModal();
+        }
+    });
+
+    // --- 기능 함수들 ---
+
+    // 피드 삭제
+    function deleteFeed() {
+        if(!confirm("정말 이 게시글을 삭제하시겠습니까?")) return;
+
+        const feedId = document.getElementById('selectedFeedId').value;
+
+        // POST 방식으로 삭제 요청 (가상 폼 생성)
+        const form = document.createElement("form");
+        form.setAttribute("method", "post");
+        form.setAttribute("action", "/board/feedDelete");
+
+        const input = document.createElement("input");
+        input.setAttribute("type", "hidden");
+        input.setAttribute("name", "id");
+        input.setAttribute("value", feedId);
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // 피드 수정
+    function updateFeed() {
+        const feedId = document.getElementById('selectedFeedId').value;
+        location.href = '/board/feedUpdate/' + feedId;
+    }
+
+    // 계정 정보 보기 (예시)
+    function viewUserInfo() {
+        const writerId = document.getElementById('selectedFeedWriter').value;
+        // alert(writerId + "님의 프로필로 이동합니다.");
+        // 실제 구현 시: location.href = '/user/profile/' + writerId;
+    }
+</script>
 
 </body>
 </html>

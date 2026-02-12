@@ -36,7 +36,8 @@
                      th:if="${#authorization.expression('isAuthenticated()') and #authentication.name == board.memberId}">
                     <button class="action-btn"
                             th:onclick="|location.href='@{/board/update/}' + ${board.boardId}|">수정</button>
-                    <button class="action-btn delete">삭제</button>
+                    <button class="action-btn delete"
+                            th:onclick="|deleteBoard(${board.boardId})|">삭제</button>
                 </div>
             </div>
         </div>
@@ -74,6 +75,8 @@
             </div>
         </div>
 
+        <br>
+
         <div class="reaction-area">
             <button class="like-btn">
                 ❤️ 좋아요 <span th:text="${board.likeCnt}">0</span>
@@ -86,7 +89,7 @@
             <h3>댓글 <span th:text="${board.comments.size()}">2</span></h3>
 
             <form action="/comment/save" method="post" class="comment-form">
-                <input type="hidden" name="boardId" th:value="${board.id}">
+                <input type="hidden" name="boardId" th:value="${board.boardId}">
                 <input type="text" name="content" placeholder="따뜻한 댓글을 남겨주세요..." required>
                 <button type="submit">등록</button>
             </form>
@@ -115,6 +118,32 @@
 <footer>
     <div th:replace="~{fragments/footer :: footer}"></div>
 </footer>
+
+
+<script th:inline="javascript">
+    function deleteBoard(boardId) {
+        // 1. 사용자 확인
+        if (confirm("정말로 삭제하시겠습니까? 삭제된 글은 복구할 수 없습니다.")) {
+
+            // 2. 가상의 폼(Form) 생성하여 POST 전송
+            // (GET 방식 링크 이동은 보안에 취약하므로 Form 전송을 권장합니다)
+            var form = document.createElement("form");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", "/board/delete");
+
+            // ID 값을 담을 hidden input 생성
+            var input = document.createElement("input");
+            input.setAttribute("type", "hidden");
+            input.setAttribute("name", "boardId");
+            input.setAttribute("value", boardId);
+
+
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
 
 </body>
 </html>

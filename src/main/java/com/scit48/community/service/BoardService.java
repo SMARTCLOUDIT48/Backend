@@ -323,5 +323,20 @@ public class BoardService {
 		
 		// @Transactional이 걸려있으므로 메서드 종료 시 자동 update 됩니다.
 	}
+	
+	@Transactional
+	public void delete(Long boardId) {
+		
+		// 1. 게시글 조회 (파일 삭제를 위해 필요)
+		BoardEntity board = br.findById(boardId)
+				.orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다."));
+		
+		// 2. 첨부파일이 있다면 로컬(디스크)에서도 삭제 (선택사항)
+		// fileManager.deleteFile(board.getFileName()); // 파일 매니저에 삭제 메서드가 있다면 호출
+		
+		// 3. DB에서 삭제
+		br.delete(board);
+		
+	}
 }
 

@@ -546,6 +546,72 @@ button {
   margin-right: 6px;
 }
 
+/* 모달 배경 (어두운 반투명) */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* 모달 박스 */
+.modal-content {
+    width: 90%;
+    max-width: 400px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    animation: scaleUp 0.2s ease-out;
+}
+
+/* 모달 버튼 공통 */
+.modal-btn {
+    width: 100%;
+    padding: 14px;
+    background: white;
+    border: none;
+    border-bottom: 1px solid #efefef;
+    font-size: 14px;
+    font-weight: 500;
+    color: #262626;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.modal-btn:hover {
+    background-color: #f9f9f9;
+}
+
+.modal-btn:last-child {
+    border-bottom: none;
+}
+
+/* 빨간색 버튼 (삭제 등 중요 작업) */
+.modal-btn.delete {
+    color: #ed4956;
+    font-weight: 700;
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+
+
 /* 반응형 */
 @media (max-width: 900px) {
     .feed-container {

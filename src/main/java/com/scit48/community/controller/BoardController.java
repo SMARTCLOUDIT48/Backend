@@ -106,7 +106,7 @@ public class BoardController {
 			return "redirect:/board/write";
 		}
 		
-		return "redirect:/board/list";
+		return "redirect:/board/read/" + boardDTO.getBoardId();
 	}
 	
 	
@@ -222,6 +222,7 @@ public class BoardController {
 				.likeCnt(board.getLikeCnt() != null ? board.getLikeCnt() : 0)
 				.createdDate(board.getCreatedAt())
 				.nation(board.getUser().getNation())
+				.memberId(board.getUser().getMemberId())
 				.build());
 		
 		
@@ -266,4 +267,33 @@ public class BoardController {
 		return "redirect:/board/read/" + boardDTO.getBoardId();
 	}
 	
+	
+	@PostMapping("/delete")
+	public String delete(@RequestParam Long boardId) {
+		
+		bs.delete(boardId);
+		
+		return "redirect:/board/list";
+	}
+	
+	// 1. 피드 수정 페이지 이동 (GET)
+	@GetMapping("/feedUpdate/{boardId}")
+	public String feedUpdateForm(@PathVariable Long boardId, Model model) {
+		// 기존 조회 메서드 재사용 (조회수 증가 없는 findById 사용)
+		BoardDTO boardDTO = bs.findById(boardId);
+		model.addAttribute("board", boardDTO);
+		
+		return "feedUpdate"; // feedUpdate.html 로 이동
+	}
+	
+	@PostMapping("/feedUpdate")
+	public String feedUpdate(@ModelAttribute BoardDTO boardDTO,
+							 @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+		
+		// 기존 서비스의 update 메서드 재사용
+		bs.update(boardDTO, uploadPath, file);
+		
+		// 수정 후 '피드 목록'으로 리다이렉트
+		return "redirect:/board/feedView";
+	}
 }
