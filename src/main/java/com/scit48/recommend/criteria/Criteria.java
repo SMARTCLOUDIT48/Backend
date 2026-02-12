@@ -16,7 +16,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 @Getter
-@NoArgsConstructor
 public class Criteria {
 	private String gender = "ANY";
 	private int ageMin = 18;
