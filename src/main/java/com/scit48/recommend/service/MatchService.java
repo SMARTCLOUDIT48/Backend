@@ -9,6 +9,7 @@ import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.enums.InterestType;
 import com.scit48.common.enums.LanguageLevel;
 import com.scit48.common.repository.UserRepository;
+import com.scit48.recommend.criteria.Criteria;
 import com.scit48.recommend.domain.dto.MatchResponseDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -170,7 +171,6 @@ public class MatchService {
 		}
 		return raw.trim();
 	}
-	
 	/**
 	 * criteria가 target(상대)에게 허용되는지 (관심사 제외: 관심사는 criteria끼리 비교)
 	 */
@@ -273,26 +273,26 @@ public class MatchService {
 		int ageMax = 80;
 		String nation = "ANY";     // KOREA/JAPAN/ANY
 		String studyLang = "ANY";  // KOREAN/JAPANESE/ANY
-		
+
 		boolean levelsAny = true;
 		Set<Integer> levels = new HashSet<>(); // 1~4
-		
+
 		boolean interestsAny = true;
 		Set<InterestType> interests = new HashSet<>();
-		
+
 		static Criteria parse(String key) {
 			Criteria c = new Criteria();
 			if (key == null || key.isBlank()) return c;
-			
+
 			String[] parts = key.split("\\|");
 			Map<String, String> map = new HashMap<>();
 			for (String p : parts) {
 				String[] kv = p.split("=", 2);
 				if (kv.length == 2) map.put(kv[0].trim(), kv[1].trim());
 			}
-			
+
 			c.gender = map.getOrDefault("g", "ANY").toUpperCase();
-			
+
 			// age=20-30
 			String age = map.get("age");
 			if (age != null && age.contains("-")) {
@@ -307,10 +307,10 @@ public class MatchService {
 					}
 				} catch (Exception ignored) { }
 			}
-			
+
 			c.nation = map.getOrDefault("n", "ANY").toUpperCase();
 			c.studyLang = map.getOrDefault("lang", "ANY").toUpperCase();
-			
+
 			// lv=ANY or lv=1,2,3
 			String lv = map.getOrDefault("lv", "ANY").toUpperCase();
 			if (!"ANY".equals(lv)) {
@@ -323,7 +323,7 @@ public class MatchService {
 				}
 				if (c.levels.isEmpty()) c.levelsAny = true;
 			}
-			
+
 			// interest=ANY or interest=CULTURE,IT
 			String it = map.getOrDefault("interest", "ANY").toUpperCase();
 			if (!"ANY".equals(it)) {
@@ -334,13 +334,12 @@ public class MatchService {
 					try {
 						c.interests.add(InterestType.valueOf(name));
 					} catch (Exception ignored) {
-						// 디버깅 필요하면 아래 주석 해제
-						// log.warn("Invalid interest token: {}", name);
+						log.debug("Invalid interest token: {}", name);
 					}
 				}
 				if (c.interests.isEmpty()) c.interestsAny = true;
 			}
-			
+
 			return c;
 		}
 	}

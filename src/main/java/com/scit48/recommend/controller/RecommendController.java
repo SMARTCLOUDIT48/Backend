@@ -32,7 +32,7 @@ public class RecommendController {
 	
 	@Getter
 	@Setter
-	public static class MatchStartRequest {
+	public static class CriteriaKey {
 		private String criteriaKey;
 	}
 	
@@ -71,7 +71,7 @@ public class RecommendController {
 	@PostMapping("/api/match/start")
 	public MatchResponseDTO start(
 			@AuthenticationPrincipal UserDetails userDetails,
-			@RequestBody(required = false) MatchStartRequest req){
+			@RequestBody(required = false) CriteriaKey req){
 		Long myId = rs.searchid(userDetails);
 		String criteriaKey = (req != null) ? req.getCriteriaKey() : null;
 		
@@ -94,5 +94,16 @@ public class RecommendController {
 		return ResponseEntity.ok(Map.of("status", "CANCELED"));
 	}
 	
-	//new git test commit 주석
+	@ResponseBody
+	@PostMapping("api/filtering/search")
+	public List<RecommendDTO> recommend_filtering(
+			@AuthenticationPrincipal UserDetails user,
+			@RequestBody(required = false) CriteriaKey req
+	){
+		Long user_id = rs.searchid(user);
+		String criteriaKey = (req != null) ? req.getCriteriaKey() : null;
+		//List<RecommendDTO> userDTO= rs.filteringSearch(user_id, criteriaKey);
+		return null;
+	}
+	
 }

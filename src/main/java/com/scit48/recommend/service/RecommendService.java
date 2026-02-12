@@ -30,6 +30,7 @@ public class RecommendService {
 	//의존성 주입 DI
 	private final UserRepository ur;
 	private final UserInterestRepository uir;
+	private final MatchService matchService;
 	
 	public List<RecommendDTO> firstRecommend(Long user) {
 		
@@ -51,12 +52,14 @@ public class RecommendService {
 		
 		//성별, 한일 반전된
 		//회원 목록, 회원 관심사 전체 목록 로그인한 회원 제외
-		List<UserEntity> allUserEntitylist =
-				ur.findByGenderAndNationAndIdNot(
-						targetGender,
-						targetCountry,
-						user
-				);
+		List <UserEntity> allUserEntitylist = ur.findByIdNot(user);
+		
+//		List<UserEntity> allUserEntitylist =
+//				ur.findByGenderAndNationAndIdNot(
+//						targetGender,
+//						targetCountry,
+//						user
+//				);
 		
 		//allUsersEntitylist에 해당하는 id들의 리스트를 만들겠다.
 		List<Long> userIds = allUserEntitylist.stream().map(UserEntity::getId).toList();
@@ -125,6 +128,11 @@ public class RecommendService {
 		
 	}
 	
+//	public List<RecommendDTO> filteringSearch(Long userId, String criteriaKey) {
+//		matchService.
+//
+//		return null;
+//	}
 	
 	
 	//처음 찾을 때 성별 반전 찾기
@@ -220,4 +228,6 @@ public class RecommendService {
 		
 		return entity.getId();
 	}
+	
+	
 }

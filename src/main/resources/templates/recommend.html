@@ -54,9 +54,35 @@
 					chat_partner_btn.disabled = false;
 				}
 			});
+			//필터링 후 검색 버튼
+			const search_btn = document.getElementById('searchBtn');
+			//필터링한 필터링 키를 가지고 검색
+			search_btn.addEventListener('click', async () => {
+				try {
+					//필터링 키 생성 
+					const criteriaKey = buildCriteriaKey();
+					const payload = criteriaKey ? { criteriaKey } : {};
+					console.log("Filtering Key : ", payload);
+					const res = await fetch('api/filtering/search', {
+						method: 'POST',
+						headers:  { 'Content-Type': 'application/json' },
+						body: JSON.stringify(payload)
+					})
+					if (!res.ok) {
+						throw new Error('HTTP error ' + res.status);
+					}
+					const list = await res.json();
+					renderRecommend(list);
+				}
+				catch(e){
+					console.log(e);
+				}
+			})
+			
+			
 			//자동 매칭 버튼
 			const mathch_btn = document.getElementById('auto_matching');
-
+			//자동 매칭 버튼 클릭 시
 			mathch_btn.addEventListener('click', async () => {
 				mathch_btn.disabled = true;
 
@@ -66,8 +92,7 @@
 					const payload = criteriaKey ? { criteriaKey } : {};
 					// ✅ 필요하면 여기서 필터 조건을 같이 보냅니다.
 					// 서버에서 로그인 유저 기준으로 자동 계산한다면 body 없이 보내도 됩니다.
-					console.log("Filtering Key");
-					console.log(payload);
+					console.log("Filtering Key : " + payload);
 					const res = await fetch('/api/match/start', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
@@ -547,7 +572,7 @@
 					자동 매칭
 				</button>
 				<button type="reset" id="refreshBtn" class="btn ghost">
-					초기화? 새로고침?
+					초기화
 				</button>
 				<button type="submit" id="searchBtn" class="btn solid">
 					검색
