@@ -61,67 +61,12 @@ public class RecommendService {
 //				);
 		
 		//allUsersEntitylist에 해당하는 id들의 리스트를 만들겠다.
-		List<Long> userIds = allUserEntitylist.stream().map(UserEntity::getId).toList();
+		//List<Long> userIds = allUserEntitylist.stream().map(UserEntity::getId).toList();
 		
 		//userIds로 구현된 리스트를 활용해서 id에 해당하는 리스트
-		List<UserInterestEntity> userInterestEntityList= uir.findByUser_IdIn(userIds);
+		//List<UserInterestEntity> userInterestEntityList= uir.findByUser_IdIn(userIds);
 		
-		//userInterestEntityList를 각 id에 맞게 관심사 리스트를 분리
-		Map<Long, List<UserInterestEntity>> interestMap =
-				userInterestEntityList.stream()
-						.collect(Collectors.groupingBy(
-								ui ->ui.getUser().getId()
-						));
-		
-		//반복문 + 점수를 dto에 넣기
-		for(UserEntity partner : allUserEntitylist){
-			List<UserInterestEntity> partnerInterests =
-					interestMap.getOrDefault(
-							partner.getId(),List.of()
-					);
-			
-			//언어 점수
-			int langScore = calLangScore(
-					loginUserEntity.getLevelLanguage(),partner.getLevelLanguage());
-			
-			// 3. 관심사 점수
-			int interestScore = calInterestScore(
-					loginUserInterestList,
-					partnerInterests
-			);
-			
-			// 4. 매너 점수
-			int mannerScore = calMannerScore(
-					partner.getManner()
-			);
-			// 5. 총 점수
-			int totalScore = langScore + interestScore + mannerScore;
-			
-			RecommendDTO dto = new RecommendDTO().builder()
-					.id(partner.getId())
-					.nickname(partner.getNickname())
-					.age(partner.getAge())
-					.gender(partner.getGender())
-					.nation(partner.getNation())
-					.manner(partner.getManner())
-					.profileImageName(partner.getProfileImageName())
-					.profileImagePath(partner.getProfileImagePath())
-					.nativeLanguage(partner.getNativeLanguage())
-					.levelLanguage(partner.getLevelLanguage())
-					.studyLanguage(partner.getStudyLanguage())
-					.matchPoint(totalScore)
-					.build();
-			
-			userPatnerDTOList.add(dto);
-		}
-		
-		//리턴
-		return userPatnerDTOList.stream()
-				.sorted(Comparator.comparingInt(
-						RecommendDTO::getMatchPoint
-				).reversed())
-				.limit(10)
-				.toList();
+		return scoreAndConvert(loginUserEntity, loginUserInterestList, allUserEntitylist, 10);
 	}
 	
 	public List<RecommendDTO> filteringSearch(Long userId, String criteriaKey) {
@@ -157,7 +102,7 @@ public class RecommendService {
 //				.map(user -> RecommendDTO.fromEntity(user))
 //				.toList();
 		
-		return filteredResult;
+		return scoreAndConvert(loginUserEntity, loginUserInterestList, filtered, 10);
 	}
 	
 	
@@ -322,10 +267,11 @@ public class RecommendService {
 	 * ✅ 공통: 후보 리스트에 대해
 	 * - 관심사 bulk 조회 → 점수 계산 → DTO 변환 → 점수 내림차순 정렬 → 상위 10개
 	 */
-	private List<RecommendDTO> scoreAndConvertTop10(
+	private List<RecommendDTO> scoreAndConvert(
 			UserEntity loginUser,
 			List<UserInterestEntity> loginInterests,
-			List<UserEntity> partners
+			List<UserEntity> partners,
+			int limit
 	) {
 		if (partners == null || partners.isEmpty()) {
 			return List.of();
@@ -368,7 +314,7 @@ public class RecommendService {
 							.build();
 				})
 				.sorted(Comparator.comparingInt(RecommendDTO::getMatchPoint).reversed())
-				.limit(10)
+				.limit(limit)
 				.toList();
 	}
 	

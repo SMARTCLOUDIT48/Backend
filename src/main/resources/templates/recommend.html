@@ -69,8 +69,11 @@
 					if (!res.ok) {
 						throw new Error('HTTP error ' + res.status);
 					}
-					// const list = await res.json();
-					// renderRecommend(list);
+					const list = await res.json();
+					console.log("매칭 리스트");
+					console.log(list);
+					//list 반환 했을 때 null이면 > js에서 해당되는 회원이 없습니다. 표시
+					renderRecommend(list);
 				}
 				catch (e) {
 					console.log(e);
