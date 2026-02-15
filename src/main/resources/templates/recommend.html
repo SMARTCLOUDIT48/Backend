@@ -61,25 +61,23 @@
 				try {
 					//필터링 키 생성 
 					const criteriaKey = buildCriteriaKey();
-					const payload = criteriaKey ? { criteriaKey } : {};
-					console.log("Filtering Key : ", payload);
-					const res = await fetch('api/filtering/search', {
-						method: 'POST',
-						headers:  { 'Content-Type': 'application/json' },
-						body: JSON.stringify(payload)
+					console.log("Filtering Key : ", criteriaKey);
+					const url = `/api/filtering/search?criteriaKey=${encodeURIComponent(criteriaKey ?? '')}`;
+					const res = await fetch(url, {
+						method: 'GET',
 					})
 					if (!res.ok) {
 						throw new Error('HTTP error ' + res.status);
 					}
-					const list = await res.json();
-					renderRecommend(list);
+					// const list = await res.json();
+					// renderRecommend(list);
 				}
-				catch(e){
+				catch (e) {
 					console.log(e);
 				}
 			})
-			
-			
+
+
 			//자동 매칭 버튼
 			const mathch_btn = document.getElementById('auto_matching');
 			//자동 매칭 버튼 클릭 시
@@ -574,7 +572,7 @@
 				<button type="reset" id="refreshBtn" class="btn ghost">
 					초기화
 				</button>
-				<button type="submit" id="searchBtn" class="btn solid">
+				<button type="button" id="searchBtn" class="btn solid">
 					검색
 				</button>
 			</div>

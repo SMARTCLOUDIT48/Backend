@@ -74,7 +74,7 @@ public class RecommendController {
 			@RequestBody(required = false) CriteriaKey req){
 		Long myId = rs.searchid(userDetails);
 		String criteriaKey = (req != null) ? req.getCriteriaKey() : null;
-		
+		log.debug("match 필터링키 : {}", criteriaKey);
 		return matchService.start(myId, criteriaKey);
 	}
 	
@@ -95,15 +95,16 @@ public class RecommendController {
 	}
 	
 	@ResponseBody
-	@PostMapping("api/filtering/search")
-	public List<RecommendDTO> recommend_filtering(
+	@GetMapping("api/filtering/search")
+	public List<RecommendDTO> recommendFiltering(
 			@AuthenticationPrincipal UserDetails user,
-			@RequestBody(required = false) CriteriaKey req
+			@RequestParam(required = false) String criteriaKey
 	){
 		Long user_id = rs.searchid(user);
-		String criteriaKey = (req != null) ? req.getCriteriaKey() : null;
-		//List<RecommendDTO> userDTO= rs.filteringSearch(user_id, criteriaKey);
-		return null;
+		System.out.println("log 안뜸");
+		log.debug("parsing 되지 않은 필터링 키 : {}",criteriaKey);
+		List<RecommendDTO> userDTO= rs.filteringSearch(user_id, criteriaKey);
+		return userDTO;
 	}
 	
 }
