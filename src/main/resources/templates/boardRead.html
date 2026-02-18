@@ -13,6 +13,7 @@
 </header>
 
 <main class="read-container">
+    <input type="hidden" id="loginUserId" th:value="${#authentication.name}">
 
     <div class="read-wrapper">
 
@@ -21,7 +22,11 @@
             <h1 class="post-title" th:text="${board.title}">게시글 제목입니다.</h1>
 
             <div class="writer-info">
-                <img th:src="${board.profileImageName != null ? '/images/profile/upload/' + board.profileImageName : '/images/default_profile.png'}" class="profile-img-sm" alt="프로필">
+                <a th:href="${#authentication.name == board.memberId} ? @{/member/mypage} : @{/member/userPage/{memberId}(memberId=${board.memberId})}"
+                   style="display: block; cursor: pointer;">
+                    <img th:src="${board.profileImageName != null ? '/images/profile/upload/' + board.profileImageName : '/images/default_profile.png'}"
+                         class="profile-img-sm" alt="프로필">
+                </a>
                 <div class="info-text">
                     <span class="nickname" th:text="${board.writerNickname}">작성자</span>
                     <span class="location" th:text="${board.nation}"
@@ -78,31 +83,65 @@
         <br>
 
         <div class="reaction-area">
-            <button class="like-btn">
-                ❤️ 좋아요 <span th:text="${board.likeCnt}">0</span>
+            <button class="like-btn" id="likeBtn"
+                    th:classappend="${board.liked} ? 'active' : ''"
+                    th:onclick="|toggleLike(${board.boardId})|">
+                <span class="heart-icon">
+            <svg th:if="${board.liked}" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+            </svg>
+
+            <svg th:unless="${board.liked}" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
+            </svg>
+                </span>
+                <span id="likeCount" th:text="${board.likeCnt}">0</span>
             </button>
         </div>
 
         <hr class="divider">
 
         <div class="comment-section">
-            <h3>댓글 <span th:text="${board.comments.size()}">2</span></h3>
+            <h3>댓글 <span id="commentCount" th:text="${board.comments != null ? board.comments.size() : 0}">0</span></h3>
 
-            <form action="/comment/save" method="post" class="comment-form">
-                <input type="hidden" name="boardId" th:value="${board.boardId}">
-                <input type="text" name="content" placeholder="따뜻한 댓글을 남겨주세요..." required>
-                <button type="submit">등록</button>
-            </form>
+            <div class="comment-form">
+                <input type="text" id="commentContent" placeholder="따뜻한 댓글을 남겨주세요..."
+                       th:disabled="${#authentication.name == 'anonymousUser'}">
 
-            <div class="comment-list">
-                <div class="comment-item" th:each="comment : ${board.comments}">
-                    <img th:src="${comment.writerProfileImage}" class="cmt-profile" alt="P">
+                <button type="button" onclick="writeComment()">등록</button>
+            </div>
+
+            <div class="comment-list" id="commentList">
+                <div class="comment-item" th:each="comment : ${board.comments}" th:id="'comment-item-' + ${comment.commentId}">
+
+                    <a th:href="${#authentication.name == comment.memberId} ? @{/member/mypage} : @{/member/userPage/{id}(id=${comment.memberId})}"
+                       style="display: block; cursor: pointer;">
+                        <img th:src="${comment.writerProfileImage != null ? '/images/profile/upload/' + #strings.replace(comment.writerProfileImage, '/files/', '') : '/images/default_profile.png'}"
+                             class="cmt-profile" alt="프로필">
+                    </a>
+
                     <div class="cmt-content">
                         <div class="cmt-header">
                             <span class="cmt-writer" th:text="${comment.writerNickname}">닉네임</span>
                             <span class="cmt-date" th:text="${#temporals.format(comment.createdDate, 'MM.dd HH:mm')}">날짜</span>
                         </div>
-                        <p class="cmt-text" th:text="${comment.content}">댓글 내용</p>
+
+                        <div class="comment-view" th:id="'comment-view-' + ${comment.commentId}">
+                            <p class="cmt-text" th:text="${comment.content}" th:id="'comment-content-' + ${comment.commentId}">댓글 내용</p>
+
+                            <div class="cmt-actions" th:if="${#authentication.name == comment.memberId}">
+                                <button type="button" class="btn-edit" th:onclick="|toggleEditBox(${comment.commentId})|">수정</button>
+                                <button type="button" class="btn-delete" th:onclick="|deleteComment(${comment.commentId})|">삭제</button>
+                            </div>
+                        </div>
+
+                        <div class="comment-edit-box" th:id="'comment-edit-' + ${comment.commentId}" style="display: none;">
+                            <input type="text" class="edit-input" th:id="'edit-input-' + ${comment.commentId}" th:value="${comment.content}">
+                            <div class="edit-actions">
+                                <button type="button" class="btn-save" th:onclick="|updateComment(${comment.commentId})|">저장</button>
+                                <button type="button" class="btn-cancel" th:onclick="|toggleEditBox(${comment.commentId})|">취소</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -143,7 +182,257 @@
             form.submit();
         }
     }
-</script>
 
+
+    function toggleLike(boardId) {
+        // [SVG 문자열 상수 정의]
+        const filledHeartSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/></svg>`;
+
+        const emptyHeartSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16"><path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/></svg>`;
+
+        // (로그인 체크 로직 생략 - 기존과 동일) ...
+
+        fetch('/board/like/' + boardId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (response.status === 401) {
+                 if(confirm("로그인이 필요한 서비스입니다. 로그인 하시겠습니까?")) {
+                    location.href = '/login';
+                 }
+                 throw new Error("Unauthorized");
+            }
+            return response.json();
+        })
+        .then(data => {
+            const likeBtn = document.getElementById('likeBtn');
+            const heartIconSpan = likeBtn.querySelector('.heart-icon'); // SVG를 감싸고 있는 span
+            const likeCount = document.getElementById('likeCount');
+
+            // [수정] 데이터에 따라 SVG 코드 교체
+            if (data.liked) {
+                likeBtn.classList.add('active');
+                heartIconSpan.innerHTML = filledHeartSvg; // 꽉 찬 하트 SVG 넣기
+            } else {
+                likeBtn.classList.remove('active');
+                heartIconSpan.innerHTML = emptyHeartSvg;  // 빈 하트 SVG 넣기
+            }
+
+            likeCount.innerText = data.likeCount;
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+
+    // 댓글 작성 함수 (AJAX)
+    function writeComment() {
+        const contentInput = document.getElementById('commentContent');
+        const content = contentInput.value.trim();
+        const boardId = [[${board.boardId}]]; // 타임리프 변수
+
+        if (!content) {
+            alert("댓글 내용을 입력해주세요.");
+            contentInput.focus();
+            return;
+        }
+
+        const data = {
+            boardId: boardId,
+            content: content
+        };
+
+        fetch('/comment/write', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.status === 401) {
+                if(confirm("로그인이 필요한 서비스입니다. 로그인 하시겠습니까?")) {
+                    location.href = '/member/login';
+                }
+                throw new Error("Unauthorized");
+            }
+            if (!response.ok) throw new Error("Server Error");
+            return response.json();
+        })
+        .then(newComment => {
+            const commentList = document.getElementById('commentList');
+
+            // 1. 프로필 이미지 경로 처리
+            // (HTML의 #strings.replace 로직을 JS로 구현)
+            let profileSrc = '/images/default_profile.png';
+            if (newComment.writerProfileImage) {
+                // /files/ 가 포함되어 있다면 제거
+                const cleanPath = newComment.writerProfileImage.replace('/files/', '');
+                profileSrc = '/images/profile/upload/' + cleanPath;
+            }
+
+            // 2. 날짜 포맷팅 (MM.dd HH:mm)
+            let dateStr = "방금 전";
+            if(newComment.createdDate) {
+                try {
+                    const date = new Date(newComment.createdDate);
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const hour = String(date.getHours()).padStart(2, '0');
+                    const minute = String(date.getMinutes()).padStart(2, '0');
+                    dateStr = `${month}.${day} ${hour}:${minute}`;
+                } catch(e) {}
+            }
+
+            // 3. [핵심] 본인 확인 로직
+            const loginUserId = document.getElementById('loginUserId').value;
+            const isMyComment = (loginUserId === newComment.memberId);
+
+            // 4. 버튼 HTML 생성 (본인일 때만)
+            let buttonsHtml = '';
+            if (isMyComment) {
+                buttonsHtml = `
+                    <div class="cmt-actions">
+                        <button type="button" class="btn-edit" onclick="toggleEditBox(${newComment.commentId})">수정</button>
+                        <button type="button" class="btn-delete" onclick="deleteComment(${newComment.commentId})">삭제</button>
+                    </div>
+                `;
+            }
+
+            // 5. 전체 HTML 조립 (수정창 포함)
+            const commentHtml = `
+                <div class="comment-item" id="comment-item-${newComment.commentId}">
+                    <a href="${isMyComment ? '/member/mypage' : '/member/userPage/' + newComment.memberId}"
+                       style="display: block; cursor: pointer;">
+                        <img src="${profileSrc}" class="cmt-profile" alt="프로필">
+                    </a>
+
+                    <div class="cmt-content">
+                        <div class="cmt-header">
+                            <span class="cmt-writer">${newComment.writerNickname}</span>
+                            <span class="cmt-date">${dateStr}</span>
+                        </div>
+
+                        <div class="comment-view" id="comment-view-${newComment.commentId}">
+                            <p class="cmt-text" id="comment-content-${newComment.commentId}">${newComment.content}</p>
+                            ${buttonsHtml} </div>
+
+                        <div class="comment-edit-box" id="comment-edit-${newComment.commentId}" style="display: none;">
+                            <input type="text" class="edit-input" id="edit-input-${newComment.commentId}" value="${newComment.content}">
+                            <div class="edit-actions">
+                                <button type="button" class="btn-save" onclick="updateComment(${newComment.commentId})">저장</button>
+                                <button type="button" class="btn-cancel" onclick="toggleEditBox(${newComment.commentId})">취소</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 목록 맨 끝에 추가
+            commentList.insertAdjacentHTML('beforeend', commentHtml);
+
+            // 입력창 초기화 및 카운트 증가
+            contentInput.value = '';
+            const countSpan = document.getElementById('commentCount');
+            if(countSpan) countSpan.innerText = parseInt(countSpan.innerText) + 1;
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // 댓글 수정창 토글 함수 (보이기/숨기기)
+    function toggleEditBox(commentId) {
+        const viewArea = document.getElementById('comment-view-' + commentId);
+        const editArea = document.getElementById('comment-edit-' + commentId);
+
+        // 현재 display 상태를 확인해서 토글
+        if (editArea.style.display === 'none') {
+            viewArea.style.display = 'none';
+            editArea.style.display = 'block';
+        } else {
+            viewArea.style.display = 'block';
+            editArea.style.display = 'none';
+            // 취소 시 입력창 값을 원래대로 복구
+            const originalContent = document.getElementById('comment-content-' + commentId).innerText;
+            document.getElementById('edit-input-' + commentId).value = originalContent;
+        }
+    }
+
+    // 댓글 수정 요청 (AJAX)
+    function updateComment(commentId) {
+        const inputField = document.getElementById('edit-input-' + commentId);
+        const newContent = inputField.value.trim();
+
+        if (!newContent) {
+            alert("댓글 내용을 입력해주세요.");
+            return;
+        }
+
+        fetch('/comment/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                commentId: commentId,
+                content: newContent
+            })
+        })
+        .then(response => {
+            if (response.status === 401) {
+                alert("로그인이 필요합니다.");
+                return;
+            }
+            if (!response.ok) throw new Error("Update failed");
+            return response.json();
+        })
+        .then(updatedComment => {
+            // 화면 갱신: P 태그 내용 변경
+            const contentP = document.getElementById('comment-content-' + commentId);
+            contentP.innerText = updatedComment.content;
+
+            // 수정창 닫고 원래 화면 보여주기
+            toggleEditBox(commentId);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("댓글 수정에 실패했습니다.");
+        });
+    }
+
+    // 댓글 삭제 요청 (AJAX)
+   function deleteComment(commentId) {
+        if (!confirm("정말 이 댓글을 삭제하시겠습니까?")) return;
+
+        fetch('/comment/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ commentId: commentId })
+        })
+        .then(response => {
+            if (response.status === 401) {
+                alert("로그인이 필요합니다.");
+                return;
+            }
+            if (!response.ok) {
+                // 권한 없음 등 에러 처리
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.text();
+        })
+        .then(message => {
+            // 성공 시 화면에서 요소 제거 (새로고침 없이 삭제)
+            const commentItem = document.getElementById('comment-item-' + commentId);
+            if (commentItem) {
+                commentItem.remove();
+            }
+
+            // 전체 댓글 개수 감소
+            const countSpan = document.getElementById('commentCount');
+            if (countSpan) {
+                let currentCount = parseInt(countSpan.innerText);
+                if (!isNaN(currentCount) && currentCount > 0) {
+                    countSpan.innerText = currentCount - 1;
+                }
+            }
+        })
+    }
+
+</script>
 </body>
 </html>

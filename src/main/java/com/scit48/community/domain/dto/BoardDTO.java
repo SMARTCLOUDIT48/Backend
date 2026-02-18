@@ -50,4 +50,5 @@ public class BoardDTO {
 	// 5. 연관 데이터
 	private List<CommentDTO> comments; // 댓글 목록
 	private Integer likeCnt;           // 좋아요 총 개수
+	private boolean liked;  // [추가] 내가 좋아요 눌렀는지 여부
 }

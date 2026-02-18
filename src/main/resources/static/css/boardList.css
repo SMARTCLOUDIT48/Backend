@@ -199,6 +199,23 @@ a {
   box-shadow: 0 12px 26px rgba(80, 100, 180, 0.25);
 }
 
+.profile-img-sm {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    margin-right: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    vertical-align: middle;
+}
+
+.writer-cell {
+    display: flex;
+    align-items: center; /* 수직 중앙 정렬 */
+    justify-content: center; /* (필요시) 가로 중앙 정렬 */
+}
+
 /* 헤더 CTA (오로라 효과) - 필요시 사용 */
 .header-cta {
   padding: 10px 22px;

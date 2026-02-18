@@ -436,8 +436,18 @@ button {
     box-shadow: 0 8px 20px rgba(255, 111, 145, 0.3);
     transition: transform 0.2s, box-shadow 0.2s;
     display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px; /* 아이콘과 숫자 사이 간격 */
+}
+
+.heart-icon {
+    display: flex;
     align-items: center;
-    gap: 8px;
+}
+
+.heart-icon svg {
+    margin-top: 1px;
 }
 
 .like-btn:hover {
@@ -447,12 +457,14 @@ button {
 }
 
 .like-btn span {
-    background: rgba(255,255,255,0.25);
+    background: none;
     padding: 2px 10px;
     border-radius: 12px;
     font-size: 14px;
     font-weight: 600;
 }
+
+.
 
 /* --- 댓글 영역 --- */
 .comment-section {
@@ -560,6 +572,57 @@ button {
     line-height: 1.5;
     color: #444;
 }
+
+/* 댓글 수정/삭제 버튼 영역 */
+.cmt-actions {
+    margin-top: 5px;
+    font-size: 12px; /* 글자 크기 원래대로 작게 */
+}
+
+/* 버튼 공통 스타일 (테두리/배경 제거, 원상복구) */
+.cmt-actions button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-right: 8px; /* 버튼 사이 간격 */
+
+    color: #999;       /* 기본 회색 (수정 버튼) */
+    font-size: inherit;
+    cursor: pointer;
+}
+
+.cmt-actions button:hover {
+    text-decoration: underline;
+    color: #333;
+}
+
+/* [삭제 버튼] 만 핑크/레드 톤으로 글자색 변경 */
+.cmt-actions .btn-delete {
+    color: #ff5252; /* 예쁜 핑크레드 색상 */
+}
+
+.cmt-actions .btn-delete:hover {
+    color: #d32f2f; /* 호버 시 조금 더 진한 빨강 */
+    text-decoration: underline;
+}
+
+/* 수정 입력창 스타일 */
+.comment-edit-box {
+    margin-top: 5px;
+}
+.edit-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+.edit-actions button {
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
 
 /* =========================================================
    4. FOOTER STYLES (boardList.css와 완벽 일치)

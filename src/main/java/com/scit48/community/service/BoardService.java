@@ -5,10 +5,11 @@ import com.scit48.common.dto.UserDTO;
 import com.scit48.common.repository.UserRepository;
 import com.scit48.community.domain.dto.BoardDTO;
 import com.scit48.community.domain.dto.CommentDTO;
-import com.scit48.community.domain.entity.BoardEntity;
-import com.scit48.community.domain.entity.CategoryEntity;
+import com.scit48.community.domain.entity.*;
 import com.scit48.community.repository.BoardRepository;
 import com.scit48.community.repository.CategoryRepository;
+import com.scit48.community.repository.CommentRepository;
+import com.scit48.community.repository.LikeRepository;
 import com.scit48.community.util.FileManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -36,6 +37,8 @@ public class BoardService {
 	private final CategoryRepository ctr;
 	private final UserRepository ur;
 	private final FileManager fm;
+	private final LikeRepository lr;
+	private final CommentRepository cr;
 	
 	@Value("${board.uploadPath}")
 	private String uploadPath;
@@ -44,7 +47,7 @@ public class BoardService {
 	public void write(BoardDTO boardDTO, String uploadPath, MultipartFile upload) throws IOException {
 		// 1. 작성자(User) 조회
 		UserEntity userEntity = ur.findByMemberId(boardDTO.getMemberId())
-				.orElseThrow(() -> new EntityNotFoundException("사용자가 존재하지 않습니다. id=" + boardDTO.getId()));
+				.orElseThrow(() -> new EntityNotFoundException("사용자가 존재하지 않습니다. id=" + boardDTO.getMemberId()));
 		
 		// 2. 카테고리 조회 (DTO에서 ID를 받아옴)
 		CategoryEntity categoryEntity = ctr.findByName(boardDTO.getCategoryName())
@@ -69,7 +72,9 @@ public class BoardService {
 			
 		}
 		
-		br.save(boardEntity);
+		BoardEntity savedEntity = br.save(boardEntity);
+		boardDTO.setBoardId(savedEntity.getBoardId());
+		
 	}
 	
 	
@@ -210,6 +215,8 @@ public class BoardService {
 				.createdDate(board.getCreatedAt())
 				.categoryName(board.getCategory().getName())
 				.writerNickname(board.getUser().getNickname())
+				.profileImageName(board.getUser().getProfileImageName())
+				.memberId(board.getUser().getMemberId())
 				.build());
 	}
 	
@@ -251,6 +258,7 @@ public class BoardService {
 						.writerNickname(c.getUser().getNickname())
 						.writerProfileImage(c.getUser().getProfileImageName() != null ? "/files/" + c.getUser().getProfileImageName() : "/images/default_profile.png")
 						.createdDate(c.getCreatedAt())
+						.memberId(c.getUser().getMemberId())
 						.build()).collect(Collectors.toList()))
 				.likeCnt(board.getLikeCnt())
 				.build();
@@ -267,6 +275,7 @@ public class BoardService {
 		// 3. 프로필 이미지 경로 처리 (앞선 답변 참고)
 		String profileName = board.getUser().getProfileImageName();
 		String profilePath = (profileName != null) ? "/files/" + profileName : "/images/default_profile.png";
+		
 		
 		// 4. Entity -> DTO 변환
 		return BoardDTO.builder()
@@ -291,13 +300,61 @@ public class BoardService {
 						.commentId(c.getCommentId())
 						.content(c.getContent())
 						.writerNickname(c.getUser().getNickname())
-						.writerProfileImage(c.getUser().getProfileImageName() != null ? "/files/" + c.getUser().getProfileImageName() : "/images/default_profile.png")
+						.writerProfileImage(c.getUser().getProfileImageName())
 						.createdDate(c.getCreatedAt())
 						.build()).collect(Collectors.toList()))
 				.likeCnt(board.getLikeCnt())
 				.build();
 	}
 	
+	
+	@Transactional
+	public BoardDTO findById2(Long boardId, String loginMemberId) {
+		// 1. 조회수 증가 기능은 제거
+		
+		// 2. 게시글 조회
+		BoardEntity board = br.findById(boardId)
+				.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다"));
+		
+		// 3. 프로필 이미지 경로 처리 (앞선 답변 참고)
+		String profileName = board.getUser().getProfileImageName();
+		String profilePath = (profileName != null) ? "/files/" + profileName : "/images/default_profile.png";
+		
+		boolean isLiked = false;
+		if (loginMemberId != null) {
+			isLiked = isLiked(boardId, loginMemberId); // 위에 만든 isLiked 메서드 활용
+		}
+		
+		// 4. Entity -> DTO 변환
+		return BoardDTO.builder()
+				.id(board.getUser().getId())
+				.boardId(board.getBoardId())
+				.title(board.getTitle())
+				.content(board.getContent())
+				.profileImageName(board.getUser().getProfileImageName())
+				.viewCount(board.getViewCount())
+				.createdDate(board.getCreatedAt())
+				.categoryId(board.getCategory().getCategoryId())
+				.categoryName(board.getCategory().getName())
+				.writerNickname(board.getUser().getNickname())
+				.memberId(board.getUser().getMemberId())
+				.nation(board.getUser().getNation())
+				.profileImagePath(profilePath) // 프로필 경로
+				.manner(board.getUser().getManner()) // 매너온도 (있다면)
+				.filePath(board.getFilePath()) // 첨부파일(이미지)
+				.fileName(board.getFileName())
+				// 댓글 리스트 변환 (CommentEntity -> CommentDTO)
+				.comments(board.getComments().stream().map(c -> CommentDTO.builder()
+						.commentId(c.getCommentId())
+						.content(c.getContent())
+						.writerNickname(c.getUser().getNickname())
+						.writerProfileImage(c.getUser().getProfileImageName())
+						.createdDate(c.getCreatedAt())
+						.build()).collect(Collectors.toList()))
+				.likeCnt(board.getLikeCnt())
+				.liked(isLiked)
+				.build();
+	}
 	
 	public void update(BoardDTO boardDTO, String uploadPath, MultipartFile file) throws IOException {
 		// 1. 기존 게시글 엔티티 조회
@@ -325,18 +382,138 @@ public class BoardService {
 	}
 	
 	@Transactional
-	public void delete(Long boardId) {
+	public void delete(Long boardId) throws Exception {
 		
 		// 1. 게시글 조회 (파일 삭제를 위해 필요)
 		BoardEntity board = br.findById(boardId)
 				.orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다."));
 		
-		// 2. 첨부파일이 있다면 로컬(디스크)에서도 삭제 (선택사항)
-		// fileManager.deleteFile(board.getFileName()); // 파일 매니저에 삭제 메서드가 있다면 호출
+		// 2. 첨부파일이 있다면 로컬(디스크)에서도 삭제
+		if (board.getFileName() != null) {
+			fm.deleteFile(board.getFilePath() ,board.getFileName());
+		}
 		
 		// 3. DB에서 삭제
 		br.delete(board);
 		
 	}
+	
+	/**
+	 * 좋아요 토글 기능
+	 * @param boardId 게시글 ID
+	 * @param memberId 로그인한 유저의 ID (String)
+	 * @param clientIp 클라이언트 IP 주소 (LikeKey 생성을 위해 필요)
+	 * @return 좋아요가 추가되었으면 true, 취소되었으면 false
+	 */
+	public boolean toggleLike(Long boardId, String memberId, String clientIp) {
+		// 1. 유저와 게시글 조회
+		UserEntity user = ur.findByMemberId(memberId)
+				.orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다."));
+		
+		BoardEntity board = br.findById(boardId)
+				.orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+		
+		// 2. 좋아요 존재 여부 확인 (IP 무관, 유저와 게시글 기준)
+		if (lr.existsByUser_IdAndBoard_BoardId(user.getId(), boardId)) {
+			// [취소] 이미 좋아요가 있다면 삭제
+			lr.deleteByUser_IdAndBoard_BoardId(user.getId(), boardId);
+			board.setLikeCnt(board.getLikeCnt() - 1); // 게시글 내 카운트 감소
+			return false;
+			
+		} else {
+			// [추가] 좋아요가 없다면 생성
+			
+			// LikeKey 생성 (boardId와 IP)
+			LikeKey key = new LikeKey(boardId, clientIp);
+			
+			LikeEntity like = LikeEntity.builder()
+					.likeId(key)
+					.user(user)
+					.board(board)
+					// inputDate는 @CreatedDate로 자동 처리되거나 필요시 LocalDateTime.now()
+					.build();
+			
+			lr.save(like);
+			board.setLikeCnt(board.getLikeCnt() + 1); // 게시글 내 카운트 증가
+			return true;
+		}
+	}
+	
+	// 게시글 상세 조회 시 현재 유저의 좋아요 상태 확인용
+	@Transactional
+	public boolean isLiked(Long boardId, String memberId) {
+		UserEntity user = ur.findByMemberId(memberId).orElse(null);
+		if (user == null) return false;
+		return lr.existsByUser_IdAndBoard_BoardId(user.getId(), boardId);
+	}
+	
+	
+	// 댓글 작성
+	public CommentDTO commentWrite(Long boardId, String memberId, String content) {
+		// 1. 게시글 및 유저 조회
+		BoardEntity board = br.findById(boardId)
+				.orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
+		
+		UserEntity user = ur.findByMemberId(memberId)
+				.orElseThrow(() -> new EntityNotFoundException("사용자 정보가 없습니다."));
+		
+		// 2. 엔티티 생성 및 저장
+		CommentEntity comment = CommentEntity.builder()
+				.content(content)
+				.board(board)
+				.user(user)
+				// createdAt은 @PrePersist로 자동 설정됨
+				.build();
+		
+		cr.save(comment);
+		
+		// 3. DTO 변환 및 반환 (화면 갱신용)
+		return CommentDTO.builder()
+				.commentId(comment.getCommentId())
+				.boardId(board.getBoardId())
+				.content(comment.getContent())
+				.writerNickname(user.getNickname())
+				.writerProfileImage(user.getProfileImageName()) // UserEntity 필드명 확인 필요
+				.createdDate(comment.getCreatedAt())
+				.memberId(comment.getUser().getMemberId())
+				.build();
+	}
+	
+	// 댓글 수정
+	@Transactional
+	public CommentDTO updateComment(Long commentId, String memberId, String newContent) {
+		CommentEntity comment = cr.findById(commentId)
+				.orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
+		
+		// 작성자 본인 확인 (보안)
+		if (!comment.getUser().getMemberId().equals(memberId)) {
+			throw new IllegalArgumentException("수정 권한이 없습니다.");
+		}
+		
+		// 내용 변경 (Dirty Checking으로 자동 update 쿼리 실행)
+		comment.setContent(newContent);
+		
+		// 변경된 DTO 반환
+		return CommentDTO.builder()
+				.commentId(comment.getCommentId())
+				.content(comment.getContent())
+				.writerNickname(comment.getUser().getNickname())
+				// 필요한 필드들...
+				.build();
+	}
+	
+	// 댓글 삭제
+	@Transactional
+	public void deleteComment(Long commentId, String memberId) {
+		CommentEntity comment = cr.findById(commentId)
+				.orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
+		
+		if (!comment.getUser().getMemberId().equals(memberId)) {
+			throw new IllegalArgumentException("삭제 권한이 없습니다.");
+		}
+		
+		cr.delete(comment);
+	}
+	
 }
 
