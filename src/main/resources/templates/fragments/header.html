@@ -10,11 +10,22 @@
             💬 TalkTribe
         </div>
 
+        <!-- ✅ 전역 알림용: 로그인한 내 userId (전 페이지 공통) -->
+        <div sec:authorize="isAuthenticated()" style="display:none;">
+            <input type="hidden" id="globalMyUserId" th:value="${#authentication.principal.user.id}">
+        </div>
+
         <!-- 네비게이션 -->
         <nav class="nav">
             <a th:href="@{/community}">커뮤니티</a>
             <a th:href="@{/recommend}">파트너찾기</a>
-            <a th:href="@{/chat}">채팅</a>
+
+            <!-- ✅ 채팅 메뉴 + 헤더 🔴 -->
+            <a th:href="@{/chat}" class="nav-chat-link">
+                채팅
+                <span id="headerUnreadDot" style="display:none;"></span>
+            </a>
+
             <a th:href="@{/customer/inquiry}">1:1문의</a>
             <a th:href="@{/customer/notice}">고객센터</a>
         </nav>
@@ -63,4 +74,12 @@
 
     <!-- 로그아웃 JS -->
     <script th:src="@{/js/member/logout.js}"></script>
+
+    <!-- ✅ SockJS / STOMP는 먼저 로드 (defer X 권장) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <!-- ✅ 전역 헤더 알림 JS -->
+    <script th:src="@{/js/common/header-notify.js}" defer></script>
+
 </header>

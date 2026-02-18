@@ -1,5 +1,6 @@
 package com.scit48.community.repository;
 
+import com.scit48.admin.dto.AdminPostListDTO;
 import com.scit48.community.domain.entity.BoardEntity;
 import com.scit48.community.domain.entity.CategoryEntity;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -52,7 +54,7 @@ public interface BoardRepository
 	Page<BoardEntity> findAll(Pageable pageable);
 	*/
 	
-	
+	// 관리자 페이지에서 불러오기 용
 	@Query(
 			value = """
     SELECT
@@ -74,4 +76,33 @@ public interface BoardRepository
 	void updateHits(@Param("boardId") Long boardId);
 	
 	
+	// 관리자 페이지에서 불러오기 용
+	@Query("""
+        SELECT new com.scit48.admin.dto.AdminPostListDTO(
+            'COMMUNITY',
+            b.boardId,
+            b.title,
+            u.nickname,
+            b.createdAt,
+            CONCAT('/community/detail/', b.boardId)
+        )
+        FROM BoardEntity b
+        JOIN b.user u
+        WHERE
+          (
+            :keyword IS NULL OR :keyword = ''
+            OR (
+              :searchType = 'TITLE' AND b.title LIKE %:keyword%
+            )
+            OR (
+              :searchType = 'AUTHOR' AND u.nickname LIKE %:keyword%
+            )
+          )
+        ORDER BY b.createdAt DESC
+    """)
+	Page<AdminPostListDTO> findAdminBoardPosts(
+			@Param("searchType") String searchType, // TITLE / AUTHOR
+			@Param("keyword") String keyword,
+			Pageable pageable
+	);
 }

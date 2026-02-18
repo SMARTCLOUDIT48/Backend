@@ -7,11 +7,29 @@
 	<link rel="stylesheet" th:href="@{/css/layout.css}">
 	<link rel="stylesheet" th:href="@{/css/recommend/recommend.css}" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.1/css/flag-icons.min.css" />
-
 	<script>
 		window.addEventListener('DOMContentLoaded', () => {
 			loadRecommend();
 
+			const ageMin = document.getElementById("ageMin");
+			const ageMax = document.getElementById("ageMax");
+			const ageMinValue = document.getElementById("ageMinValue");
+			const ageMaxValue = document.getElementById("ageMaxValue");
+			const ageFill = document.getElementById("ageFill");
+
+			ageMin.addEventListener("input", syncAge);
+			ageMax.addEventListener("input", syncAge);
+
+			syncAge();
+
+			document.getElementById('filterForm')?.addEventListener('reset', () => {
+				setTimeout(() => {
+					syncAge();
+				}, 0);
+			});
+
+
+			//채팅 신청 버튼으로 채팅방 입장
 			document.getElementById('recommendTbody').addEventListener('click', async (e) => {
 				const chat_partner_btn = e.target.closest('.chat-btn');
 				if (!chat_partner_btn) return;
@@ -36,25 +54,24 @@
 					chat_partner_btn.disabled = false;
 				}
 			});
-
+			//자동 매칭 버튼
 			const mathch_btn = document.getElementById('auto_matching');
 
 			mathch_btn.addEventListener('click', async () => {
 				mathch_btn.disabled = true;
 
 				try {
+					const criteriaKey = buildCriteriaKey();
+					// criteriaKey: "g=FEMALE|n=JAPAN|s=KOREAN|l=ANY"
+					const payload = criteriaKey ? { criteriaKey } : {};
 					// ✅ 필요하면 여기서 필터 조건을 같이 보냅니다.
 					// 서버에서 로그인 유저 기준으로 자동 계산한다면 body 없이 보내도 됩니다.
-					const payload = {
-						// 예시(선택): 서버가 criteriaKey를 요구한다면 전달
-						// criteriaKey: "g=FEMALE|n=JAPAN|s=KOREAN|l=ANY"
-						criteriaKey: "g=ANY|n=ANY" //임시 매칭 전체 범위
-					};
-
+					console.log("Filtering Key");
+					console.log(payload);
 					const res = await fetch('/api/match/start', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(payload) // payload가 필요 없으면 이 줄 제거 가능
+						body: JSON.stringify(payload)
 					});
 
 					if (!res.ok) {
@@ -65,8 +82,8 @@
 					console.log("match Start Data");
 					console.log(data);
 					// data 예시:
-					// { status: "WAITING" }
-					// { status: "MATCHED", roomId: 10, roomUuid: "....", partnerId: 2 }
+					// {status: "WAITING" }
+					// {status: "MATCHED", roomId: 10, roomUuid: "....", partnerId: 2 }
 
 					if (data.status === 'MATCHED') {
 						// ✅ 채팅방 페이지 규칙에 맞게 수정
@@ -74,32 +91,117 @@
 						console.log(data);
 						console.log("데이터. roomId" + data.roomId);
 						sessionStorage.setItem('openRoomId', data.roomId);
+						closeMatchOverlay(); // 혹시 열려있을 수 있으니 닫기
 						location.href = `/chat`;
 						return;
 					}
 
 					// WAITING이면 폴링 시작(1초마다 매칭 결과 확인)
+					openMatchOverlay();
 					startPollingForMatch(mathch_btn);
 
 				} catch (err) {
 					console.error(err);
 					alert('매칭 시작 실패');
+					closeMatchOverlay(); // 혹시 열려있을 수 있으니 닫기
 					mathch_btn.disabled = false;
 				}
 			});
 
-		});
+			// ✅ 매칭 취소 버튼
+			document.getElementById('matchCancelBtn')?.addEventListener('click', async () => {
+				stopMatchPolling();
+				closeMatchOverlay();
+
+				const mathch_btn = document.getElementById('auto_matching');
+				if (mathch_btn) mathch_btn.disabled = false;
+
+				try {
+					await fetch('/api/match/cancel', { method: 'POST' });
+				} catch (e) {
+					console.error('cancel failed', e);
+				}
+			});
+
+		}); //window.addEventListener('DOMContentLoaded' 끝나는 지점
+
+
+		//데이터 일관성을 위해서 ALL > ANY로 바꿈
+		function toAny(v) {
+			if (!v) return 'ANY';
+			const up = String(v).toUpperCase();
+			return (up === 'ALL') ? 'ANY' : up;
+		}
+
+		//필터링을 form 안에 담아서 필터링키를 만듬
+		function buildCriteriaKey() {
+			const form = document.getElementById('filterForm');
+			if (!form) return null;
+			const fd = new FormData(form);
+
+			const g = toAny(fd.get('gender')); // MALE/FEMALE/ANY
+			const n = toAny(fd.get('nation')); // KOREA/JAPAN/ANY
+			const lang = toAny(fd.get('studyLanguage')); // KOREAN/JAPANESE/ANY
+
+			// ageMin/ageMax input이 없으면 기본값
+			const ageMinEl = document.getElementById('ageMin');
+			const ageMaxEl = document.getElementById('ageMax');
+			let ageMin = ageMinEl ? parseInt(ageMinEl.value, 10) : 18;
+			let ageMax = ageMaxEl ? parseInt(ageMaxEl.value, 10) : 80;
+			if (Number.isNaN(ageMin)) ageMin = 18;
+			if (Number.isNaN(ageMax)) ageMax = 80;
+			if (ageMin > ageMax) [ageMin, ageMax] = [ageMax, ageMin];
+
+			const levels = fd.getAll('levels');
+			const lv = levels.length ? levels.join(',') : 'ANY';
+
+			// interests: 체크된 대분류 InterestType(CULTURE, IT...), 없으면 ANY
+			const interests = fd.getAll('interestTypes');
+			const interest = interests.length ? interests.join(',') : 'ANY';
+
+			console.log("[criteriaKey]", `g=${g}|age=${ageMin}-${ageMax}|n=${n}|lang=${lang}|lv=${lv}|interest=${interest}`);
+
+			// 서버 파서가 기대하는 키: g, age, n, lang, lv, interest
+			return `g=${g}|age=${ageMin}-${ageMax}|n=${n}|lang=${lang}|lv=${lv}|interest=${interest}`;
+		}
+
+		function clampSwap(minEl, maxEl) {
+			let min = parseFloat(minEl.value);
+			let max = parseFloat(maxEl.value);
+			if (min > max) {
+				[min, max] = [max, min];
+				minEl.value = min;
+				maxEl.value = max;
+			}
+			return { min, max };
+		}
+
+		function setFill(fillEl, min, max, minLimit, maxLimit) {
+			const left = ((min - minLimit) / (maxLimit - minLimit)) * 100;
+			const right = ((max - minLimit) / (maxLimit - minLimit)) * 100;
+			fillEl.style.left = left + "%";
+			fillEl.style.width = (right - left) + "%";
+		}
+
+		function syncAge() {
+			const { min, max } = clampSwap(ageMin, ageMax);
+			ageMinValue.textContent = String(min);
+			ageMaxValue.textContent = String(max);
+			setFill(ageFill, min, max, 18, 60);
+		}
 
 		function startPollingForMatch(mathch_btn) {
+			stopMatchPolling(); // ✅ 혹시 남아있던 폴링 제거
+
 			const intervalMs = 1000;
 			const maxMs = 60_000; // 60초
 			const startedAt = Date.now();
 
-			const timer = setInterval(async () => {
+			matchPollingTimer = setInterval(async () => {
 				try {
 					const res = await fetch('/api/match/result');
 					if (!res.ok) {
-						const body = await res.text(); // ✅ 서버가 준 에러 내용
+						const body = await res.text();
 						console.error('match/result failed:', res.status, body);
 						throw new Error('HTTP ' + res.status);
 					}
@@ -107,21 +209,20 @@
 					const data = await res.json();
 
 					if (data.status === 'MATCHED') {
-						clearInterval(timer);
-						//roomId를 어디서 받아와야함
-						console.log("Polling Data 전체")
-						console.log(data);
-						console.log("데이터. roomId" + data.roomId);
+						stopMatchPolling();
+						closeMatchOverlay(); // ✅ 매칭 성공 시 모달 닫기
 						sessionStorage.setItem('openRoomId', data.roomId);
 						location.href = `/chat`;
 						return;
 					}
 
-					// ✅ 타임아웃 처리
+					// ✅ 타임아웃 처리: 모달 닫고 알럿 띄우기
 					if (Date.now() - startedAt > maxMs) {
-						clearInterval(timer);
+						stopMatchPolling();
+						closeMatchOverlay(); // ✅ 여기 추가
 						alert('매칭 대기 시간이 초과되었습니다. 다시 시도해주세요.');
-						btn.disabled = false;
+						mathch_btn.disabled = false;
+						return;
 					}
 
 				} catch (err) {
@@ -151,6 +252,28 @@
 			}
 		}
 
+		let matchPollingTimer = null;
+
+		function openMatchOverlay() {
+			const overlay = document.getElementById('matchOverlay');
+			overlay.classList.add('is-open');
+			overlay.setAttribute('aria-hidden', 'false');
+			document.body.style.overflow = 'hidden'; // 스크롤 잠금
+		}
+
+		function closeMatchOverlay() {
+			const overlay = document.getElementById('matchOverlay');
+			overlay.classList.remove('is-open');
+			overlay.setAttribute('aria-hidden', 'true');
+			document.body.style.overflow = ''; // 스크롤 복구
+		}
+
+		function stopMatchPolling() {
+			if (matchPollingTimer) {
+				clearInterval(matchPollingTimer);
+				matchPollingTimer = null;
+			}
+		}
 
 
 		function renderRecommend(list) {
@@ -222,38 +345,38 @@
 
 
 				html += `
-            	<div class="member-card">
-			<div class="profile-wrap">
-				<img src="${imagePath}" class="profile-img" alt="">
-				<span class="${flagStatus}" aria-label="Japan"></span>
-			</div>
+    <div class="member-card">
+        <div class="profile-wrap">
+            <img src="${imagePath}" class="profile-img" alt="">
+                <span class="${flagStatus}" aria-label="Japan"></span>
+        </div>
 
-			<!-- 정보 영역 -->
-			<div class="info">
-				<div class="nickname">${item.nickname}</div>
+        <!-- 정보 영역 -->
+        <div class="info">
+            <div class="nickname">${item.nickname}</div>
 
-				<div class="row">
-					<span class="label">거주국가</span>
-					<span class="value">${nation}</span>
-				</div>
+            <div class="row">
+                <span class="label">거주국가</span>
+                <span class="value">${nation}</span>
+            </div>
 
-				<div class="row">
-					<span class="label">학습언어</span>
-					<span class="lang">
-						<span class="${study}"></span>
-						<span class="level">${languageLevel}</span>
-					</span>
-				</div>
-			</div>
+            <div class="row">
+                <span class="label">학습언어</span>
+                <span class="lang">
+                    <span class="${study}"></span>
+                    <span class="level">${languageLevel}</span>
+                </span>
+            </div>
+        </div>
 
-			<!-- 우측 영역 -->
-			<div class="right">
-				<span class="chatting-text">"인기 멤버예요! 🔥 답장이 늦을 수 있어요."</span>
-				<div class="temp">${item.manner}℃</div>
-				<button class="chat-btn" data-user-id="${item.id}">채팅 신청</button>
-			</div>
-		</div>
-        		`;
+        <!-- 우측 영역 -->
+        <div class="right">
+            <span class="chatting-text">"인기 멤버예요! 🔥 답장이 늦을 수 있어요."</span>
+            <div class="temp">${item.manner}℃</div>
+            <button class="chat-btn" data-user-id="${item.id}">채팅 신청</button>
+        </div>
+    </div>
+    `;
 			});
 
 			recommendList.innerHTML = html;
@@ -274,7 +397,6 @@
 		// 		console.log(e);
 		// 	}
 		// }
-
 	</script>
 </head>
 
@@ -288,20 +410,151 @@
 		<h1 class="SubTitle">추천 파트너 리스트</h1>
 		<p class="temp_context">언어 리스트부터 채팅 요청까지 서비스를 한눈에 확인하세요(임시)</p>
 	</section>
-	<section>
-		<button id="auto_matching">자동 매칭</button>
+	<section class="filter-panel" aria-label="추천 파트너 필터">
+		<div class="filter-header">
+			<h2 class="filter-title">조건 필터</h2>
+			<p class="filter-sub">원하는 조건을 선택해서 추천 리스트를 좁혀보세요.</p>
+		</div>
+
+		<form id="filterForm" class="filter-grid">
+			<!-- 1) 성별 -->
+			<div class="filter-item">
+				<label class="filter-label">성별</label>
+				<div class="segmented" role="group" aria-label="성별 선택">
+					<input type="radio" name="gender" id="g_all" value="ALL" checked>
+					<label for="g_all">모두</label>
+
+					<input type="radio" name="gender" id="g_male" value="MALE">
+					<label for="g_male">남</label>
+
+					<input type="radio" name="gender" id="g_female" value="FEMALE">
+					<label for="g_female">여</label>
+				</div>
+			</div>
+
+			<!-- 2) 학습언어 -->
+			<div class="filter-item">
+				<label class="filter-label">학습언어</label>
+				<div class="segmented" role="group" aria-label="학습언어 선택">
+					<input type="radio" name="studyLanguage" id="sl_all" value="ALL" checked>
+					<label for="sl_all">모두</label>
+
+					<input type="radio" name="studyLanguage" id="sl_kor" value="KOREAN">
+					<label for="sl_kor">한국어</label>
+
+					<input type="radio" name="studyLanguage" id="sl_jpn" value="JAPANESE">
+					<label for="sl_jpn">일본어</label>
+				</div>
+			</div>
+
+
+
+			<!-- 3) 거주국가 -->
+			<div class="filter-item">
+				<label class="filter-label">거주국가</label>
+				<div class="segmented" role="group" aria-label="거주국가 선택">
+					<input type="radio" name="nation" id="n_all" value="ALL" checked>
+					<label for="n_all">모두</label>
+
+					<input type="radio" name="nation" id="n_kor" value="KOREA">
+					<label for="n_kor">한국</label>
+
+					<input type="radio" name="nation" id="n_jpn" value="JAPAN">
+					<label for="n_jpn">일본</label>
+				</div>
+			</div>
+
+
+			<!-- 4) 나이 (최소/최대) -->
+			<div class="filter-item">
+				<label class="filter-label">나이</label>
+
+				<div class="dual-range" data-range="age">
+					<div class="dual-track">
+						<span class="dual-fill" id="ageFill"></span>
+					</div>
+
+					<div class="dual-inputs">
+						<input id="ageMin" name="ageMin" type="range" min="18" max="60" value="20" step="1">
+						<input id="ageMax" name="ageMax" type="range" min="18" max="80" value="35" step="1">
+					</div>
+
+					<div class="range-meta">
+						<span class="chip"><b id="ageMinValue">20</b>세</span>
+						<span class="chip"><b id="ageMaxValue">35</b>세</span>
+					</div>
+				</div>
+			</div>
+
+
+			<!-- 5) 학습레벨(복수 선택) -->
+			<div class="filter-item">
+				<label class="filter-label">학습레벨</label>
+
+				<div class="level-chips" role="group" aria-label="학습레벨 선택(복수)">
+					<input type="checkbox" name="levels" id="lv1" value="1">
+					<label for="lv1">1</label>
+
+					<input type="checkbox" name="levels" id="lv2" value="2">
+					<label for="lv2">2</label>
+
+					<input type="checkbox" name="levels" id="lv3" value="3">
+					<label for="lv3">3</label>
+
+					<input type="checkbox" name="levels" id="lv4" value="4">
+					<label for="lv4">4</label>
+				</div>
+
+				<p class="help">원하는 레벨만 체크하세요. (미체크 시 전체로 간주)</p>
+			</div>
+
+			<!-- 6) 관심사 (대분류) -->
+			<div class="filter-item">
+				<label class="filter-label">관심사</label>
+
+				<div class="btn-group interest-group">
+					<input type="checkbox" name="interestTypes" id="it_culture" value="CULTURE">
+					<label for="it_culture" class="filter-btn">문화 · 예술</label>
+
+					<input type="checkbox" name="interestTypes" id="it_hobby" value="HOBBY">
+					<label for="it_hobby" class="filter-btn">취미 · 여가</label>
+
+					<input type="checkbox" name="interestTypes" id="it_sport" value="SPORTS">
+					<label for="it_sport" class="filter-btn">운동 · 스포츠</label>
+
+					<input type="checkbox" name="interestTypes" id="it_travel" value="TRAVEL">
+					<label for="it_travel" class="filter-btn">여행 · 지역</label>
+
+					<input type="checkbox" name="interestTypes" id="it_food" value="FOOD">
+					<label for="it_food" class="filter-btn">음식 · 요리</label>
+
+					<input type="checkbox" name="interestTypes" id="it_learning" value="STUDY">
+					<label for="it_learning" class="filter-btn">학습 · 자기계발</label>
+
+					<input type="checkbox" name="interestTypes" id="it_tech" value="IT">
+					<label for="it_tech" class="filter-btn">IT · 기술</label>
+
+					<input type="checkbox" name="interestTypes" id="it_life" value="LIFESTYLE">
+					<label for="it_life" class="filter-btn">라이프스타일</label>
+				</div>
+
+				<p class="help">흥미가 있는 관심사를 선택하세요. (미체크 시 전체로 간주)</p>
+			</div>
+
+			<!-- ✅ 액션 버튼 3개 -->
+			<div class="filter-actions">
+				<button type="button" id="auto_matching" class="btn primary">
+					자동 매칭
+				</button>
+				<button type="reset" id="refreshBtn" class="btn ghost">
+					초기화? 새로고침?
+				</button>
+				<button type="submit" id="searchBtn" class="btn solid">
+					검색
+				</button>
+			</div>
+		</form>
 	</section>
-	<!-- <section class="filter">
-	<h3>조건 필터</h3>
-	<div class="filter-box">
-		<span class="tag">한국어</span>
-		<span class="tag">30km 이내</span>
-		<span class="tag green">칭찬</span>
-		<span class="tag orange">언제</span>
-		<button class="btn primary">필터 적용</button>
-		<button class="btn">초기화</button>
-	</div>
-	</section> -->
 	<section class="content">
 		<div id="recommendTbody">
 		</div>
@@ -309,6 +562,16 @@
 	<footer>
 		<div th:replace="~{fragments/footer :: footer}"></div>
 	</footer>
+	<div id="matchOverlay" class="match-overlay" aria-hidden="true">
+		<div class="match-modal" role="dialog" aria-modal="true" aria-labelledby="matchTitle">
+			<h3 id="matchTitle" class="match-title">매칭중입니다…</h3>
+			<p class="match-sub">잠시만 기다려 주세요.<br> (매칭시간이 60초가 넘어가면 자동으로 취소됩니다.)</p>
+
+			<div class="match-actions">
+				<button type="button" id="matchCancelBtn" class="btn ghost">취소</button>
+			</div>
+		</div>
+	</div>
 </body>
 
 </html>

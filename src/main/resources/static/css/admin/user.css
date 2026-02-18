@@ -1,0 +1,394 @@
+/* =========================
+   공통 레이아웃
+========================= */
+
+.admin-container {
+    max-width: 1200px;
+    margin: 140px auto;
+    padding: 0 24px;
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 28px;
+    letter-spacing: -0.3px;
+}
+
+/* =========================
+   검색 / 필터
+========================= */
+
+.admin-filter {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.admin-filter input,
+.admin-filter select {
+    padding: 10px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,0.08);
+    font-size: 14px;
+    outline: none;
+}
+
+.admin-filter button {
+    padding: 10px 18px;
+    border-radius: 16px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    color: #fff;
+}
+
+/* =========================
+   테이블 (글라스 스타일)
+========================= */
+
+.admin-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    border-radius: 22px;
+    overflow: hidden;
+
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.08),
+        inset 0 0 0 1px rgba(255,255,255,0.4);
+}
+
+.admin-table thead {
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.75),
+        rgba(255,255,255,0.55)
+    );
+}
+
+.admin-table th {
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    color: #333;
+}
+
+.admin-table td {
+    padding: 16px;
+    font-size: 14px;
+    text-align: center;
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+/* hover */
+.admin-table tbody tr:hover {
+    background: rgba(99, 102, 241, 0.06);
+}
+
+/* =========================
+   버튼
+========================= */
+
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+
+    background: linear-gradient(135deg,  #8b85ff, #b7a8ff);
+    color: #fff;
+
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(99, 102, 241, 0.35);
+}
+
+/* =========================
+   회원 상세
+========================= */
+
+.detail-card {
+    max-width: 720px;
+    margin: 140px auto;
+    padding: 56px;
+
+    border-radius: 36px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.75),
+        rgba(255,255,255,0.55)
+    );
+
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    box-shadow:
+        0 30px 60px rgba(0,0,0,0.12),
+        inset 0 0 0 1px rgba(255,255,255,0.4);
+}
+
+.detail-card h3 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 32px;
+}
+
+.detail-card p {
+    font-size: 15px;
+    margin-bottom: 14px;
+    color: #333;
+}
+
+.detail-card b {
+    display: inline-block;
+    width: 90px;
+    color: #555;
+}
+
+/* =========================
+   탈퇴 버튼 (위험 액션)
+========================= */
+
+.btn-danger {
+    margin-top: 32px;
+    padding: 12px 22px;
+    border-radius: 22px;
+    border: none;
+
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+
+    background: linear-gradient(135deg, #ff6b6b, #ff8787);
+    color: #fff;
+
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(255, 107, 107, 0.35);
+}
+
+/* =========================
+   버튼 클릭 애니메이션
+========================= */
+
+.btn,
+.btn-danger {
+    transition:
+        transform 0.12s ease,
+        box-shadow 0.12s ease,
+        filter 0.12s ease;
+}
+
+/* 눌렀을 때 */
+.btn:active,
+.btn-danger:active {
+    transform: translateY(1px) scale(0.96);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    filter: brightness(0.95);
+}
+
+.btn,
+.btn-danger {
+    position: relative;
+    overflow: hidden;
+}
+
+/* ripple */
+.btn::after,
+.btn-danger::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.35);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+}
+
+.btn:active::after,
+.btn-danger:active::after {
+    width: 140%;
+    height: 140%;
+    opacity: 1;
+    transition: width 0.4s ease, height 0.4s ease, opacity 0.6s ease;
+}
+
+.btn-danger:hover {
+    animation: dangerPulse 0.6s ease;
+}
+
+@keyframes dangerPulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+.btn.disabled,
+.btn-danger.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+    filter: grayscale(0.3);
+}
+
+/* =========================
+   공통 버튼 인터랙션
+========================= */
+
+.admin-filter button {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+
+    background: linear-gradient(
+        135deg,
+        #8b85ff,
+        #b7a8ff
+    );
+    color: #fff;
+
+    box-shadow: 0 6px 16px rgba(139, 133, 255, 0.35);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        filter 0.15s ease;
+}
+
+
+.admin-filter button:hover,
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(99, 102, 241, 0.45);
+    filter: brightness(1.03);
+}
+
+.admin-filter button:active,
+.btn:active {
+    transform: translateY(1px) scale(0.96);
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.35);
+    filter: brightness(0.95);
+}
+
+.admin-filter button,
+.btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-filter button::after,
+.btn::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.35);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+}
+
+.admin-filter button:active::after,
+.btn:active::after {
+    width: 140%;
+    height: 140%;
+    opacity: 1;
+    transition:
+        width 0.4s ease,
+        height 0.4s ease,
+        opacity 0.6s ease;
+}
+
+/* =========================
+   회원 상세 레이아웃
+========================= */
+
+.user-detail-layout {
+    display: flex;
+    gap: 36px;
+    align-items: center;
+}
+
+/* 프로필 이미지 */
+.profile-image-box {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    box-shadow:
+        0 10px 24px rgba(0,0,0,0.15),
+        inset 0 0 0 2px rgba(255,255,255,0.6);
+}
+
+.profile-image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 정보 영역 */
+.user-info p {
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.user-info b {
+    display: inline-block;
+    width: 80px;
+    color: #555;
+}
+
+.pagination {
+    margin-top: 28px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.pagination a {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255,255,255,0.6);
+    color: #555;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.pagination a.active {
+    background: linear-gradient(135deg, #f3a6d8, #b8b5ff);
+    color: #fff;
+}

@@ -4,6 +4,8 @@ import com.scit48.chat.domain.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDateTime;
 import java.util.List; // List import 필수
 import java.util.Optional;
 
@@ -28,4 +30,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 	// 설명: ChatRoomMemberEntity 테이블에서 내 아이디(userId)가 들어있는 방(m.room)만 쏙 뽑아옵니다.
 	@Query("SELECT m.room FROM ChatRoomMemberEntity m WHERE m.user.id = :userId")
 	List<ChatRoom> findMyChatRooms(@Param("userId") Long userId);
+	
+	// ✅ 24시간 지났고(createdAt < 기준시간), 아직 정산 안 된(isEvaluated == false) 방 찾기
+	List<ChatRoom> findByCreatedAtBeforeAndIsEvaluatedFalse(LocalDateTime timeLimit);
 }

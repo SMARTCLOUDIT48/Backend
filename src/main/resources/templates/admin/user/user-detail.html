@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" th:href="@{/css/layout.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/user.css}" />
+
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<section class="detail-card">
+
+    <h3>회원 상세</h3>
+
+    <div class="user-detail-layout">
+
+        <!-- 🔥 프로필 이미지 -->
+        <div class="profile-image-box">
+            <img th:src="${user.profileImageUrl}" alt="프로필 이미지" />
+        </div>
+
+        <!-- 정보 영역 -->
+        <div class="user-info">
+            <p><b>닉네임</b> [[${user.nickname}]]</p>
+            <p><b>아이디</b> [[${user.memberId}]]</p>
+            <p><b>국가</b> [[${user.nation}]]</p>
+            <p><b>언어</b> [[${user.nativeLanguage}]]</p>
+            <p><b>레벨</b> [[${user.levelLanguage}]]</p>
+        </div>
+
+    </div>
+
+    <button class="btn-danger"
+            th:onclick="|deleteUser(${user.userId})|">
+        회원 탈퇴
+    </button>
+
+</section>
+
+<!-- 푸터 -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:src="@{/js/admin/user.js}"></script>
+
+
+</body>
+</html>

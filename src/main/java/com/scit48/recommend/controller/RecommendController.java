@@ -1,5 +1,6 @@
 package com.scit48.recommend.controller;
 
+import com.scit48.auth.member.service.CustomUserDetails;
 import com.scit48.chat.domain.dto.DirectRoomResponseDTO;
 import com.scit48.chat.service.ChatRoomMemberService;
 import com.scit48.common.dto.UserDTO;
@@ -11,12 +12,14 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @Slf4j
@@ -33,6 +36,10 @@ public class RecommendController {
 		private String criteriaKey;
 	}
 	
+	/**
+	 * Recommend 페이지로 이동
+	 * @return
+	 */
 	@GetMapping("recommend") //임시
 	public String Recommend(){
 		
@@ -44,10 +51,8 @@ public class RecommendController {
 	public List<RecommendDTO> recommend(
 			@AuthenticationPrincipal UserDetails user
 	){
-		
 		Long user_id = rs.searchid(user);
 		List<RecommendDTO> userDTO= rs.firstRecommend(user_id);
-		
 		return userDTO;
 	}
 	
@@ -58,16 +63,15 @@ public class RecommendController {
 			@PathVariable Long partnerId
 	){
 		Long myId = rs.searchid(userDetails);
-		log.debug(userDetails.getUsername());
 		DirectRoomResponseDTO dto = chatRoomMemberService.createOrGetDirectRoom(myId,partnerId);
 		return dto;
 	}
 	
 	@ResponseBody
 	@PostMapping("/api/match/start")
-	public MatchResponseDTO start(@AuthenticationPrincipal UserDetails userDetails,
-								  @RequestBody(required = false) MatchStartRequest req){
-		
+	public MatchResponseDTO start(
+			@AuthenticationPrincipal UserDetails userDetails,
+			@RequestBody(required = false) MatchStartRequest req){
 		Long myId = rs.searchid(userDetails);
 		String criteriaKey = (req != null) ? req.getCriteriaKey() : null;
 		
@@ -82,4 +86,13 @@ public class RecommendController {
 		Long myId = rs.searchid(userDetails);
 		return matchService.getOrWaiting(myId);
 	}
+	
+	@PostMapping("/api/match/cancel")
+	public ResponseEntity<?> cancel(@AuthenticationPrincipal UserDetails userDetails) {
+		Long myId = rs.searchid(userDetails);
+		matchService.cancel(myId);
+		return ResponseEntity.ok(Map.of("status", "CANCELED"));
+	}
+	
+	//new git test commit 주석
 }

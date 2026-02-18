@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시물 관리</title>
+
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/post.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="admin-container">
+    <h2 class="page-title">게시물 관리</h2>
+
+    <!-- 검색 필터 -->
+    <form class="admin-filter" method="get" th:action="@{/admin/posts}">
+        <select name="board">
+            <option value="ALL" th:selected="${board=='ALL'}">전체</option>
+            <option value="COMMUNITY" th:selected="${board=='COMMUNITY'}">커뮤니티</option>
+            <option value="NOTICE" th:selected="${board=='NOTICE'}">공지</option>
+            <option value="FAQ" th:selected="${board=='FAQ'}">FAQ</option>
+        </select>
+
+        <select name="searchType">
+            <option value="TITLE" th:selected="${searchType=='TITLE'}">제목</option>
+            <option value="AUTHOR" th:selected="${searchType=='AUTHOR'}">작성자</option>
+        </select>
+
+        <input name="keyword" placeholder="검색어 입력" th:value="${keyword}">
+        <button type="submit" class="btn">검색</button>
+    </form>
+
+    <!-- 게시글 목록 -->
+    <table class="admin-table">
+        <thead>
+        <tr>
+            <th>구분</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>작성일</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${posts}">
+            <td><span class="pill" th:text="${p.board}"></span></td>
+            <td class="title" th:text="${p.title}"></td>
+            <td th:text="${p.authorNickname}"></td>
+            <td th:text="${#temporals.format(p.createdAt,'yyyy-MM-dd')}"></td>
+            <td>
+                <!-- 상세 → 모달 -->
+                <button type="button"
+                        class="btn btn-mini btn-detail"
+                        th:attr="data-id=${p.postId},data-board=${p.board}">
+                    상세
+                </button>
+
+                <!-- 삭제 -->
+                <button type="button"
+                        class="btn btn-danger btn-mini"
+                        th:attr="data-id=${p.postId},data-board=${p.board}">
+                    삭제
+                </button>
+            </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(posts)}">
+            <td colspan="5" class="empty">검색 결과가 없습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 페이지네이션 -->
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 0}"
+           th:href="@{/admin/posts(board=${board},searchType=${searchType},keyword=${keyword},page=${currentPage-1})}">
+            ‹
+        </a>
+
+        <a th:each="i : ${#numbers.sequence(0,totalPages-1)}"
+           th:href="@{/admin/posts(board=${board},searchType=${searchType},keyword=${keyword},page=${i})}"
+           th:text="${i+1}"
+           th:classappend="${i==currentPage}?'active'">
+        </a>
+
+        <a th:if="${currentPage < totalPages-1}"
+           th:href="@{/admin/posts(board=${board},searchType=${searchType},keyword=${keyword},page=${currentPage+1})}">
+            ›
+        </a>
+    </div>
+
+    <!-- 삭제 전송용 -->
+    <form id="deleteForm" method="post" th:action="@{/admin/posts/delete}" style="display:none">
+        <input type="hidden" name="board" id="delBoard">
+        <input type="hidden" name="id" id="delId">
+    </form>
+
+</main>
+
+<!-- =========================
+     게시물 수정 모달
+========================= -->
+<div id="postModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+        <h3>게시물 수정</h3>
+
+        <input type="hidden" id="modalPostId">
+        <input type="hidden" id="modalBoard">
+
+        <div class="field">
+            <label>제목</label>
+            <input type="text" id="modalTitle">
+        </div>
+
+        <div class="field">
+            <label>내용</label>
+            <textarea id="modalContent" rows="6"></textarea>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn btn-cancel">취소</button>
+            <button type="button" class="btn btn-save">수정</button>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:src="@{/js/admin/post.js}"></script>
+</body>
+</html>
