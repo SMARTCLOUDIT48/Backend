@@ -8,10 +8,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
 
 @Repository
 public interface BoardRepository
@@ -63,6 +68,13 @@ public interface BoardRepository
 			nativeQuery = true
 	)
 	List<Object[]> countStatsDaily();
+	
+	
+	// 조회수 증가 (update 쿼리)
+	@Modifying
+	@Query("update BoardEntity b set b.viewCount = b.viewCount + 1 where b.boardId = :boardId")
+	void updateHits(@Param("boardId") Long boardId);
+	
 	
 	// 관리자 페이지에서 불러오기 용
 	@Query("""

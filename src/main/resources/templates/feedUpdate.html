@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>MUSUBI - 피드 수정</title>
+    <link rel="stylesheet" th:href="@{/css/feedUpdate.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+    <div th:replace="~{fragments/header :: header}"></div>
+</header>
+
+<main class="feed-container">
+
+    <form th:action="@{/board/feedUpdate}" method="post" enctype="multipart/form-data" class="feed-card">
+
+        <input type="hidden" name="boardId" th:value="${board.boardId}">
+
+        <div class="card-header">
+            <div class="user-profile">
+                <img th:src="${board.profileImageName != null ? '/images/profile/upload/' + board.profileImageName : '/images/default_profile.png'}"
+                     class="profile-img" alt="프로필">
+                <div class="user-info">
+                    <span class="username" th:text="${board.writerNickname}">Username</span>
+                    <span class="location">게시글 수정</span>
+                </div>
+            </div>
+            <button type="button" class="close-btn" onclick="history.back()">✕</button>
+        </div>
+
+        <label for="fileInput" class="image-preview-area">
+            <img id="imagePreview"
+                 th:src="${board.filePath != null ? board.filePath : ''}"
+                 th:style="${board.filePath != null ? 'display: block;' : 'display: none;'}"
+                 alt="Preview">
+
+            <div class="placeholder-text" id="placeholderText"
+                 th:style="${board.filePath != null ? 'display: none;' : 'display: block;'}">
+                <span>📸</span>
+                <p>사진을 변경하려면 클릭하세요</p>
+            </div>
+        </label>
+
+        <input type="file" id="fileInput" name="file" accept="image/*">
+
+        <div class="content-area">
+            <textarea name="content" placeholder="문구를 입력하세요..." required th:text="${board.content}"></textarea>
+        </div>
+
+        <div class="card-footer">
+            <button type="submit" class="share-btn">수정 완료</button>
+        </div>
+
+    </form>
+</main>
+
+<footer>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</footer>
+
+<script>
+    // 이미지 미리보기 스크립트
+    const fileInput = document.getElementById('fileInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const placeholderText = document.getElementById('placeholderText');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                if(placeholderText) placeholderText.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
+</body>
+</html>

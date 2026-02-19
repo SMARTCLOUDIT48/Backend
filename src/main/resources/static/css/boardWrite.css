@@ -1,11 +1,73 @@
+/* =========================
+   RESET & FONT (Home 스타일 적용)
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Pretendard, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+/* =========================
+   THEME VARIABLES (Home 테마 변수 가져옴)
+========================= */
+:root {
+  /* 🔥 강한 컬러 배경 */
+  --bg:
+    radial-gradient(1200px 800px at 10% 10%, rgba(255, 90, 150, 0.75), transparent 55%),
+    radial-gradient(1000px 700px at 90% 20%, rgba(120, 140, 255, 0.75), transparent 55%),
+    radial-gradient(900px 800px at 50% 90%, rgba(120, 220, 200, 0.75), transparent 55%),
+    linear-gradient(180deg, #eceeff 0%, #e6ebff 100%);
+
+  --hero-text: rgba(19, 29, 53, 0.88);
+  --muted: #555;
+  --header-h: 72px; /* 헤더 높이 통일 */
+
+  --blue: #4a6cff;
+  --red: #ff6f91;
+
+  /* 💎 Glass 효과 변수 */
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
+  --radius-lg: 28px;
+}
+
+/* =========================
+   BODY & BACKGROUND (Home 배경 적용)
+========================= */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+
+  background:
+    radial-gradient(circle at 20% 30%, rgba(130, 180, 255, 0.6), transparent 40%),
+    radial-gradient(circle at 70% 40%, rgba(255, 150, 200, 0.6), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(180, 255, 220, 0.6), transparent 50%);
+
+  filter: blur(40px);
+  opacity: 0.6;
+}
+
+body {
+  background: var(--bg);
+  color: #333;
+  padding-top: var(--header-h); /* 헤더 높이만큼 상단 여백 */
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* =========================
+   HEADER (Home 스타일 완벽 일치)
+========================= */
 .header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-
-  /* 세로 길이를 기존보다 조금 더 늘림 (예: 85px) */
-  height: 85px;
+  height: var(--header-h); /* 72px로 통일 */
 
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(8px);
@@ -17,12 +79,8 @@
     box-shadow 0.35s ease;
 
   z-index: 100;
-
-  /* 하단에 은은한 경계선 추가 (선택 사항) */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: none; /* Home에는 border-bottom이 없으므로 제거하거나 아주 연하게 */
 }
-
-
 
 .header-inner {
   max-width: 1200px;
@@ -30,21 +88,26 @@
   margin: 0 auto;
   padding: 0 24px;
   display: flex;
-  align-items: center; /* 요소들이 늘어난 높이의 중앙에 위치하게 함 */
+  align-items: center;
   justify-content: space-between;
 }
 
 .logo {
-  font-weight: 800;
+  font-weight: 800; /* Home 폰트 웨이트 적용 */
+  font-size: 1.1rem;
+  color: #222;
+  letter-spacing: -0.5px;
+  cursor: pointer;
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
+/* 네비게이션 */
 .nav {
   display: flex;
   align-items: center;
-  gap: 24px;
-  /* ✅ 핵심: 메뉴 간격 */
+  gap: 24px; /* Home 간격 적용 */
 }
 
 .nav a {
@@ -52,9 +115,9 @@
   padding: 8px 14px;
   border-radius: 999px;
 
-  color: var(--muted);
+  color: var(--muted); /* Home 변수 사용 */
   text-decoration: none;
-  font-size: 14px;
+  font-size: 14px; /* Home 폰트 사이즈 적용 */
   font-weight: 500;
 
   transition:
@@ -77,15 +140,13 @@
   transform: translateY(-1px);
 }
 
-
 .nav .divider {
   color: #ddd;
   font-size: 13px;
   margin: 0 -6px;
-  /* divider는 살짝만 */
 }
 
-
+/* 밑줄 효과 */
 .nav a::after {
   content: "";
   position: absolute;
@@ -99,15 +160,18 @@
   transition: width 0.25s ease;
 }
 
-.nav a:hover {
-  color: #222;
-}
-
 .nav a:hover::after {
   width: 100%;
 }
 
+/* 인증 버튼 영역 */
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
 
+/* 로그인 버튼 (그라데이션) */
 .login-btn {
   background: linear-gradient(135deg, #ff6f91, #ff9f7f);
   color: #fff;
@@ -117,19 +181,12 @@
   font-weight: 700;
   box-shadow: 0 12px 30px rgba(255, 120, 150, 0.45);
   cursor: pointer;
-}
-
-.login-btn {
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    filter 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
 }
 
 .login-btn:hover {
   transform: translateY(-2px) scale(1.03);
   filter: brightness(1.05);
-
 }
 
 .login-btn:active {
@@ -139,36 +196,19 @@
     0 0 0 10px rgba(255, 120, 150, 0.25);
 }
 
-/* =========================
-   HEADER AUTH BUTTONS
-========================= */
-.auth-buttons {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-/* 회원가입 버튼 (서브) */
+/* 회원가입 버튼 (글래스) */
 .signup-btn {
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.65);
-
   padding: 10px 18px;
   border-radius: 999px;
-
   font-size: 14px;
   font-weight: 600;
   color: rgba(40, 60, 120, 0.8);
-
   cursor: pointer;
-
   box-shadow: 0 8px 18px rgba(80, 100, 180, 0.15);
-
-  transition:
-    background 0.25s ease,
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+  transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .signup-btn:hover {
@@ -177,398 +217,310 @@
   box-shadow: 0 12px 26px rgba(80, 100, 180, 0.25);
 }
 
-
-
-/* 헤더 옆 CTA */
+/* 헤더 CTA (오로라 효과) */
 .header-cta {
   padding: 10px 22px;
   border-radius: 999px;
-
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-
   border: 1px solid rgba(255, 255, 255, 0.65);
   color: #4a6cff;
   font-weight: 600;
-
   box-shadow: 0 8px 20px rgba(80, 100, 180, 0.15);
   cursor: pointer;
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    background 0.25s ease;
-}
-
-.header-cta:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 12px 28px rgba(80, 100, 180, 0.25);
-}
-
-.header-cta {
   position: relative;
   overflow: hidden;
-}
-
-* =========================================================
-   🔥 HEADER CTA – ENHANCED PREMIUM EFFECT
-========================================================= */
-
-.header-cta {
   isolation: isolate;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
-/* 🌈 오로라 흐름 레이어 */
 .header-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   opacity: 0;
-  background:
-    linear-gradient(120deg,
-      rgba(120, 150, 255, 0.35),
-      rgba(255, 160, 200, 0.35),
-      rgba(140, 220, 200, 0.35));
+  background: linear-gradient(120deg, rgba(120, 150, 255, 0.35), rgba(255, 160, 200, 0.35), rgba(140, 220, 200, 0.35));
   background-size: 200% 200%;
   animation: ctaAurora 6s ease infinite;
+  z-index: -1;
+  transition: opacity 0.3s ease;
 }
 
-/* ✨ 스윕 라이트 */
 .header-cta::after {
   content: "";
   position: absolute;
   inset: -150%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.45),
-      transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
   transform: translateX(-100%);
   transition: transform 0.8s ease;
   pointer-events: none;
 }
 
-/* Hover */
 .header-cta:hover {
   transform: translateY(-3px) scale(1.05);
-  box-shadow:
-    0 20px 40px rgba(90, 120, 220, 0.35),
-    0 0 0 6px rgba(120, 150, 255, 0.12);
+  box-shadow: 0 20px 40px rgba(90, 120, 220, 0.35), 0 0 0 6px rgba(120, 150, 255, 0.12);
 }
 
-.header-cta:hover::before {
-  opacity: 1;
-}
+.header-cta:hover::before { opacity: 1; }
+.header-cta:hover::after { transform: translateX(100%); }
+.header-cta:active { transform: translateY(-1px) scale(0.98); box-shadow: 0 10px 20px rgba(90, 120, 220, 0.25); }
 
-.header-cta:hover::after {
-  transform: translateX(100%);
-}
-
-/* Active */
-.header-cta:active {
-  transform: translateY(-1px) scale(0.98);
-  box-shadow:
-    0 10px 20px rgba(90, 120, 220, 0.25);
-}
-
-/* 🌈 오로라 애니메이션 */
 @keyframes ctaAurora {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 
-/* 개별 탭 */
-.community-label-bar .label {
-  padding: 10px 22px;
-  border-radius: 999px;
-
-  font-size: 14px;
-  font-weight: 600;
-  color: rgba(60, 70, 90, 0.65);
-
-  cursor: pointer;
-  user-select: none;
-
-  transition:
-    background 0.25s ease,
-    color 0.25s ease,
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
-}
-
-/* hover */
-.community-label-bar .label:hover {
-  background: rgba(255, 255, 255, 0.7);
-  color: rgba(40, 60, 120, 0.85);
-}
-
-.community-bg {
-  padding: 80px 0;
-  background:
-    radial-gradient(800px 400px at 20% 20%, rgba(180, 210, 255, 0.45), transparent 60%),
-    radial-gradient(800px 400px at 80% 30%, rgba(255, 200, 230, 0.45), transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45));
-  backdrop-filter: blur(40px);
-}
-
-.community-title {
-  text-align: center;
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 48px;
-  color: rgba(30, 40, 60, 0.9);
-}
-
-
-
-/* 전반적인 배경 설정 (이미지의 퍼플/블루 그라데이션 반영) */
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  font-family: 'Noto Sans KR', sans-serif;
-  color: #444;
-
-  /* 배경색의 기본 베이스를 아주 연한 화이트/블루로 설정 */
-  background-color: #f8faff;
-  overflow-x: hidden;
-}
-
-/* 배경의 부드러운 빛 방울(Blobs) 효과 */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-
-  /* 이미지의 색감(핑크, 보라, 하늘색)을 반영한 메쉬 그라데이션 */
-  background:
-    radial-gradient(circle at 15% 15%, rgba(255, 174, 214, 0.45) 0%, transparent 40%),
-    radial-gradient(circle at 85% 20%, rgba(182, 193, 255, 0.45) 0%, transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(142, 211, 255, 0.45) 0%, transparent 45%),
-    radial-gradient(circle at 20% 85%, rgba(200, 160, 255, 0.45) 0%, transparent 45%),
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.6) 0%, transparent 50%);
-
-  /* 블러 수치를 높여서 훨씬 부드럽게 뭉개짐 효과를 줌 */
-  filter: blur(80px);
-  opacity: 0.8;
-  transform: scale(1.1); /* 끝부분이 잘리지 않게 살짝 확대 */
-}
-
+/* =========================
+   CONTAINER & LAYOUT
+========================= */
 .container {
-    max-width: 900px;
-    margin: 125px auto 60px; /* 헤더 높이(85px)를 고려한 상단 여백 */
-    padding: 20px;
-    position: relative;
-    z-index: 1; /* 배경보다 위에 오도록 설정 */
+  max-width: 900px;
+  /* 헤더 높이(72px) + 여유분 */
+  margin: 100px auto 60px;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
 }
 
-/* ==========================================
-   1. 히어로 섹션 (상단 카테고리 & 말풍선)
-   ========================================== */
+
 .hero-section {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 32px;
-    margin-bottom: 40px;
-}
-
-.hero-icon {
-    font-size: 3.5rem;
-    display: block;
-    margin-bottom: 15px;
-}
-
-.hero-text h2 {
-    font-size: 28px;
-    color: #333;
-    font-weight: 700;
-    margin-bottom: 20px;
-}
-
-.category-select {
-    padding: 12px 25px;
-    font-size: 16px;
+    /* 기존의 배경색, 테두리, 그림자 모두 제거 */
+    background: transparent;
     border: none;
-    border-radius: 50px;
-    background: #fff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    color: #5e5ce6;
-    font-weight: 500;
-    cursor: pointer;
-    transition: transform 0.2s;
+    box-shadow: none;
+    backdrop-filter: none;
+
+    /* 위치 및 여백 정렬 */
+    max-width: 100%;
+    margin-bottom: 20px; /* 폼과의 간격 */
+    padding: 0 10px; /* 내부 요소들과의 좌우 라인 맞춤 */
+    position: relative;
+    text-align: left; /* 왼쪽 정렬 (가장 보편적) */
 }
 
-.category-select:hover {
-    transform: scale(1.05);
+/* 페이지 메인 타이틀 (새로운 글 작성) */
+.hero-text h2 {
+    font-size: 32px; /* 크기를 키워 명확하게 */
+    color: #111; /* 진한 검정색으로 가독성 확보 */
+    font-weight: 800;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
 }
 
-/* 떠다니는 말풍선 스타일 */
-.bubble {
-    position: absolute;
-    padding: 12px 20px;
-    background: #fff;
-    border-radius: 25px;
+/* 설명 텍스트 (안녕하세요! 등) */
+.hero-text p {
     font-size: 14px;
+    color: #666;
+    margin-top: 8px !important;
     font-weight: 500;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    animation: float 4s ease-in-out infinite;
-}
-
-.bubble-1 { top: 10%; left: 5%; color: #9c27b0; }
-.bubble-2 { bottom: 15%; right: 5%; color: #2196f3; animation-delay: 2s; }
-
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
 }
 
 /* ==========================================
-   2. 글쓰기 카드 (메인 폼)
+   CATEGORY SELECT (카테고리 선택 박스)
+   - 길이 절반 축소 및 심플한 디자인
    ========================================== */
+.category-select {
+    width: 23%;
+    min-width: 100px; /* 너무 작아지지 않게 최소 너비 설정 */
+
+    /* 디자인: 깔끔한 화이트 인풋 스타일 */
+    padding: 12px 16px;
+    font-size: 15px;
+    color: #333;
+    font-weight: 500;
+
+    background-color: #fff;
+    border: 1px solid #ddd; /* 은은한 테두리 */
+    border-radius: 12px; /* 적당한 둥글기 */
+
+    outline: none;
+    cursor: pointer;
+
+    /* 기본 브라우저 화살표 제거 후 커스텀 화살표 적용 (선택사항) */
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+
+    transition: all 0.2s ease;
+}
+
+/* 호버 및 포커스 효과 */
+.category-select:hover {
+    border-color: #bbb;
+}
+
+.category-select:focus {
+    border-color: #4a6cff; /* 브랜드 컬러 */
+    box-shadow: 0 0 0 3px rgba(74, 108, 255, 0.1);
+}
+
+/* 장식용 말풍선은 글쓰기 집중을 위해 숨김 처리 (필요시 삭제) */
+.bubble {
+    display: none;
+}
+
+
+/* =========================
+   WRITE CARD (글쓰기 폼 - 디자인 업데이트)
+   Home의 Glass 스타일을 적용하여 이질감 없앰
+========================= */
 .write-card {
-    /* 카드 배경을 이미지처럼 더 투명하고 입체감 있게 수정 (Glassmorphism) */
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(30px) saturate(150%);
-    -webkit-backdrop-filter: blur(30px) saturate(150%);
+  /* Home의 glass 변수 활용 */
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
 
-    border-radius: 32px;
-    padding: 45px;
+  border-radius: 32px; /* 라운드 증가 */
+  padding: 56px 48px; /* 패딩 넉넉하게 */
 
-    /* 부드러운 그림자와 테두리 광택 효과 */
-    box-shadow:
-        0 20px 50px rgba(0, 0, 0, 0.05),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.4);
-
-    border: none;
+  /* 글래스 테두리 */
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
 /* 작성자 정보 */
 .writer-info {
-    display: flex;
-    align-items: center;
-    margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+  margin-right: 15px;
+  background-color: #fff;
 }
 
 .avatar img {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #fff;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 
+.info-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .nickname {
-    font-size: 18px;
-    font-weight: 700;
-    color: #222;
+  font-size: 18px;
+  font-weight: 700;
+  color: #222; /* 텍스트 진하게 */
 }
 
 /* 입력 필드 설정 */
 .input-group {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .input-title {
-    width: 100%;
-    border: none;
-    background: transparent;
-    font-size: 26px;
-    font-weight: 700;
-    padding: 15px 0;
-    outline: none;
-    color: #111;
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 26px;
+  font-weight: 700;
+  padding: 15px 0;
+  outline: none;
+  color: #111;
+  font-family: Pretendard, sans-serif; /* 폰트 통일 */
 }
 
-.input-title::placeholder { color: #bbb; }
+.input-title::placeholder { color: rgba(0,0,0,0.4); }
 
 .divider {
-    border: 0;
-    height: 1px;
-    background: linear-gradient(to right, #eee, transparent);
-    margin: 10px 0 30px;
+  border: 0;
+  height: 1px;
+  background: linear-gradient(to right, rgba(0,0,0,0.1), transparent);
+  margin: 10px 0 30px;
 }
 
 .input-content {
-    width: 100%;
-    min-height: 350px;
-    border: none;
-    background: transparent;
-    resize: none;
-    font-size: 18px;
-    line-height: 1.8;
-    outline: none;
-    color: #444;
+  width: 100%;
+  min-height: 350px;
+  border: none;
+  background: transparent;
+  resize: none;
+  font-size: 17px;
+  line-height: 1.8;
+  outline: none;
+  color: #333;
+  font-family: Pretendard, sans-serif;
 }
 
 .meta-info {
-    text-align: right;
-    color: #aaa;
-    font-size: 14px;
-    margin-top: 15px;
+  text-align: right;
+  color: #666;
+  font-size: 14px;
+  margin-top: 15px;
 }
 
 /* 하단 툴바 */
 .bottom-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 40px;
-    padding-top: 25px;
-    border-top: 1px solid rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
+  padding-top: 25px;
+  border-top: 1px solid rgba(0,0,0,0.05);
 }
 
-/* 파일 첨부 버튼 (이미지의 태그 스타일 반영) */
+/* 파일 첨부 버튼 */
 .attach-btn {
-    background: #f0f2f5;
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #666;
-    cursor: pointer;
-    transition: all 0.2s;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .attach-btn:hover {
-    background: #e4e6e9;
-    color: #333;
+  background: rgba(255, 255, 255, 0.9);
+  color: #222;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* 등록 버튼 (이미지의 '더보기' 버튼 스타일 반영) */
+/* 등록 버튼 (Home 스타일 활용) */
 .submit-btn {
-    background: #fff;
-    color: #5e5ce6;
-    border: 1px solid #5e5ce6;
-    padding: 12px 40px;
-    border-radius: 15px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 10px rgba(94, 92, 230, 0.1);
+  background: linear-gradient(135deg, #7b8cff, #7be0cf); /* Home의 포인트 컬러 활용 */
+  color: #fff;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 8px 20px rgba(123, 140, 255, 0.3);
 }
 
 .submit-btn:hover {
-    background: #5e5ce6;
-    color: #fff;
-    box-shadow: 0 8px 20px rgba(94, 92, 230, 0.2);
-    transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(123, 140, 255, 0.45);
+  filter: brightness(1.05);
 }
 
+
 /* =========================
-   FOOTER
+   FOOTER (Home 스타일 완벽 일치)
 ========================= */
 .site-footer {
   margin-top: 120px;
@@ -641,55 +593,17 @@ body::before {
   }
 }
 
-/* ==========================================
-   작성자 프로필 영역 (완벽한 원형 유지)
-   ========================================== */
-.writer-info {
-    display: flex;
-    align-items: center;
-    margin-bottom: 30px;
-}
-
-/* 프로필 이미지를 감싸는 틀 */
-.avatar {
-    /* 1. 크기 고정 (feedWrite와 동일한 크기로 설정) */
-    width: 50px;
-    height: 50px;
-
-    /* 2. 완벽한 원형 만들기 */
-    border-radius: 50%;
-
-    /* 3. 중요: 화면이 좁아져도 절대 찌그러지지 않게 설정 */
-    flex-shrink: 0;
-
-    /* 4. 꾸밈 효과 (테두리 및 그림자) */
-    border: 2px solid #fff;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-
-    /* 5. 내부 이미지가 넘치지 않게 자르기 */
-    overflow: hidden;
-    margin-right: 15px; /* 닉네임과의 간격 */
-    background-color: #fff; /* 이미지가 없을 때를 대비한 배경 */
-}
-
-/* 실제 이미지 태그 */
-.avatar img {
-    width: 100%;
-    height: 100%;
-
-    /* 6. 원본 비율을 유지하면서 틀에 꽉 채우기 (찌그러짐 방지) */
-    object-fit: cover;
-    display: block;
-}
-
-.info-text {
-    display: flex;
-    flex-direction: column; /* 닉네임과 국기를 수직 정렬하고 싶다면 사용, 아니면 row */
-    justify-content: center;
-}
-
-.nickname {
-    font-size: 18px;
-    font-weight: 700;
-    color: #222;
+/* =========================
+   RESPONSIVE (모바일 대응)
+========================= */
+@media (max-width: 520px) {
+  .nav {
+    display: none; /* 모바일에서 메뉴 숨김 (필요시 햄버거 메뉴 구현) */
+  }
+  .write-card {
+    padding: 30px 20px;
+  }
+  .input-title {
+    font-size: 22px;
+  }
 }
