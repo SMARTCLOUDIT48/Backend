@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서비스 소개 | LANG:MATE</title>
+
+    <link rel="stylesheet" href="/css/layout.css">
+
+    <style>
+        /* ===== 공통 ===== */
+        body {
+            margin: 0;
+            font-family: 'Pretendard', sans-serif;
+            background: linear-gradient(135deg, #cfd9ff, #f6d8ff, #dff4ff);
+            color: #222;
+        }
+
+        .service-wrapper {
+            max-width: 1100px;
+            margin: 140px auto;
+            padding: 0 24px;
+        }
+
+        /* ===== 히어로 ===== */
+        .hero {
+            text-align: center;
+            margin-bottom: 100px;
+        }
+
+        .hero h1 {
+            font-size: 40px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: #555;
+        }
+
+        /* ===== 특징 카드 ===== */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 28px;
+            margin-bottom: 120px;
+        }
+
+        .feature-card {
+            padding: 40px;
+            border-radius: 28px;
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(16px);
+            box-shadow:
+                0 20px 40px rgba(0,0,0,0.08),
+                inset 0 0 0 1px rgba(255,255,255,0.4);
+            transition: 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            margin-bottom: 14px;
+        }
+
+        .feature-card p {
+            font-size: 15px;
+            color: #555;
+        }
+
+        /* ===== 사용 흐름 ===== */
+        .flow {
+            text-align: center;
+            margin-bottom: 120px;
+        }
+
+        .flow h2 {
+            font-size: 28px;
+            margin-bottom: 50px;
+        }
+
+        .flow-steps {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            max-width: 200px;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            background: linear-gradient(135deg, #7a8cff, #b38dff);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* ===== CTA ===== */
+        .cta {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .cta-btn {
+    display: inline-block;
+    padding: 16px 40px;
+    border-radius: 40px;
+    background: linear-gradient(135deg, #7a8cff, #b38dff);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: 0.3s ease;
+}
+
+.cta-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(122,140,255,0.4);
+}
+
+    </style>
+</head>
+<body>
+
+<div class="service-wrapper">
+
+    <!-- HERO -->
+    <section class="hero">
+        <h1>언어로 연결되는 새로운 만남</h1>
+        <p>LANG:MATE는 한국어와 일본어 사용자를 연결하는 글로벌 언어 교환 플랫폼입니다.</p>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features">
+
+        <div class="feature-card">
+            <h3>🌏 관심사 기반 매칭</h3>
+            <p>공통 관심사를 기반으로 대화가 자연스럽게 시작되도록 설계되었습니다.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>💬 실시간 채팅</h3>
+            <p>Redis 기반 실시간 채팅으로 빠르고 안정적인 대화를 제공합니다.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>🤖 AI 문장 첨삭</h3>
+            <p>작성한 문장을 AI가 자연스럽게 교정해 언어 실력을 빠르게 향상시킵니다.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>🛡 안전한 환경</h3>
+            <p>신고 시스템과 관리자 모니터링을 통해 안전한 교환 환경을 유지합니다.</p>
+        </div>
+
+    </section>
+
+    <!-- FLOW -->
+    <section class="flow">
+        <h2>이용 방법</h2>
+
+        <div class="flow-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <p>회원가입 후 관심사를 설정합니다.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <p>추천 사용자와 매칭됩니다.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <p>채팅을 시작하고 AI 첨삭을 활용합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <a th:href="@{/}" class="cta-btn">지금 시작하기</a>
+    </section>
+
+</div>
+
+</body>
+</html>
