@@ -175,7 +175,9 @@ function renderInterestChips(interests) {
 =============================== */
 async function loadLikedMeList() {
   const wrap = document.getElementById("likedMeList");
-  if (!wrap) return;
+  const likeCountEl = document.getElementById("likeCount");
+
+  if (!wrap || !likeCountEl) return;
 
   try {
     const res = await authFetch(`${CONTEXT_PATH}api/reactions/liked-me`);
@@ -186,6 +188,12 @@ async function loadLikedMeList() {
 
     const result = await res.json();
     const list = result.data ?? [];
+
+    /* ===============================
+        좋아요 개수만 여기서 처리
+    =============================== */
+    likeCountEl.textContent = list.length.toLocaleString();
+
     wrap.innerHTML = "";
 
     if (list.length === 0) {
@@ -193,22 +201,16 @@ async function loadLikedMeList() {
       return;
     }
 
-    list.forEach(user => {
-      const imgSrc = user.profileImagePath && user.profileImageName
-        ? `${user.profileImagePath}/${user.profileImageName}`
-        : "/images/profile/default.png";
-
+    list.forEach(userId => {
       const item = document.createElement("div");
       item.className = "viewer-item";
       item.innerHTML = `
-        <div class="viewer-avatar">
-          <img src="${imgSrc}" alt="profile">
-        </div>
         <div class="viewer-info">
-          <strong>${user.nickname}</strong>
-          <span class="viewer-time">${formatTime(user.likedAt)}</span>
+          <strong>USER #${userId}</strong>
         </div>
-        <button class="btn-view" data-user-id="${user.userId}">프로필</button>
+        <button class="btn-view" data-user-id="${userId}">
+          프로필
+        </button>
       `;
       wrap.appendChild(item);
     });
@@ -218,6 +220,7 @@ async function loadLikedMeList() {
     wrap.innerHTML = `<p class="muted">오류 발생</p>`;
   }
 }
+
 
 /* ===============================
    시간 포맷

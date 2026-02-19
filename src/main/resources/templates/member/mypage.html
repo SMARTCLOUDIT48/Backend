@@ -64,10 +64,20 @@
             <span id="nationFlag">🇰🇷</span>
         </h3>
 
+        <div class="likeAndProfileContainer">
+<div class="like-dislike">
+    <button id="likeBtn" class="likeBtn">
+        👍 <span id="likeCount">0</span>
+    </button>
+    <button id="dislikeBtn" class="likeBtn">
+        👎
+    </button>
+</div>
+
         <button id="openProfileModal" class="btn btn-profile" type="button">
             프로필 수정
         </button>
-
+</div>
         <!-- 🔥 언어 라인 (핵심 구조) -->
     <div class="profile-lang-block">
 
@@ -82,7 +92,7 @@
         <!-- 2줄: 매너 온도 -->
 <div class="manner-line" data-value="36.5">
     <div class="manner-fill"></div>
-    <span id="manner" class="manner">36.5°C</span>
+    <span id="manner" class="manner"></span>
 </div>
 
 </div>
@@ -113,7 +123,7 @@
                         <span class="mi-ico">📘</span><span>내 게시글</span>
                         <span class="badge">3</span>
                     </a>
-                    <a class="menu-item" href="#">
+                    <a class="menu-item" href="@{/chat}">
                         <span class="mi-ico">💬</span><span>채팅</span>
                     </a>
                     <a class="menu-item" href="#">
@@ -164,7 +174,7 @@
                                 <h2>관심사에 맞는 친구 추천</h2>
                                 <p>내 관심사에 맞는 친구를 추천해드려요.</p>
                             </div>
-                            <button class="btn btn-member" type="button">더보기</button>
+                            <button class="btn btn-member" type="button" href="@{/recommend}" >더보기</button>
                         </div>
 
                         <div class="reco-grid">

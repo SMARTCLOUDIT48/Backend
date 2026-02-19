@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>MUSUBI - 글 수정</title>
+    <link rel="stylesheet" th:href="@{/css/boardUpdate.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+    <div th:replace="~{fragments/header :: header}"></div>
+</header>
+
+<main class="container">
+    <section class="hero-section">
+        <div class="category-display">
+
+            <div class="hero-text">
+                <h2><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                </svg>게시글 수정</h2>
+                <p>내용과 첨부파일만 수정할 수 있습니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <form action="/board/update" method="post" enctype="multipart/form-data" class="write-card">
+
+        <input type="hidden" name="boardId" th:value="${board.boardId}">
+
+        <div class="writer-info">
+            <div class="avatar">
+                <img th:src="${board.profileImageName != null ? '/images/profile/upload/' + board.profileImageName : '/images/default_profile.png'}" alt="프로필">
+            </div>
+            <div class="info-text">
+                <span class="nickname" th:text="${board.writerNickname}">닉네임</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label class="label-text">카테고리</label>
+            <input type="text" class="input-readonly" th:value="${board.categoryName}" readonly>
+        </div>
+
+        <div class="input-group">
+            <label class="label-text">제목</label>
+            <input type="text" name="title" class="input-readonly" th:value="${board.title}" readonly>
+        </div>
+
+        <hr class="divider">
+
+        <div class="input-group content-area">
+            <textarea name="content" class="input-content" required th:text="${board.content}"></textarea>
+        </div>
+
+        <div class="current-file" th:if="${board.fileOriginalName != null}">
+            <span>현재 파일: </span>
+            <span th:text="${board.fileOriginalName}">file.jpg</span>
+        </div>
+
+        <div class="bottom-toolbar">
+            <div class="attach-buttons">
+                <label for="file-upload" class="attach-btn">파일 변경 &nbsp<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
+                </svg>
+                </label>
+                <input type="file" id="file-upload" name="file" style="display: none;">
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="cancel-btn" onclick="history.back()">취소</button>
+                <button type="submit" class="submit-btn">수정 완료</button>
+            </div>
+        </div>
+    </form>
+</main>
+
+<footer>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</footer>
+
+<script>
+    // 파일 변경 시 알림
+    document.getElementById('file-upload').addEventListener('change', function(e) {
+        if(e.target.files.length > 0) {
+            alert("새로운 파일이 선택되었습니다: " + e.target.files[0].name);
+        }
+    });
+</script>
+</body>
+</html>
