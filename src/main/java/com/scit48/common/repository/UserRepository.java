@@ -104,6 +104,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 			    where u.id = :userId
 			""")
 	void updateManner(Long userId, double delta);
-
-
+	
+	
+	List<UserEntity> findByIdNot(Long user);
 }
