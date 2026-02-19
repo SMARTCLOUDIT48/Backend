@@ -3,8 +3,11 @@ package com.scit48.community.repository;
 import com.scit48.community.domain.entity.LikeEntity;
 import com.scit48.community.domain.entity.LikeKey;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,5 +20,8 @@ public interface LikeRepository extends JpaRepository<LikeEntity, LikeKey> {
 
 	// 좋아요 취소 시 삭제
 	void deleteByUser_IdAndBoard_BoardId(Long memberId, Long boardId);
+	
+	@Query("SELECT l.board.boardId FROM LikeEntity l WHERE l.user.memberId = :memberId AND l.board.boardId IN :boardIds")
+	List<Long> findLikedBoardIds(@Param("memberId") String memberId, @Param("boardIds") List<Long> boardIds);
 
 }
