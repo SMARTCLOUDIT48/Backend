@@ -831,7 +831,7 @@ align-items: stretch;
 }
 
 .stat-head h3 {
-    font-size: 17px;
+    font-size: 14px;
     font-weight: 900;
 }
 
@@ -853,14 +853,53 @@ align-items: stretch;
     margin-left: 4px;
 }
 
+
+/* =========================
+  좋아요
+========================= */
+
+.likeAndProfileContainer {
+    display: flex;
+    margin: 5px;
+    justify-content: center;
+}
+.like-dislike {
+    display: inline-flex;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+background: rgba(255, 255, 255, 0.65);
+}
+
+.likeBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 800;
+}
+
+.likeBtn:hover {
+    background: #e6e6e6;
+}
+
+.likeBtn.active {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
 /* =========================
    POST STATS (ENHANCED)
 ========================= */
 
 /* 통계 본문 */
 .stat-body {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+display: flex;
+    justify-content: center;
     gap: 14px;
 }
 
@@ -870,7 +909,7 @@ align-items: stretch;
     padding: 18px 12px;
     border-radius: 18px;
     text-align: center;
-
+    width: 140px;
     background: linear-gradient(180deg,
             rgba(255, 255, 255, 0.75),
             rgba(255, 255, 255, 0.55));
@@ -983,11 +1022,16 @@ align-items: stretch;
 /* =========================
    POST STAT EXTRA
 ========================= */
+.extra-container {
+    display: flex;
+    justify-content: center;
+}
+
 .stat-extra {
-    margin-top: 18px;
+    margin-top: 30px;
     padding: 14px 16px;
     border-radius: 18px;
-
+    width: 450px;
     display: flex;
     align-items: center;
     gap: 8px;

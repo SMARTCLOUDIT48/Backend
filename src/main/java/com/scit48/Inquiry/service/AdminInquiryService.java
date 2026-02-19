@@ -9,6 +9,10 @@ import com.scit48.Inquiry.repository.InquiryAnswerRepository;
 import com.scit48.Inquiry.repository.InquiryRepository;
 import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -28,35 +32,71 @@ public class AdminInquiryService {
 	 * 관리자 문의 목록
 	 */
 	@Transactional(readOnly = true)
-	public List<InquiryAdminListDto> getInquiryList() {
-		return inquiryRepository.findAll().stream()
-				.filter(InquiryEntity::isActive)
-				.map(inquiry -> {
-					
-					UserEntity user = userRepository
-							.findById(inquiry.getUserId())
-							.orElse(null);
-					
-					// ⭐ 답변 내용 조회 (있으면, 없으면 null)
-					String answerContent = inquiryAnswerRepository
-							.findByInquiry_InquiryId(inquiry.getInquiryId())
-							.map(InquiryAnswerEntity::getContent)
-							.orElse(null);
-					
-					return InquiryAdminListDto.builder()
-							.inquiryId(inquiry.getInquiryId())
-							.userNickname(user != null ? user.getNickname() : "탈퇴회원")
-							.type(inquiry.getType())
-							.title(inquiry.getTitle())
-							.content(inquiry.getContent())          // 문의 내용
-							.answerContent(answerContent)           // ⭐ 답변 내용
-							.status(inquiry.getStatus())
-							.createdAt(inquiry.getCreatedAt())
-							.attachmentPath(inquiry.getAttachmentPath())
-							.build();
-				})
-				.toList();
+	public Page<InquiryAdminListDto> getInquiryPage(
+			int page,
+			String keyword,
+			String searchType
+	) {
+		
+		Pageable pageable =
+				PageRequest.of(page, 10, Sort.by("createdAt").descending());
+		
+		Page<InquiryEntity> inquiryPage;
+
+    /* =========================
+       🔍 검색 조건 분기 (정답)
+    ========================= */
+		if (keyword == null || keyword.isBlank()) {
+			
+			inquiryPage =
+					inquiryRepository.findAllByIsActiveTrue(pageable);
+			
+		} else if ("USER".equals(searchType)) {
+			
+			inquiryPage =
+					inquiryRepository.searchByUserNickname(keyword, pageable);
+			
+		} else if ("TITLE".equals(searchType)) {
+			
+			inquiryPage =
+					inquiryRepository.searchByTitle(keyword, pageable);
+			
+		} else {
+			// USER + TITLE
+			inquiryPage =
+					inquiryRepository.searchByUserNicknameOrTitle(keyword, pageable);
+		}
+
+    /* =========================
+       DTO 매핑 (기존 그대로)
+    ========================= */
+		return inquiryPage.map(inquiry -> {
+			
+			UserEntity user = userRepository
+					.findById(inquiry.getUserId())
+					.orElse(null);
+			
+			String answerContent = inquiryAnswerRepository
+					.findByInquiry_InquiryId(inquiry.getInquiryId())
+					.map(InquiryAnswerEntity::getContent)
+					.orElse(null);
+			
+			return InquiryAdminListDto.builder()
+					.inquiryId(inquiry.getInquiryId())
+					.userNickname(user != null ? user.getNickname() : "탈퇴회원")
+					.type(inquiry.getType())
+					.title(inquiry.getTitle())
+					.content(inquiry.getContent())
+					.answerContent(answerContent)
+					.attachmentPath(inquiry.getAttachmentPath())
+					.status(inquiry.getStatus())
+					.createdAt(inquiry.getCreatedAt())
+					.build();
+		});
 	}
+	
+	
+	
 	
 	
 	/**

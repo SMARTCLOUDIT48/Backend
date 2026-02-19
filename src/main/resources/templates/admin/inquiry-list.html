@@ -16,6 +16,33 @@
 <div class="admin-container">
     <h2 class="page-title">1:1 문의 관리</h2>
 
+    <form method="get" action="/admin/inquiries" class="admin-search">
+
+        <!-- 🔽 검색 기준 선택 -->
+        <select name="type" class="search-select">
+            <option value="ALL"
+                    th:selected="${type == null || type == 'ALL'}">
+                전체
+            </option>
+            <option value="USER"
+                    th:selected="${type == 'USER'}">
+                회원
+            </option>
+            <option value="TITLE"
+                    th:selected="${type == 'TITLE'}">
+                문의 제목
+            </option>
+        </select>
+
+        <!-- 🔍 검색어 -->
+        <input type="text"
+               name="keyword"
+               placeholder="검색어를 입력하세요"
+               th:value="${keyword}">
+
+        <button type="submit">검색</button>
+    </form>
+
     <table class="admin-table">
         <thead>
         <tr>
@@ -64,6 +91,30 @@
         </tr>
         </tbody>
     </table>
+    <!-- 🔽 페이지네이션 -->
+    <div class="pagination">
+        <!-- 이전 -->
+        <a th:if="${currentPage > 0}"
+           th:href="@{/admin/inquiries(page=${currentPage - 1})}"
+           class="page-btn">
+            ‹
+        </a>
+
+        <!-- 페이지 번호 -->
+        <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+           th:href="@{/admin/inquiries(page=${i})}"
+           th:text="${i + 1}"
+           th:classappend="${i == currentPage} ? 'active'"
+           class="page-btn">
+        </a>
+
+        <!-- 다음 -->
+        <a th:if="${currentPage < totalPages - 1}"
+           th:href="@{/admin/inquiries(page=${currentPage + 1})}"
+           class="page-btn">
+            ›
+        </a>
+    </div>
 </div>
 
 <!-- 답변 모달 -->

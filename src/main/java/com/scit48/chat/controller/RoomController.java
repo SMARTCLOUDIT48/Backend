@@ -8,6 +8,7 @@ import com.scit48.chat.service.ChatService; // 👈 서비스 추가
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.scit48.chat.domain.dto.ChatRoomListDto;
 
 import java.util.List;
 
@@ -23,12 +24,14 @@ public class RoomController {
 	// 1. 채팅방 목록 반환
 	// ==========================================
 	@GetMapping("/rooms")
-	public List<ChatRoom> getRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
+	public List<ChatRoomListDto> getRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
 		if (userDetails == null) {
 			return List.of();
 		}
 		Long myId = userDetails.getUser().getId();
-		return chatRoomRepository.findMyChatRooms(myId);
+		
+		// ✅ hasUnread 포함해서 내려줌
+		return chatService.getMyChatRoomsWithUnread(myId);
 	}
 	
 	// ==========================================
@@ -61,4 +64,17 @@ public class RoomController {
 		}
 		return "초기 데이터 체크 및 생성 완료!";
 	}
+	@PostMapping("/rooms/{roomId}/read")
+	public void markAsRead(@PathVariable Long roomId,
+						   @AuthenticationPrincipal CustomUserDetails userDetails) {
+		
+		if (userDetails == null) {
+			throw new RuntimeException("로그인이 필요합니다.");
+		}
+		
+		Long myId = userDetails.getUser().getId();
+		chatService.markAsRead(roomId, myId);
+	}
+	
+	
 }

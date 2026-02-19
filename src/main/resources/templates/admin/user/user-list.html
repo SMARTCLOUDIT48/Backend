@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>user-list</title>
+
+    <link rel="stylesheet" th:href="@{/css/layout.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/user.css}" />
+
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="admin-container">
+    <h2 class="page-title">회원 관리</h2>
+
+    <form class="admin-filter">
+        <input name="keyword" placeholder="닉네임 / 아이디">
+        <select name="nation">
+            <option value="">전체 국가</option>
+            <option value="KOREA">KOREA</option>
+            <option value="JAPAN">JAPAN</option>
+        </select>
+        <button>검색</button>
+    </form>
+
+    <table class="admin-table">
+        <thead>
+        <tr>
+            <th>닉네임</th>
+            <th>아이디</th>
+            <th>국가</th>
+            <th>가입일</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="u : ${users}">
+            <td th:text="${u.nickname}"></td>
+            <td th:text="${u.memberId}"></td>
+            <td th:text="${u.nation}"></td>
+            <td th:text="${#temporals.format(u.createdAt, 'yyyy-MM-dd')}"></td>
+            <td>
+                <a th:href="@{/admin/users/{id}(id=${u.userId})}"
+                   class="btn">상세</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="pagination">
+        <!-- 이전 -->
+        <a th:if="${currentPage > 0}"
+           th:href="@{/admin/users(page=${currentPage - 1})}">
+            ‹
+        </a>
+
+        <!-- 페이지 번호 -->
+        <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+           th:href="@{/admin/users(page=${i})}"
+           th:text="${i + 1}"
+           th:classappend="${i == currentPage} ? 'active'">
+        </a>
+
+        <!-- 다음 -->
+        <a th:if="${currentPage < totalPages - 1}"
+           th:href="@{/admin/users(page=${currentPage + 1})}">
+            ›
+        </a>
+    </div>
+
+</main>
+
+<!-- 푸터 -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>
