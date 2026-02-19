@@ -349,6 +349,8 @@
 				let nation = "";
 				let imagePath = item.profileImagePath + "/" + item.profileImageName;
 				let interestHtml = renderInterests(item.interests);
+				const mannerTenth = Math.round((Number(item.manner) || 0) * 10);
+				const mannerText = (mannerTenth / 10).toFixed(1);
 				//console.log(item.id);
 
 				switch (item.nativeLanguage) {
@@ -441,7 +443,7 @@
         <!-- 우측 영역 -->
         <div class="right">
             <span class="chatting-text">"인기 멤버예요! 🔥 답장이 늦을 수 있어요."</span>
-            <div class="temp">${item.manner}℃</div>
+            <div class="temp">${mannerText}℃</div>
             <button class="chat-btn" data-user-id="${item.id}">채팅 신청</button>
         </div>
     </div>
