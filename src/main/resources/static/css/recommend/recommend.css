@@ -836,3 +836,125 @@ input[type="range"] {
   justify-content: center;
   gap: 10px;
 }
+
+/* 관심사 뱃지 컨테이너 */
+.interests {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  /* 세로/가로 간격 */
+  max-width: 100%;
+}
+
+/* 기본 뱃지(글래스 느낌) */
+.interest-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px 10px;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  line-height: 1;
+
+  color: #3d5a97;
+  /* 카드 상단 말풍선(푸른 톤)과 어울리는 색 */
+  background: rgba(255, 255, 255, 0.60);
+  border: 1px solid rgba(255, 255, 255, 0.80);
+
+  box-shadow:
+    0 10px 22px rgba(31, 38, 135, 0.10),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* 호버(데스크톱에서 살짝 떠오르는 느낌) */
+.interest-badge:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 14px 28px rgba(31, 38, 135, 0.12),
+    0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: 160ms ease;
+}
+
+/* 관심사 없을 때(회색/약한 톤) */
+.interest-badge--muted {
+  color: rgba(40, 45, 55, 0.55);
+  background: rgba(255, 255, 255, 0.45);
+  border-color: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
+}
+
+/* tbody(컨테이너) 안에서 중앙 정렬되도록 */
+#recommendTbody:has(.empty-state) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+  /* 카드 영역 높이감 */
+}
+
+/* 빈 결과 박스 */
+.empty-state {
+  width: min(720px, 92%);
+  padding: 22px 26px;
+  border-radius: 20px;
+
+  /* 파스텔 그라데이션 + 글래스 */
+  background: linear-gradient(135deg,
+      rgba(230, 242, 255, 0.80),
+      rgba(255, 231, 242, 0.70));
+  border: 1px solid rgba(255, 255, 255, 0.85);
+
+  box-shadow:
+    0 18px 40px rgba(31, 38, 135, 0.10),
+    0 6px 16px rgba(0, 0, 0, 0.05);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  text-align: center;
+}
+
+/* 제목 */
+.empty-title {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #2b3a67;
+  margin-bottom: 6px;
+}
+
+/* 설명 */
+.empty-desc {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(43, 58, 103, 0.65);
+}
+
+/* 상단 “인기 멤버예요” 말풍선 느낌의 작은 배지(선택) */
+.empty-state::before {
+  content: "검색 결과";
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(43, 58, 103, 0.75);
+
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 20px rgba(31, 38, 135, 0.08);
+}

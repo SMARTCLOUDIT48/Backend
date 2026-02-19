@@ -8,6 +8,17 @@
 	<link rel="stylesheet" th:href="@{/css/recommend/recommend.css}" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.1/css/flag-icons.min.css" />
 	<script>
+		const interestLabelMap = {
+			CULTURE: "문화체험",
+			HOBBY: "취미생활",
+			SPORTS: "운동",
+			TRAVEL: "여행",
+			FOOD: "음식",
+			STUDY: "학습",
+			IT: "IT",
+			LIFESTYLE: "라이프스타일"
+			// 프로젝트 enum에 맞게 추가
+		};
 		window.addEventListener('DOMContentLoaded', () => {
 			loadRecommend();
 
@@ -16,6 +27,8 @@
 			const ageMinValue = document.getElementById("ageMinValue");
 			const ageMaxValue = document.getElementById("ageMaxValue");
 			const ageFill = document.getElementById("ageFill");
+
+
 
 			ageMin.addEventListener("input", syncAge);
 			ageMax.addEventListener("input", syncAge);
@@ -301,10 +314,32 @@
 			}
 		}
 
+		function renderInterests(interests) {
+			const arr = Array.isArray(interests) ? interests : [];
+			if (arr.length === 0) return `<span class="interest-badge interest-badge--muted value">관심사 없음</span>`;
+
+			return arr
+				.map(x => interestLabelMap[x] ?? x)
+				.map(label => `<span class="interest-badge">${label}</span>`)
+				.join("");
+		}
+
+
 
 		function renderRecommend(list) {
 			const recommendList = document.getElementById('recommendTbody');
 			let html = '';
+
+			if (list.length == 0) {
+				html = `
+					<div class="empty-state">
+					<div class="empty-title">조건에 맞는 회원이 없습니다</div>
+					<div class="empty-desc">필터를 조금 완화해서 다시 검색해 보세요.</div>
+					</div>
+				`
+				recommendList.innerHTML = html;
+				return;
+			}
 
 			list.forEach(item => {
 
@@ -313,6 +348,7 @@
 				let languageLevel = "";
 				let nation = "";
 				let imagePath = item.profileImagePath + "/" + item.profileImageName;
+				let interestHtml = renderInterests(item.interests);
 				//console.log(item.id);
 
 				switch (item.nativeLanguage) {
@@ -393,6 +429,13 @@
                     <span class="level">${languageLevel}</span>
                 </span>
             </div>
+			<!-- ✅ 관심사 추가 -->
+			<div class="row">
+				<span class="label">관심사</span>
+				<span class="interests">
+				${interestHtml}
+				</span>
+			</div>
         </div>
 
         <!-- 우측 영역 -->

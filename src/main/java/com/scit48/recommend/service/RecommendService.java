@@ -298,6 +298,13 @@ public class RecommendService {
 					
 					int totalScore = langScore + interestScore + mannerScore;
 					
+					// ✅ 여기서 partnerInterests -> List<InterestType> 변환
+					List<InterestType> interests = partnerInterests.stream()
+							.map(UserInterestEntity::getInterest) // 또는 getInterestType()
+							.filter(Objects::nonNull)
+							.distinct()
+							.toList();
+					
 					return RecommendDTO.builder()
 							.id(partner.getId())
 							.nickname(partner.getNickname())
@@ -311,6 +318,7 @@ public class RecommendService {
 							.levelLanguage(partner.getLevelLanguage())
 							.studyLanguage(partner.getStudyLanguage())
 							.matchPoint(totalScore)
+							.interests(interests)
 							.build();
 				})
 				.sorted(Comparator.comparingInt(RecommendDTO::getMatchPoint).reversed())
