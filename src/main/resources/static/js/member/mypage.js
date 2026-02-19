@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   await loadInterestChips();
   await loadLikedMeList();
+  await loadRecommendList();
 
   window.addEventListener("interest:updated", loadInterestChips);
 
@@ -297,4 +298,88 @@ function convertInterestToLabel(item) {
   return INTEREST_DETAIL_LABEL[item.interestDetail]
       ?? INTEREST_DETAIL_LABEL[item.interest]
       ?? "알 수 없음";
+}
+
+
+
+/* ===============================
+   추천 친구 로드
+=============================== */
+async function loadRecommendList() {
+  const wrap = document.getElementById("recommendGrid");
+  if (!wrap) return;
+
+  try {
+    const res = await authFetch(`${CONTEXT_PATH}api/recommend`);
+    if (!res.ok) {
+      wrap.innerHTML = `<p class="muted">추천 불러오기 실패</p>`;
+      return;
+    }
+
+    const list = await res.json();
+    wrap.innerHTML = "";
+
+    if (!list || list.length === 0) {
+      wrap.innerHTML = `<p class="muted">추천 결과가 없습니다.</p>`;
+      return;
+    }
+
+    list.slice(0, 4).forEach(user => {
+      const imagePath =
+        user.profileImagePath && user.profileImageName
+          ? `${user.profileImagePath}/${user.profileImageName}`
+          : "/images/profile/default.png";
+
+      const item = document.createElement("article");
+      item.className = "reco";
+      item.innerHTML = `
+        <div class="reco-top">
+          <div class="reco-avatar">
+            <img src="${imagePath}" 
+                 style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div class="reco-name">
+            <strong>${user.nickname}</strong>
+            <span class="flag">${getFlag(user.nation)}</span>
+            <div class="reco-sub">
+              ${user.nativeLanguage ?? "-"} · ${user.studyLanguage ?? "-"}
+            </div>
+          </div>
+          <div class="stars">
+            ${renderStars(user.manner ?? 36.5)}
+          </div>
+        </div>
+        <div class="match">
+          매칭 ${user.matchPoint ?? 0}%
+        </div>
+      `;
+
+      item.addEventListener("click", () => {
+        location.href = `${CONTEXT_PATH}members/${user.id}`;
+      });
+
+      wrap.appendChild(item);
+    });
+
+  } catch (e) {
+    console.error(e);
+    wrap.innerHTML = `<p class="muted">오류 발생</p>`;
+  }
+}
+
+function getFlag(nation) {
+  const map = {
+    KOREA: "🇰🇷",
+    JAPAN: "🇯🇵",
+  };
+  return map[nation] ?? "❓";
+}
+
+function renderStars(temp) {
+  const score = Math.floor(temp / 10); // 36.5 → 3
+  let stars = "";
+  for (let i = 0; i < 5; i++) {
+    stars += i < score ? "★" : "☆";
+  }
+  return stars;
 }
