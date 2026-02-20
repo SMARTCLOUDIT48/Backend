@@ -43,7 +43,8 @@ public class RecommendDTO {
 	private int matchPoint;
 	
 	private List<InterestType> interests;
-
+	
+	private Long getTodayInteractionCount;
 	// --- DTO 변환 메서드 (편의성 제공) ---
 
 	/*

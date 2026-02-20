@@ -41,8 +41,11 @@ public class RecommendController {
 	 * @return
 	 */
 	@GetMapping("recommend") //임시
-	public String Recommend(){
-		
+	public String Recommend(@AuthenticationPrincipal UserDetails user){
+		// 🔒 로그인 안 했으면 접근 불가
+		if (user == null) {
+			return "redirect:/login";
+		}
 		return "recommend";
 	}
 	
