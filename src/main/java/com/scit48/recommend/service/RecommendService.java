@@ -300,9 +300,6 @@ public class RecommendService {
 					
 					int totalScore = langScore + interestScore + mannerScore;
 					
-					long TodayInteractionCount = redisService.getTodayInteractionCount(loginUser.getId());
-					log.debug("TodayInteractionCount : {}", TodayInteractionCount);
-					
 					// ✅ 여기서 partnerInterests -> List<InterestType> 변환
 					List<InterestType> interests = partnerInterests.stream()
 							.map(UserInterestEntity::getInterest) // 또는 getInterestType()

@@ -324,9 +324,27 @@
 				.join("");
 		}
 
+		//사용자 채팅 인원수
+		async function checkPartnerActivity(partnerId) {
+			if (!partnerId) return "";
+
+			try {
+				const res = await fetch(`/chat/activity/${partnerId}`);
+				const count = await res.json();
+				
+				console.log(count);
+
+				if (count >= 10) return "인기 멤버예요! 🔥";
+				if (count > 0) return "오늘 대화 분위기가 좋은 분이네요 💬";
+				return "지금 대화하면 칼답 가능성! ⚡";
+			} catch (err) {
+				console.error("활동량 조회 실패:", err);
+				return "";
+			}
+		}
 
 
-		function renderRecommend(list) {
+		async function renderRecommend(list) {
 			const recommendList = document.getElementById('recommendTbody');
 			let html = '';
 
@@ -341,14 +359,19 @@
 				return;
 			}
 
-			list.forEach(item => {
-
+			//list.forEach(item => {
+			for (const item of list) {
 				let flagStatus = "";
 				let study = "";
 				let languageLevel = "";
 				let nation = "";
 				let imagePath = item.profileImagePath + "/" + item.profileImageName;
 				let interestHtml = renderInterests(item.interests);
+				let chatMsg = await checkPartnerActivity(item.id);
+				
+				console.log(item.id);
+				console.log(chatMsg);
+
 				const mannerTenth = Math.round((Number(item.manner) || 0) * 10);
 				const mannerText = (mannerTenth / 10).toFixed(1);
 				//console.log(item.id);
@@ -442,32 +465,18 @@
 
         <!-- 우측 영역 -->
         <div class="right">
-            <span class="chatting-text">"인기 멤버예요! 🔥 답장이 늦을 수 있어요."</span>
+            <span class="chatting-text">${chatMsg}</span>
             <div class="temp">${mannerText}℃</div>
             <button class="chat-btn" data-user-id="${item.id}">채팅 신청</button>
         </div>
     </div>
     `;
-			});
+			}
+			/*)*/
+			;
 
 			recommendList.innerHTML = html;
 		}
-
-		// async function chattingNumber(user_id) {
-		// 	try {
-		// 		const response = await fetch('/api/chat/partner-activity/{id}');
-
-		// 		if (!response.ok) {
-		// 			throw new Error('HTTP error ' + response.status);
-		// 		}
-		// 		const list = await response.json();
-		// 		console.log(list);
-		// 		renderRecommend(list);
-
-		// 	} catch (e) {
-		// 		console.log(e);
-		// 	}
-		// }
 	</script>
 </head>
 
