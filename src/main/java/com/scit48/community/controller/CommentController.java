@@ -23,7 +23,7 @@ public class CommentController {
 	
 	private final BoardService bs;
 	
-	// 게시글 댓글 작성 (AJAX)
+	// 댓글 작성 (AJAX)
 	@PostMapping("/write")
 	@ResponseBody // JSON 반환
 	public ResponseEntity<CommentDTO> write(@RequestBody CommentDTO commentDTO,
@@ -44,7 +44,7 @@ public class CommentController {
 		return ResponseEntity.ok(createdComment);
 	}
 	
-	// 게시글 댓글 수정 (AJAX)
+	// 댓글 수정 (AJAX)
 	@PostMapping("/update")
 	@ResponseBody
 	public ResponseEntity<CommentDTO> updateComment(@RequestBody Map<String, Object> params,
@@ -65,7 +65,7 @@ public class CommentController {
 		return ResponseEntity.ok(updatedComment);
 	}
 	
-	// 게시글 댓글 삭제
+	// 댓글 삭제
 	@PostMapping("/delete")
 	@ResponseBody
 	public ResponseEntity<String> deleteComment(@RequestBody Map<String, Long> params,
