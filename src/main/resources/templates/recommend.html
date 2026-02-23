@@ -226,7 +226,7 @@
 			const { min, max } = clampSwap(ageMin, ageMax);
 			ageMinValue.textContent = String(min);
 			ageMaxValue.textContent = String(max);
-			setFill(ageFill, min, max, 18, 60);
+			setFill(ageFill, min, max, 18, 80);
 		}
 
 		function startPollingForMatch(mathch_btn) {
@@ -331,7 +331,7 @@
 			try {
 				const res = await fetch(`/chat/activity/${partnerId}`);
 				const count = await res.json();
-				
+
 				console.log(count);
 
 				if (count >= 10) return "인기 멤버예요! 🔥";
@@ -368,7 +368,7 @@
 				let imagePath = item.profileImagePath + "/" + item.profileImageName;
 				let interestHtml = renderInterests(item.interests);
 				let chatMsg = await checkPartnerActivity(item.id);
-				
+
 				console.log(item.id);
 				console.log(chatMsg);
 
@@ -547,7 +547,7 @@
 
 			<!-- 4) 나이 (최소/최대) -->
 			<div class="filter-item">
-				<label class="filter-label">나이</label>
+				<!-- <label class="filter-label">나이</label> -->
 
 				<div class="dual-range" data-range="age">
 					<div class="dual-track">
@@ -555,8 +555,10 @@
 					</div>
 
 					<div class="dual-inputs">
-						<input id="ageMin" name="ageMin" type="range" min="18" max="60" value="20" step="1">
-						<input id="ageMax" name="ageMax" type="range" min="18" max="80" value="35" step="1">
+						<span class="filter-label">최소 나이</span><input id="ageMin" name="ageMin" type="range" min="18"
+							max="80" value="20" step="1">
+						<sapn class="filter-label">최대 나이 </sapn><input id="ageMax" name="ageMax" type="range" min="18"
+							max="80" value="35" step="1">
 					</div>
 
 					<div class="range-meta">
