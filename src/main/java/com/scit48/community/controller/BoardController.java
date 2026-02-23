@@ -241,6 +241,7 @@ public class BoardController {
 					.likeCnt(board.getLikeCnt() != null ? board.getLikeCnt() : 0)
 					.liked(isLiked) // 최적화된 결과
 					.createdDate(board.getCreatedAt())
+					.nation(board.getUser().getNation())
 					.memberId(board.getUser().getMemberId())
 					.build();
 		});
@@ -282,6 +283,7 @@ public class BoardController {
 					.likeCnt(board.getLikeCnt() != null ? board.getLikeCnt() : 0)
 					.liked(isLiked)
 					.createdDate(board.getCreatedAt())
+					.nation(board.getUser().getNation())
 					.memberId(board.getUser().getMemberId())
 					.build();
 		}).collect(Collectors.toList());
