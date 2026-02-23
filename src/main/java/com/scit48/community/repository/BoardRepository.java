@@ -5,6 +5,7 @@ import com.scit48.community.domain.entity.BoardEntity;
 import com.scit48.community.domain.entity.CategoryEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -42,7 +43,7 @@ public interface BoardRepository
 	
 	
 	// '일상' 카테고리인 글만 조회 (피드용)
-	Page<BoardEntity> findByCategoryName(String categoryName, Pageable pageable);
+	Slice<BoardEntity> findByCategoryName(String categoryName, Pageable pageable);
 	
 	
 	/*
