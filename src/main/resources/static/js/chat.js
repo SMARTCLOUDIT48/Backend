@@ -657,7 +657,10 @@ function updatePartnerProfileUI(data) {
     document.getElementById("partnerName").innerText = data.opponentNickname || "알 수 없음";
 
     // 2. 프로필 이미지
-    const imgPath = data.opponentProfileImg ? data.opponentProfileImg : "/images/profile/default.png";
+    const imgPath = data.opponentProfileImg
+        ? "/images/profile/upload/" + data.opponentProfileImg
+        : "/images/default_profile.png";
+
     const imgTag = document.getElementById("partnerImg");
     if (imgTag) imgTag.src = imgPath;
 
