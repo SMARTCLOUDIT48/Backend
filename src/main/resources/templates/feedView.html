@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>MUSUBI - 일상 공유</title>
     <link rel="stylesheet" th:href="@{/css/feedView.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -476,35 +477,143 @@
         .catch(error => alert("댓글 작성 실패: " + error.message));
     }
 
-    // 4. 화면에 댓글 요소 그리기 (코드 중복 방지 함수)
+    // 댓글 요소 (수정/삭제 기능 포함)
     function appendCommentToDOM(comment) {
         const listArea = document.getElementById('commentListArea');
+
+        // 현재 로그인한 사용자 ID 가져오기
+        const loginInput = document.getElementById('loginUserId');
+        const currentUserId = loginInput ? loginInput.value : "";
 
         let profileSrc = comment.writerProfileImage
             ? '/images/profile/upload/' + comment.writerProfileImage.replace('/files/', '')
             : '/images/default_profile.png';
 
         let formattedDate = "";
-            if (comment.createdDate) {
-                const dateObj = new Date(comment.createdDate);
-                const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                const day = String(dateObj.getDate()).padStart(2, '0');
-                const hours = String(dateObj.getHours()).padStart(2, '0');
-                const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-                formattedDate = `${month}.${day} ${hours}:${minutes}`;
+        if (comment.createdDate) {
+            const dateObj = new Date(comment.createdDate);
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const hours = String(dateObj.getHours()).padStart(2, '0');
+            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+            formattedDate = `${month}.${day} ${hours}:${minutes}`;
+        }
+
+        // 본인 댓글일 경우에만 수정/삭제 버튼 표시
+        let actionButtons = '';
+        if (currentUserId === comment.memberId) {
+            actionButtons = `
+                <div style="margin-left: auto; display: flex; gap: 8px;">
+                    <button type="button" onclick="toggleFeedCommentEdit(${comment.commentId})" style="background: none; border: none; color: #999; font-size: 11px; cursor: pointer; padding: 0;">수정</button>
+                    <button type="button" onclick="deleteFeedComment(${comment.commentId})" style="background: none; border: none; color: #ff5252; font-size: 11px; cursor: pointer; padding: 0;">삭제</button>
+                </div>
+            `;
         }
 
         const commentHtml = `
-            <div class="comment-row">
-                <img src="${profileSrc}" class="profile-img" alt="프로필">
-                <div class="comment-text">
-                    <span class="comment-writer">${comment.writerNickname}</span>
-                    <span>${comment.content}</span>
-                    <div class="comment-date">${formattedDate}</div>
+            <div class="comment-row" id="feed-comment-row-${comment.commentId}" style="display: flex; margin-bottom: 15px; width: 100%;">
+                <img src="${profileSrc}" class="profile-img" alt="프로필" style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px; flex-shrink: 0; object-fit: cover;">
+
+                <div class="comment-text-area" style="flex-grow: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="font-size: 14px; word-break: break-all;">
+                            <span class="comment-writer" style="font-weight: 600; margin-right: 5px;">${comment.writerNickname}</span>
+                            <span id="feed-comment-content-${comment.commentId}">${comment.content}</span>
+                        </div>
+                        ${actionButtons}
+                    </div>
+
+                    <div id="feed-comment-edit-box-${comment.commentId}" style="display: none; margin-top: 5px;">
+                        <input type="text" id="feed-comment-edit-input-${comment.commentId}" value="${comment.content}" style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 6px; font-size: 13px; margin-bottom: 4px; outline: none;">
+                        <div style="text-align: right;">
+                            <button type="button" onclick="updateFeedComment(${comment.commentId})" style="background: none; border: none; color: #0095f6; font-size: 12px; font-weight: 600; cursor: pointer;">저장</button>
+                            <button type="button" onclick="toggleFeedCommentEdit(${comment.commentId})" style="background: none; border: none; color: #999; font-size: 12px; cursor: pointer; margin-left: 8px;">취소</button>
+                        </div>
+                    </div>
+
+                    <div class="comment-date" style="font-size: 12px; color: #8e8e8e; margin-top: 4px;">${formattedDate}</div>
                 </div>
             </div>
         `;
         listArea.insertAdjacentHTML('beforeend', commentHtml);
+    }
+
+    // 피드 댓글 수정창 껐다 켜기
+    function toggleFeedCommentEdit(commentId) {
+        const contentSpan = document.getElementById('feed-comment-content-' + commentId);
+        const editBox = document.getElementById('feed-comment-edit-box-' + commentId);
+        const editInput = document.getElementById('feed-comment-edit-input-' + commentId);
+
+        if (editBox.style.display === 'none') {
+            editBox.style.display = 'block';
+            contentSpan.style.display = 'none';
+            editInput.value = contentSpan.innerText; // 입력창을 원래 텍스트로 초기화
+            editInput.focus();
+        } else {
+            editBox.style.display = 'none';
+            contentSpan.style.display = 'inline';
+        }
+    }
+
+    // 피드 댓글 수정 전송 (AJAX)
+    function updateFeedComment(commentId) {
+        const editInput = document.getElementById('feed-comment-edit-input-' + commentId);
+        const newContent = editInput.value.trim();
+
+        if (!newContent) {
+            alert("수정할 내용을 입력해주세요.");
+            return;
+        }
+
+        fetch('/comment/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ commentId: commentId, content: newContent })
+        })
+        .then(response => {
+            if (response.status === 401) {
+                alert("로그인이 필요합니다.");
+                return;
+            }
+            if (!response.ok) throw new Error("수정 실패");
+            return response.json();
+        })
+        .then(updatedComment => {
+            // 화면의 댓글 내용 갱신
+            const contentSpan = document.getElementById('feed-comment-content-' + commentId);
+            contentSpan.innerText = updatedComment.content;
+
+            // 수정창 닫기
+            toggleFeedCommentEdit(commentId);
+        })
+        .catch(error => alert("댓글 수정 중 오류가 발생했습니다."));
+    }
+
+    // 피드 댓글 삭제 (AJAX)
+    function deleteFeedComment(commentId) {
+        if (!confirm("정말 이 댓글을 삭제하시겠습니까?")) return;
+
+        fetch('/comment/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ commentId: commentId })
+        })
+        .then(response => {
+            if (response.status === 401) {
+                alert("로그인이 필요합니다.");
+                return;
+            }
+            if (!response.ok) throw new Error("삭제 실패");
+            return response.text();
+        })
+        .then(message => {
+            // 삭제 성공 시 화면에서 해당 댓글 요소를 완전히 제거
+            const commentRow = document.getElementById('feed-comment-row-' + commentId);
+            if (commentRow) {
+                commentRow.remove();
+            }
+        })
+        .catch(error => alert("댓글 삭제 중 오류가 발생했습니다."));
     }
 
 </script>
