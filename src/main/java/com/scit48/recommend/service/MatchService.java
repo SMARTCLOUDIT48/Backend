@@ -9,12 +9,14 @@ import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.enums.InterestType;
 import com.scit48.common.enums.LanguageLevel;
 import com.scit48.common.repository.UserRepository;
+import com.scit48.recommend.criteria.Criteria;
 import com.scit48.recommend.domain.dto.MatchResponseDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import com.scit48.recommend.criteria.Criteria;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +41,8 @@ public class MatchService {
 	
 	// pop 후보를 너무 오래 뒤지지 않도록 제한(실무에서는 대기열 크기/트래픽에 맞춰 조절)
 	private static final int TRY_POP_LIMIT = 30;
+	
+	
 	
 	// ===== public API =====
 	
@@ -170,38 +174,37 @@ public class MatchService {
 		}
 		return raw.trim();
 	}
-	
 	/**
 	 * criteria가 target(상대)에게 허용되는지 (관심사 제외: 관심사는 criteria끼리 비교)
 	 */
 	private boolean acceptsUserFilters(Criteria c, UserEntity target) {
 		
 		// gender
-		if (!"ANY".equals(c.gender)) {
+		if (!"ANY".equals(c.getGender())) {
 			if (target.getGender() == null) return false;
-			if (!target.getGender().name().equals(c.gender)) return false;
+			if (!target.getGender().name().equals(c.getGender())) return false;
 		}
 		
 		// age range
 		if (target.getAge() == null) return false;
-		if (target.getAge() < c.ageMin || target.getAge() > c.ageMax) return false;
+		if (target.getAge() < c.getAgeMin() || target.getAge() > c.getAgeMax()) return false;
 		
 		// nation
-		if (!"ANY".equals(c.nation)) {
+		if (!"ANY".equals(c.getNation())) {
 			if (target.getNation() == null) return false;
-			if (!c.nation.equals(target.getNation())) return false;
+			if (!c.getNation().equals(target.getNation())) return false;
 		}
 		
 		// study language
-		if (!"ANY".equals(c.studyLang)) {
+		if (!"ANY".equals(c.getStudyLang())) {
 			if (target.getStudyLanguage() == null) return false;
-			if (!c.studyLang.equals(target.getStudyLanguage())) return false;
+			if (!c.getStudyLang().equals(target.getStudyLanguage())) return false;
 		}
 		
 		// level (1~4 or ANY)
-		if (!c.levelsAny) {
+		if (!c.isLevelsAny()) {
 			int targetLv = levelToInt(target.getLevelLanguage());
-			if (!c.levels.contains(targetLv)) return false;
+			if (!c.getLevels().contains(targetLv)) return false;
 		}
 		
 		return true;
@@ -217,18 +220,18 @@ public class MatchService {
 		if (a == null || b == null) return true;
 		
 		// 둘 다 ANY면 통과
-		if (a.interestsAny && b.interestsAny) return true;
+		if (a.isInterestsAny() && b.isInterestsAny()) return true;
 		
 		// 한쪽만 ANY면 통과(완화 모드)
-		if (a.interestsAny || b.interestsAny) return true;
+		if (a.isInterestsAny() || b.isInterestsAny()) return true;
 		
 		// 둘 다 선택했는데 파싱 결과가 비면(이상 케이스) 완화 정책상 통과 처리
-		if (a.interests == null || a.interests.isEmpty()) return true;
-		if (b.interests == null || b.interests.isEmpty()) return true;
+		if (a.getInterests() == null || a.getInterests().isEmpty()) return true;
+		if (b.getInterests() == null || b.getInterests().isEmpty()) return true;
 		
 		// 교집합 검사
-		for (InterestType t : a.interests) {
-			if (b.interests.contains(t)) return true;
+		for (InterestType t : a.getInterests()) {
+			if (b.getInterests().contains(t)) return true;
 		}
 		return false;
 	}
@@ -265,83 +268,83 @@ public class MatchService {
 		}
 	}
 	
+	
 	// ===== Criteria class =====
 	
-	private static class Criteria {
-		String gender = "ANY";     // MALE/FEMALE/ANY
-		int ageMin = 18;
-		int ageMax = 80;
-		String nation = "ANY";     // KOREA/JAPAN/ANY
-		String studyLang = "ANY";  // KOREAN/JAPANESE/ANY
-		
-		boolean levelsAny = true;
-		Set<Integer> levels = new HashSet<>(); // 1~4
-		
-		boolean interestsAny = true;
-		Set<InterestType> interests = new HashSet<>();
-		
-		static Criteria parse(String key) {
-			Criteria c = new Criteria();
-			if (key == null || key.isBlank()) return c;
-			
-			String[] parts = key.split("\\|");
-			Map<String, String> map = new HashMap<>();
-			for (String p : parts) {
-				String[] kv = p.split("=", 2);
-				if (kv.length == 2) map.put(kv[0].trim(), kv[1].trim());
-			}
-			
-			c.gender = map.getOrDefault("g", "ANY").toUpperCase();
-			
-			// age=20-30
-			String age = map.get("age");
-			if (age != null && age.contains("-")) {
-				try {
-					String[] rr = age.split("-", 2);
-					c.ageMin = Integer.parseInt(rr[0].trim());
-					c.ageMax = Integer.parseInt(rr[1].trim());
-					if (c.ageMin > c.ageMax) {
-						int tmp = c.ageMin;
-						c.ageMin = c.ageMax;
-						c.ageMax = tmp;
-					}
-				} catch (Exception ignored) { }
-			}
-			
-			c.nation = map.getOrDefault("n", "ANY").toUpperCase();
-			c.studyLang = map.getOrDefault("lang", "ANY").toUpperCase();
-			
-			// lv=ANY or lv=1,2,3
-			String lv = map.getOrDefault("lv", "ANY").toUpperCase();
-			if (!"ANY".equals(lv)) {
-				c.levelsAny = false;
-				for (String s : lv.split(",")) {
-					try {
-						int v = Integer.parseInt(s.trim());
-						if (v >= 1 && v <= 4) c.levels.add(v);
-					} catch (Exception ignored) { }
-				}
-				if (c.levels.isEmpty()) c.levelsAny = true;
-			}
-			
-			// interest=ANY or interest=CULTURE,IT
-			String it = map.getOrDefault("interest", "ANY").toUpperCase();
-			if (!"ANY".equals(it)) {
-				c.interestsAny = false;
-				for (String s : it.split(",")) {
-					String name = s.trim();
-					if (name.isEmpty()) continue;
-					try {
-						c.interests.add(InterestType.valueOf(name));
-					} catch (Exception ignored) {
-						// 디버깅 필요하면 아래 주석 해제
-						// log.warn("Invalid interest token: {}", name);
-					}
-				}
-				if (c.interests.isEmpty()) c.interestsAny = true;
-			}
-			
-			return c;
-		}
-	}
+//	private static class Criteria {
+//		String gender = "ANY";     // MALE/FEMALE/ANY
+//		int ageMin = 18;
+//		int ageMax = 80;
+//		String nation = "ANY";     // KOREA/JAPAN/ANY
+//		String studyLang = "ANY";  // KOREAN/JAPANESE/ANY
+//
+//		boolean levelsAny = true;
+//		Set<Integer> levels = new HashSet<>(); // 1~4
+//
+//		boolean interestsAny = true;
+//		Set<InterestType> interests = new HashSet<>();
+//
+//		static Criteria parse(String key) {
+//			Criteria c = new Criteria();
+//			if (key == null || key.isBlank()) return c;
+//
+//			String[] parts = key.split("\\|");
+//			Map<String, String> map = new HashMap<>();
+//			for (String p : parts) {
+//				String[] kv = p.split("=", 2);
+//				if (kv.length == 2) map.put(kv[0].trim(), kv[1].trim());
+//			}
+//
+//			c.gender = map.getOrDefault("g", "ANY").toUpperCase();
+//
+//			// age=20-30
+//			String age = map.get("age");
+//			if (age != null && age.contains("-")) {
+//				try {
+//					String[] rr = age.split("-", 2);
+//					c.ageMin = Integer.parseInt(rr[0].trim());
+//					c.ageMax = Integer.parseInt(rr[1].trim());
+//					if (c.ageMin > c.ageMax) {
+//						int tmp = c.ageMin;
+//						c.ageMin = c.ageMax;
+//						c.ageMax = tmp;
+//					}
+//				} catch (Exception ignored) { }
+//			}
+//
+//			c.nation = map.getOrDefault("n", "ANY").toUpperCase();
+//			c.studyLang = map.getOrDefault("lang", "ANY").toUpperCase();
+//
+//			// lv=ANY or lv=1,2,3
+//			String lv = map.getOrDefault("lv", "ANY").toUpperCase();
+//			if (!"ANY".equals(lv)) {
+//				c.levelsAny = false;
+//				for (String s : lv.split(",")) {
+//					try {
+//						int v = Integer.parseInt(s.trim());
+//						if (v >= 1 && v <= 4) c.levels.add(v);
+//					} catch (Exception ignored) { }
+//				}
+//				if (c.levels.isEmpty()) c.levelsAny = true;
+//			}
+//
+//			// interest=ANY or interest=CULTURE,IT
+//			String it = map.getOrDefault("interest", "ANY").toUpperCase();
+//			if (!"ANY".equals(it)) {
+//				c.interestsAny = false;
+//				for (String s : it.split(",")) {
+//					String name = s.trim();
+//					if (name.isEmpty()) continue;
+//					try {
+//						c.interests.add(InterestType.valueOf(name));
+//					} catch (Exception ignored) {
+//						log.debug("Invalid interest token: {}", name);
+//					}
+//				}
+//				if (c.interests.isEmpty()) c.interestsAny = true;
+//			}
+//
+//			return c;
+//		}
+//	}
 }

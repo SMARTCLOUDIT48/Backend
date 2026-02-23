@@ -13,4 +13,20 @@ public class homeController {
 		return "home/home";
 	}
 	
+	
+	@GetMapping("/service")
+	public String servicePage() {
+		return "service"; // templates/service.html
+	}
+	
+	@GetMapping("/guide")
+	public String guidePage() {
+		return "guide";
+		// templates/guide/guide.html
+	}
+	
+	@GetMapping("/usage-guide")
+	public String userGuidePage() {
+		return "usage-guide";
+	}
 }

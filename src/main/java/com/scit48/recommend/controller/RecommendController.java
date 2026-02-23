@@ -32,7 +32,7 @@ public class RecommendController {
 	
 	@Getter
 	@Setter
-	public static class MatchStartRequest {
+	public static class CriteriaKey {
 		private String criteriaKey;
 	}
 	
@@ -41,8 +41,11 @@ public class RecommendController {
 	 * @return
 	 */
 	@GetMapping("recommend") //임시
-	public String Recommend(){
-		
+	public String Recommend(@AuthenticationPrincipal UserDetails user){
+		// 🔒 로그인 안 했으면 접근 불가
+		if (user == null) {
+			return "redirect:/login";
+		}
 		return "recommend";
 	}
 	
@@ -71,10 +74,10 @@ public class RecommendController {
 	@PostMapping("/api/match/start")
 	public MatchResponseDTO start(
 			@AuthenticationPrincipal UserDetails userDetails,
-			@RequestBody(required = false) MatchStartRequest req){
+			@RequestBody(required = false) CriteriaKey req){
 		Long myId = rs.searchid(userDetails);
 		String criteriaKey = (req != null) ? req.getCriteriaKey() : null;
-		
+		log.debug("match 필터링키 : {}", criteriaKey);
 		return matchService.start(myId, criteriaKey);
 	}
 	
@@ -94,5 +97,17 @@ public class RecommendController {
 		return ResponseEntity.ok(Map.of("status", "CANCELED"));
 	}
 	
-	//new git test commit 주석
+	@ResponseBody
+	@GetMapping("api/filtering/search")
+	public List<RecommendDTO> recommendFiltering(
+			@AuthenticationPrincipal UserDetails user,
+			@RequestParam(required = false) String criteriaKey
+	){
+		Long user_id = rs.searchid(user);
+		System.out.println("log 안뜸");
+		log.debug("parsing 되지 않은 필터링 키 : {}",criteriaKey);
+		List<RecommendDTO> userDTO= rs.filteringSearch(user_id, criteriaKey);
+		return userDTO;
+	}
+	
 }

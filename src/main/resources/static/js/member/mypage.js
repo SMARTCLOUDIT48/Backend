@@ -1,6 +1,22 @@
 import { authFetch } from "/js/common/authFetch.js";
 console.log("[mypage.js] loaded");
 
+
+
+  /* ===============================
+     매너 온도 색상
+  =============================== */
+  function getMannerTextColor(percent) {
+    const p = Math.max(0, Math.min(100, percent)) / 100;
+    const start = { r: 50, g: 90, b: 210 };
+    const end   = { r: 255, g: 0, b: 0 };
+    const r = Math.round(start.r + (end.r - start.r) * p);
+    const g = Math.round(start.g + (end.g - start.g) * p);
+    const b = Math.round(start.b + (end.b - start.b) * p);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+
 document.addEventListener("DOMContentLoaded", async () => {
 
   /* ===============================
@@ -28,20 +44,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const introTextarea = profileForm.querySelector('textarea[name="intro"]');
   const levelSelect = profileForm.querySelector('select[name="levelLanguage"]');
 
-  /* ===============================
-     매너 온도 색상
-  =============================== */
-  function getMannerTextColor(percent) {
-    const p = Math.max(0, Math.min(100, percent)) / 100;
-    const start = { r: 50, g: 90, b: 210 };
-    const end   = { r: 255, g: 0, b: 0 };
-    const r = Math.round(start.r + (end.r - start.r) * p);
-    const g = Math.round(start.g + (end.g - start.g) * p);
-    const b = Math.round(start.b + (end.b - start.b) * p);
-    return `rgb(${r}, ${g}, ${b})`;
-  }
 
-  function setMannerTemp(temp) {
+   function setMannerTemp(temp) {
     const percent = Math.max(0, Math.min(100, temp));
     mannerEl.textContent = `${temp.toFixed(1)}°C`;
     mannerFillEl.style.width = `${percent}%`;
@@ -87,6 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   await loadInterestChips();
   await loadLikedMeList();
+  await loadRecommendList();
 
   window.addEventListener("interest:updated", loadInterestChips);
 
@@ -297,4 +302,168 @@ function convertInterestToLabel(item) {
   return INTEREST_DETAIL_LABEL[item.interestDetail]
       ?? INTEREST_DETAIL_LABEL[item.interest]
       ?? "알 수 없음";
+}
+
+
+
+
+/* ===============================
+   추천 친구 로드
+=============================== */
+async function loadRecommendList() {
+  const wrap = document.getElementById("recommendGrid");
+  if (!wrap) return;
+
+  try {
+    const res = await authFetch(`${CONTEXT_PATH}api/recommend`);
+    if (!res.ok) {
+      wrap.innerHTML = `<p class="muted">추천 불러오기 실패</p>`;
+      return;
+    }
+
+    const list = await res.json();
+    wrap.innerHTML = "";
+
+    if (!list || list.length === 0) {
+      wrap.innerHTML = `<p class="muted">추천 결과가 없습니다.</p>`;
+      return;
+    }
+
+    list.slice(0, 4).forEach(user => {
+
+      const imagePath =
+        user.profileImagePath && user.profileImageName
+          ? `${user.profileImagePath}/${user.profileImageName}`
+          : "/images/profile/default.png";
+
+  const interests = user.interests ?? [];
+
+const visibleInterests = interests.slice(0, 3);
+
+let interestsHtml = visibleInterests
+  .map(type => `
+    <span class="tag">${convertInterestType(type)}</span>
+  `)
+  .join("");
+
+if (interests.length > 3) {
+  const extraCount = interests.length - 3;
+  interestsHtml += `
+    <span class="tag more">+${extraCount}</span>
+  `;
+}
+
+
+      const item = document.createElement("article");
+      item.className = "reco";
+
+      item.innerHTML = `
+      <div class="reco-top">
+
+  <div class="reco-avatar">
+    <img src="${imagePath}"
+         style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+  </div>
+
+  <div class="reco-info">
+    <strong>${user.nickname}</strong>
+    <span class="flag">${getFlag(user.nation)}</span>
+
+<div class="reco-sub-row">
+  <div class="lang">
+    ${getLanguageFlag(user.nativeLanguage)}
+    →
+    ${getLanguageFlag(user.studyLanguage)}
+  </div>
+
+  <div class="stars">
+    ${renderLevelStars(user.levelLanguage)}
+  </div>
+</div>
+    
+
+    <div class="match">
+      매칭 ${user.matchPoint ?? 0}% · ${formatTemp(user.manner)}
+    </div>
+  </div>
+
+</div>
+
+        <div class="reco-tags">
+          ${interestsHtml || `<span class="tag empty">관심사 없음</span>`}
+        </div>
+      `;
+
+      item.addEventListener("click", () => {
+        location.href = `${CONTEXT_PATH}members/${user.id}`;
+      });
+
+      wrap.appendChild(item);
+    });
+
+  } catch (e) {
+    console.error(e);
+    wrap.innerHTML = `<p class="muted">오류 발생</p>`;
+  }
+}
+
+
+function renderLevelStars(level) {
+  const levelMap = {
+    BEGINNER: 1,
+    INTERMEDIATE: 2,
+    ADVANCED: 3,
+    NATIVE: 4
+  };
+
+  const score = levelMap[level] ?? 0;
+
+  let stars = "";
+  for (let i = 0; i < 4; i++) {
+    stars += i < score ? "★" : "☆";
+  }
+
+  return stars;
+}
+
+function formatTemp(temp) {
+  const value = temp ?? 36.5;
+  const percent = Math.min(100, Math.max(0, value));
+  const color = getMannerTextColor(percent);
+  return `<span style="color:${color}">${value.toFixed(1)}°C</span>`;
+}
+function getFlag(nation) {
+  const map = {
+    KOREA: "🇰🇷",
+    JAPAN: "🇯🇵"
+  };
+
+  return map[nation] ?? "";
+}
+
+function getLanguageFlag(lang) {
+  const map = {
+    KOREAN: "🇰🇷",
+    JAPANESE: "🇯🇵"
+  };
+
+  return map[lang] ?? "❓";
+}
+
+
+  
+ 
+function convertInterestType(type) {
+  const map = {
+    CULTURE: "문화·예술",
+    HOBBY: "취미·여가",
+    SPORTS: "운동·스포츠",
+    TRAVEL: "여행·지역",
+    FOOD: "음식·요리",
+    STUDY: "학습·자기계발",
+    IT: "IT·기술",
+    LIFESTYLE: "라이프스타일"
+  };
+
+  return map[type] ?? type;
 }
