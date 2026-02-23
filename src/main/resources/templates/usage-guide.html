@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이용 가이드 | TalkTribe</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Pretendard', sans-serif;
+            background: linear-gradient(135deg, #cfd9ff, #f6d8ff, #dff4ff);
+            color: #222;
+        }
+
+        /* ===== 레이아웃 ===== */
+        .guide-wrapper {
+            max-width: 1000px;
+            margin: 140px auto;
+            padding: 0 24px;
+        }
+
+        /* ===== 제목 ===== */
+        .guide-title {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .guide-title h1 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .guide-title p {
+            color: #555;
+        }
+
+        /* ===== 단계 카드 ===== */
+        .step-list {
+            display: grid;
+            gap: 40px;
+        }
+
+        .step-card {
+            padding: 40px;
+            border-radius: 28px;
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow:
+                0 20px 40px rgba(0,0,0,0.08),
+                inset 0 0 0 1px rgba(255,255,255,0.4);
+            transition: 0.3s ease;
+        }
+
+        .step-card:hover {
+            transform: translateY(-6px);
+        }
+
+        .step-card h2 {
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+
+        .step-card p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* ===== 버튼 ===== */
+        .back-btn {
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .back-btn a {
+            display: inline-block;
+            padding: 16px 40px;
+            border-radius: 40px;
+            background: linear-gradient(135deg, #7a8cff, #b38dff);
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            transition: 0.3s ease;
+        }
+
+        .back-btn a:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(122,140,255,0.4);
+        }
+    </style>
+
+</head>
+<body>
+
+
+
+<main class="guide-wrapper">
+
+    <section class="guide-title">
+        <h1>이용 가이드</h1>
+        <p>TalkTribe를 처음 사용하는 분들을 위한 상세 안내입니다.</p>
+    </section>
+
+    <section class="step-list">
+
+        <div class="step-card">
+            <h2>STEP 1. 회원가입</h2>
+            <p>
+                이메일 또는 소셜 로그인을 통해 가입할 수 있습니다.
+                가입 후 기본 프로필을 설정해 주세요.
+            </p>
+        </div>
+
+        <div class="step-card">
+            <h2>STEP 2. 프로필 완성</h2>
+            <p>
+                관심사, 학습 언어, 레벨을 정확히 입력하면
+                더 높은 매칭 정확도를 경험할 수 있습니다.
+            </p>
+        </div>
+
+        <div class="step-card">
+            <h2>STEP 3. 파트너 찾기</h2>
+            <p>
+                추천 탭에서 나와 잘 맞는 파트너를 확인하고
+                마음에 들면 채팅을 시작하세요.
+            </p>
+        </div>
+
+        <div class="step-card">
+            <h2>STEP 4. 채팅 & AI 활용</h2>
+            <p>
+                대화 중 AI 문장 첨삭 기능을 활용해
+                자연스러운 표현을 배울 수 있습니다.
+            </p>
+        </div>
+
+        <div class="step-card">
+            <h2>STEP 5. 안전한 이용</h2>
+            <p>
+                외부 메신저 이동 유도, 금전 요구, 불쾌한 발언은 금지됩니다.
+                문제 발생 시 즉시 신고 기능을 이용해 주세요.
+            </p>
+        </div>
+
+    </section>
+
+    <div class="back-btn">
+        <a th:href="@{/}">메인으로 돌아가기</a>
+    </div>
+
+</main>
+
+
+
+</body>
+</html>

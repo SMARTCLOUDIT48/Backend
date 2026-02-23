@@ -20,7 +20,7 @@ public class BoardDTO {
 	private String content;    //
 	private int viewCount;     //
 	private LocalDateTime createdDate;
-	private Long id;
+	
 	
 	
 	
@@ -31,11 +31,12 @@ public class BoardDTO {
 	
 	
 	// 3. 작성자 정보 (User 연동)
+	private Long id;
 	private String memberId;
 	private String writerNickname;     //
 	private String profileImagePath;
 	private String profileImageName;//
-	private BigDecimal manner;  //
+	private double manner;  //
 	private String nation;
 	
 	
@@ -49,4 +50,5 @@ public class BoardDTO {
 	// 5. 연관 데이터
 	private List<CommentDTO> comments; // 댓글 목록
 	private Integer likeCnt;           // 좋아요 총 개수
+	private boolean liked;  // [추가] 내가 좋아요 눌렀는지 여부
 }

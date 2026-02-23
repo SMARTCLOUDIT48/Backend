@@ -1,5 +1,6 @@
 package com.scit48.recommend.domain.dto;
 
+import com.scit48.common.enums.InterestType;
 import com.scit48.common.enums.LanguageLevel;
 import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.dto.UserDTO;
@@ -7,6 +8,7 @@ import com.scit48.common.enums.Gender;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -39,7 +41,10 @@ public class RecommendDTO {
 	private String studyLanguage;
 	
 	private int matchPoint;
-
+	
+	private List<InterestType> interests;
+	
+	private Long getTodayInteractionCount;
 	// --- DTO 변환 메서드 (편의성 제공) ---
 
 	/*

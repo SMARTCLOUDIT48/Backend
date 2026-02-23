@@ -1,5 +1,6 @@
 package com.scit48.recommend.service;
 
+import com.scit48.chat.service.RedisService;
 import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.domain.entity.UserInterestEntity;
 import com.scit48.common.dto.UserDTO;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import com.scit48.recommend.criteria.Criteria;
 
 import java.util.*;
 import java.util.stream.Collector;
@@ -30,6 +32,8 @@ public class RecommendService {
 	//의존성 주입 DI
 	private final UserRepository ur;
 	private final UserInterestRepository uir;
+	private final RedisService redisService;
+	
 	
 	public List<RecommendDTO> firstRecommend(Long user) {
 		
@@ -40,91 +44,68 @@ public class RecommendService {
 		UserEntity loginUserEntity = ur.findById(user).orElseThrow(
 				() -> new EntityNotFoundException("회원을 찾을 수 없습니다.")
 		);
-		//로그인 되어 있는 유저의 관심사 리스트 받아오기
+		//회원가입 되어 있는 유저의 관심사 리스트 받아오기
 		List<UserInterestEntity> loginUserInterestList = uir.findByUser_Id(user);
 		
-		Gender targetGender =getOppositeGender(loginUserEntity.getGender());
-		String targetCountry = getOppositeCountry(loginUserEntity.getNation());
-		
-		
+//		Gender targetGender = getOppositeGender(loginUserEntity.getGender());
+//		String targetCountry = getOppositeCountry(loginUserEntity.getNation());
 		//List <UserEntity> allUserEntitylist = ur.findByGenderAndNation(targetGender,targetCountry);
 		
 		//성별, 한일 반전된
 		//회원 목록, 회원 관심사 전체 목록 로그인한 회원 제외
-		List<UserEntity> allUserEntitylist =
-				ur.findByGenderAndNationAndIdNot(
-						targetGender,
-						targetCountry,
-						user
-				);
+		List <UserEntity> allUserEntitylist = ur.findByIdNot(user);
+		
+//		List<UserEntity> allUserEntitylist =
+//				ur.findByGenderAndNationAndIdNot(
+//						targetGender,
+//						targetCountry,
+//						user
+//				);
 		
 		//allUsersEntitylist에 해당하는 id들의 리스트를 만들겠다.
-		List<Long> userIds = allUserEntitylist.stream().map(UserEntity::getId).toList();
+		//List<Long> userIds = allUserEntitylist.stream().map(UserEntity::getId).toList();
 		
 		//userIds로 구현된 리스트를 활용해서 id에 해당하는 리스트
-		List<UserInterestEntity> userInterestEntityList= uir.findByUser_IdIn(userIds);
+		//List<UserInterestEntity> userInterestEntityList= uir.findByUser_IdIn(userIds);
 		
-		//userInterestEntityList를 각 id에 맞게 관심사 리스트를 분리
-		Map<Long, List<UserInterestEntity>> interestMap =
-				userInterestEntityList.stream()
-						.collect(Collectors.groupingBy(
-								ui ->ui.getUser().getId()
-						));
-		
-		//반복문 + 점수를 dto에 넣기
-		for(UserEntity partner : allUserEntitylist){
-			List<UserInterestEntity> partnerInterests =
-					interestMap.getOrDefault(
-							partner.getId(),List.of()
-					);
-			
-			//언어 점수
-			int langScore = calLangScore(
-					loginUserEntity.getLevelLanguage(),partner.getLevelLanguage());
-			
-			// 3. 관심사 점수
-			int interestScore = calInterestScore(
-					loginUserInterestList,
-					partnerInterests
-			);
-			
-			// 4. 매너 점수
-			int mannerScore = calMannerScore(
-					partner.getManner()
-			);
-			// 5. 총 점수
-			int totalScore = langScore + interestScore + mannerScore;
-			
-			RecommendDTO dto = new RecommendDTO().builder()
-					.id(partner.getId())
-					.nickname(partner.getNickname())
-					.age(partner.getAge())
-					.gender(partner.getGender())
-					.nation(partner.getNation())
-					.manner(partner.getManner())
-					.profileImageName(partner.getProfileImageName())
-					.profileImagePath(partner.getProfileImagePath())
-					.nativeLanguage(partner.getNativeLanguage())
-					.levelLanguage(partner.getLevelLanguage())
-					.studyLanguage(partner.getStudyLanguage())
-					.matchPoint(totalScore)
-					.build();
-			
-			userPatnerDTOList.add(dto);
-		}
-		
-		//리턴
-		return userPatnerDTOList.stream()
-				.sorted(Comparator.comparingInt(
-						RecommendDTO::getMatchPoint
-				).reversed())
-				.limit(10)
-				.toList();
-		
-		//로그인 한 계정을 제외하는 기능
-		
+		return scoreAndConvert(loginUserEntity, loginUserInterestList, allUserEntitylist, 10);
 	}
 	
+	public List<RecommendDTO> filteringSearch(Long userId, String criteriaKey) {
+		Criteria c = Criteria.parse(criteriaKey);
+		log.debug("parse된 필터링 키 : {}", c);
+		
+		//로그인 회원 정보/ 관심사 찾기(점수 계산용)
+		UserEntity loginUserEntity = ur.findById(userId).orElseThrow(
+				()-> new EntityNotFoundException("회원을 찾을 수 없습니다")
+		);
+		List<UserInterestEntity> loginUserInterestList = uir.findByUser_Id(userId);
+		
+		// 1️⃣ 로그인 유저 제외한 전체 유저 조회
+		List<UserEntity> candidates = ur.findByIdNot(userId);
+		
+		// 2️⃣ Criteria 기준 필터링
+		List<UserEntity> filtered = candidates.stream()
+				.filter(user -> matchByCriteria(user, c))
+				.toList();
+		
+		log.debug("필터링 통과 인원 수 : {}", filtered.size());
+		//DTO 변환 하기전에 List filtered를 점수 순으로 배열
+		if (filtered.isEmpty()) {
+			return List.of();
+		}
+		// ✅ filtered 후보들의 관심사 bulk 조회
+		List<Long> filteredIds = filtered.stream().map(UserEntity::getId).toList();
+		List<UserInterestEntity> filteredInterestEntities = uir.findByUser_IdIn(filteredIds);
+		
+		
+//		// 3️⃣ DTO 변환
+//		List<RecommendDTO> filteredResult = filtered.stream()
+//				.map(user -> RecommendDTO.fromEntity(user))
+//				.toList();
+		
+		return scoreAndConvert(loginUserEntity, loginUserInterestList, filtered, 10);
+	}
 	
 	
 	//처음 찾을 때 성별 반전 찾기
@@ -220,4 +201,144 @@ public class RecommendService {
 		
 		return entity.getId();
 	}
+	
+	private boolean matchByCriteria(UserEntity u, Criteria c) {
+		// 성별
+		if (!"ANY".equals(c.getGender())) {
+			if (u.getGender() == null) return false;
+			if (!u.getGender().name().equals(c.getGender())) return false;
+		}
+		
+		// 나이
+		int age = u.getAge();
+		if (age < c.getAgeMin() || age > c.getAgeMax()) return false;
+		
+		// 국적
+		if (!"ANY".equals(c.getNation())) {
+			if (u.getNation() == null) return false;
+			if (!u.getNation().equalsIgnoreCase(c.getNation())) return false;
+		}
+		
+		// 학습 언어
+		if (!"ANY".equals(c.getStudyLang())) {
+			if (u.getStudyLanguage() == null) return false;
+			if (!u.getStudyLanguage().equals(c.getStudyLang())) return false;
+		}
+		
+		// 언어 레벨
+		if (!c.isLevelsAny()) {
+			if (u.getLevelLanguage() == null) return false;
+			
+			
+			LanguageLevel level = u.getLevelLanguage(); // 구조에 맞게 수정
+			int level_int = levelToInt(level); //숫자로 변경
+			if (!c.getLevels().contains(level_int)) return false;
+		}
+		
+		// 관심사 맘에 걸리는 데
+		if (!c.isInterestsAny()) { //Interest가 비어있지 않으면
+			//user Id를 기반으로 관심사 항목을 리스트로 받아옴
+			List <UserInterestEntity> InterestEntityList= uir.findByUser_Id(u.getId());
+			
+			//받아온 관심사 List 목록을 Set으로 변경
+			Set<InterestType> userInterests = InterestEntityList.stream()
+					.map(UserInterestEntity::getInterest)
+					.collect(Collectors.toSet());
+			
+			// c 필터링 항목 c에 맞는게 한개라도 있으면 true
+			boolean hasCommon = userInterests.stream()
+					.anyMatch(c.getInterests()::contains);
+			// 아니면 false
+			if (!hasCommon) return false;
+		}
+		// 전부 통과하면 true 반환
+		return true;
+	}
+	
+	private int levelToInt(LanguageLevel lv) {
+		if (lv == null) return 1;
+		return switch (lv) {
+			case BEGINNER -> 1;
+			case INTERMEDIATE -> 2;
+			case ADVANCED -> 3;
+			case NATIVE -> 4;
+		};
+	}
+	
+	/**
+	 * ✅ 공통: 후보 리스트에 대해
+	 * - 관심사 bulk 조회 → 점수 계산 → DTO 변환 → 점수 내림차순 정렬 → 상위 10개
+	 */
+	private List<RecommendDTO> scoreAndConvert(
+			UserEntity loginUser,
+			List<UserInterestEntity> loginInterests,
+			List<UserEntity> partners,
+			int limit
+	) {
+		if (partners == null || partners.isEmpty()) {
+			return List.of();
+		}
+		
+		Map<Long, List<UserInterestEntity>> interestMap = buildInterestMap(partners);
+		
+		return partners.stream()
+				.map(partner -> {
+					List<UserInterestEntity> partnerInterests =
+							interestMap.getOrDefault(partner.getId(), List.of());
+					
+					int langScore = calLangScore(
+							loginUser.getLevelLanguage(),
+							partner.getLevelLanguage()
+					);
+					
+					int interestScore = calInterestScore(
+							loginInterests,
+							partnerInterests
+					);
+					
+					int mannerScore = calMannerScore(partner.getManner());
+					
+					int totalScore = langScore + interestScore + mannerScore;
+					
+					// ✅ 여기서 partnerInterests -> List<InterestType> 변환
+					List<InterestType> interests = partnerInterests.stream()
+							.map(UserInterestEntity::getInterest) // 또는 getInterestType()
+							.filter(Objects::nonNull)
+							.distinct()
+							.toList();
+					
+					return RecommendDTO.builder()
+							.id(partner.getId())
+							.nickname(partner.getNickname())
+							.age(partner.getAge())
+							.gender(partner.getGender())
+							.nation(partner.getNation())
+							.manner(partner.getManner())
+							.profileImageName(partner.getProfileImageName())
+							.profileImagePath(partner.getProfileImagePath())
+							.nativeLanguage(partner.getNativeLanguage())
+							.levelLanguage(partner.getLevelLanguage())
+							.studyLanguage(partner.getStudyLanguage())
+							.matchPoint(totalScore)
+							.interests(interests)
+							.build();
+				})
+				.sorted(Comparator.comparingInt(RecommendDTO::getMatchPoint).reversed())
+				.limit(limit)
+				.toList();
+	}
+	
+	/**
+	 * ✅ 공통: partners에 속한 유저들의 관심사를 한 번에 조회해서
+	 * userId -> 관심사 리스트로 그룹핑
+	 */
+	private Map<Long, List<UserInterestEntity>> buildInterestMap(List<UserEntity> partners) {
+		List<Long> ids = partners.stream().map(UserEntity::getId).toList();
+		
+		List<UserInterestEntity> interestEntities = uir.findByUser_IdIn(ids);
+		
+		return interestEntities.stream()
+				.collect(Collectors.groupingBy(ui -> ui.getUser().getId()));
+	}
+	
 }

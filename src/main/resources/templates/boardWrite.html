@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+                xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>MUSUBI - 글 작성</title>
@@ -7,63 +8,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<header th:fragment="header" xmlns:th="http://www.thymeleaf.org"
-        xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="header">
-
-    <div class="header-inner">
-
-        <!-- 로고 -->
-        <div class="logo" th:onclick="|location.href='@{/}'|">
-            💬 MUSUBI
-        </div>
-
-        <!-- 네비게이션 -->
-        <nav class="nav">
-            <a th:href="@{/community}">커뮤니티</a>
-            <a th:href="@{/recommend}">파트너찾기</a>
-            <a th:href="@{/chat}">채팅</a>
-            <a th:href="@{/support}">고객센터</a>
-        </nav>
-
-        <!-- 인증 버튼 영역 -->
-        <div class="auth-buttons">
-
-            <!-- =========================
-                 비로그인 상태
-            ========================= -->
-            <div sec:authorize="isAnonymous()">
-                <button class="login-btn" type="button" th:onclick="|location.href='@{/login}'|">
-                    로그인
-                </button>
-
-                <button class="signup-btn" type="button" th:onclick="|location.href='@{/member/signup}'|">
-                    회원가입
-                </button>
-            </div>
-
-            <!-- =========================
-                 로그인 상태
-            ========================= -->
-            <div sec:authorize="isAuthenticated()">
-                <button class="login-btn" type="button" onclick="logout()">
-                    로그아웃
-                </button>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- 로그아웃 JS (공통) -->
-    <script th:src="@{/js/member/logout.js}"></script>
-
+<header>
+    <div th:replace="~{fragments/header :: header}"></div>
 </header>
 
 <main class="container">
     <section class="hero-section">
         <div class="category-display">
-            <span class="hero-icon">🌏</span>
+
             <div class="hero-text">
-                <h2>새로운 글 작성</h2>
+                <h2><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                </svg>게시글 쓰기</h2>
 
                 <select id="viewSelect" class="category-select" onchange="syncCategory()">
                     <option th:each="cate : ${categories}"
@@ -93,7 +50,8 @@
             </div>
             <div class="info-text">
                 <span class="nickname" th:text="${userDTO.nickname}"></span>
-                <span class="flag" th:text="${userDTO.nation}"></span>
+                <span class="location" th:text="${userDTO.nation}"
+                      style="font-size: 11px; color: #666; margin-top: 2px; display: inline-block;"></span>
             </div>
         </div>
 
@@ -104,7 +62,7 @@
         <hr class="divider">
 
         <div class="input-group content-area">
-            <textarea name="content" class="input-content" placeholder="어떤 부분이 궁금한가요?" required></textarea>
+            <textarea name="content" class="input-content" placeholder="작성하고 싶은 내용을 자유롭게 적어보세요!" required></textarea>
             <div class="meta-info">
                 <span class="created-at" id="currentDate"></span>
             </div>
@@ -112,8 +70,11 @@
 
         <div class="bottom-toolbar">
             <div class="attach-buttons">
-                <label for="file-upload" class="attach-btn">
-                    <span>📎</span> 파일 첨부
+
+                <label for="file-upload" class="attach-btn">파일 업로드 &nbsp<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
+                </svg>
                 </label>
                 <input type="file" id="file-upload" name="upload" style="display: none;">
             </div>
@@ -123,52 +84,8 @@
     </form>
 </main>
 
-<footer th:fragment="footer" class="site-footer">
-    <div class="footer-inner">
-
-        <div class="footer-links">
-            <div class="footer-col">
-                <h4>소개</h4>
-                <a href="#">서비스 소개</a>
-            </div>
-
-            <div class="footer-col">
-                <h4>제품</h4>
-                <a href="#">커뮤니티</a>
-                <a href="#">파트너 찾기</a>
-                <a href="#">채팅</a>
-            </div>
-
-            <div class="footer-col">
-                <h4>가이드</h4>
-                <a href="#">이용 안내</a>
-                <a href="#">자주 하는 질문</a>
-                <a href="#">이용 가이드</a>
-            </div>
-
-            <div class="footer-col">
-                <h4>지원</h4>
-                <a href="#">공지사항</a>
-                <a href="#">1:1 문의</a>
-                <a href="#">고객센터</a>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <div class="footer-meta">
-                <span>이용약관</span>
-                <span>·</span>
-                <span>개인정보 처리방침</span>
-                <span>·</span>
-                <span>고객센터</span>
-            </div>
-
-            <div class="footer-copy">
-                © 2026 MUSUBI. All rights reserved.
-            </div>
-        </div>
-
-    </div>
+<footer>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 </footer>
 
 <script>

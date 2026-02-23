@@ -83,6 +83,7 @@ function loadChatRooms() {
                 const li = document.createElement("li");
                 li.className = "room-item";
                 li.dataset.roomId = String(roomId);
+                li.dataset.roomName = roomName;
                 li.onclick = () => enterRoom(roomId, roomName, li);
 
                 const unreadDot = room.hasUnread ? `<span class="unread-dot"></span>` : ``;

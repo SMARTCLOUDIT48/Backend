@@ -97,10 +97,37 @@ body {
 }
 
 .logo {
-    font-weight: 800;
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.25s ease;
 }
+
+/* SVG 이미지 */
+.logo-img {
+    height: 100px;
+    width: auto;
+    transition:
+        transform 0.3s ease,
+        filter 0.3s ease,
+        drop-shadow 0.3s ease;
+}
+
+.logo:hover .logo-img {
+    transform: translateY(-2px) scale(1.05);
+    filter:
+        drop-shadow(0 6px 14px rgba(90, 120, 255, 0.4))
+        brightness(1.05);
+}
+
+.logo:active .logo-img {
+    transform: translateY(-1px) scale(0.96);
+    filter:
+        drop-shadow(0 3px 8px rgba(90, 120, 255, 0.25));
+}
+
 
 .nav {
     display: flex;
