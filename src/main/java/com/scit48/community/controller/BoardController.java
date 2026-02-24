@@ -7,6 +7,7 @@ import com.scit48.community.domain.entity.BoardEntity;
 import com.scit48.community.domain.entity.CategoryEntity;
 import com.scit48.community.repository.BoardRepository;
 import com.scit48.community.repository.CategoryRepository;
+import com.scit48.community.repository.LikeRepository;
 import com.scit48.community.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +45,7 @@ public class BoardController {
 	private final CategoryRepository cr;
 	private final UserRepository ur;
 	private final BoardRepository br;
+	private final LikeRepository lr;
 	
 	// application.properties 파일의 설정값
 	@Value("${board.pageSize}")
@@ -207,29 +211,37 @@ public class BoardController {
 			@AuthenticationPrincipal UserDetails userDetails,
 			@PageableDefault(page = 0, size = 5, sort = "boardId", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		Page<BoardEntity> feeds = br.findByCategoryName("일상", pageable);
+		Slice<BoardEntity> feeds = br.findByCategoryName("일상", pageable);
 		String loginId = (userDetails != null) ? userDetails.getUsername() : null;
 		
+		List<Long> likedBoardIds = new ArrayList<>();
+		if (loginId != null && !feeds.isEmpty()) {
+			// 현재 조회된 게시글들의 ID 목록 추출
+			List<Long> boardIds = feeds.getContent().stream()
+					.map(BoardEntity::getBoardId)
+					.collect(Collectors.toList());
+			// DB에서 내가 좋아요 누른 ID들만 가져옴 (예: [10, 15])
+			likedBoardIds = lr.findLikedBoardIds(loginId, boardIds);
+		}
 		
-		Page<BoardDTO> feedList = feeds.map(board -> {
-			
-			boolean isLiked = false;
-			// if(loginId != null) { isLiked = ... }
-			
-			if (loginId != null) {
-				isLiked = board.getLikes().stream()
-						.anyMatch(like -> like.getUser().getMemberId().equals(loginId));
-			}
+		// final 키워드로 람다 내부에서 사용 가능하게 함
+		final List<Long> myLikes = likedBoardIds;
+		
+		// DTO 변환
+		Slice<BoardDTO> feedList = feeds.map(board -> {
+			// 메모리에서 바로 확인 (DB 조회 X -> 엄청 빠름)
+			boolean isLiked = myLikes.contains(board.getBoardId());
 			
 			return BoardDTO.builder()
 					.boardId(board.getBoardId())
 					.content(board.getContent())
 					.writerNickname(board.getUser().getNickname())
-					.profileImageName(board.getUser().getProfileImageName()) // 파일명만
-					.filePath(board.getFilePath()) // 피드 이미지
+					.profileImageName(board.getUser().getProfileImageName())
+					.filePath(board.getFilePath())
 					.likeCnt(board.getLikeCnt() != null ? board.getLikeCnt() : 0)
-					.liked(isLiked) // ★ DTO에 liked 필드 필요
+					.liked(isLiked) // 최적화된 결과
 					.createdDate(board.getCreatedAt())
+					.nation(board.getUser().getNation())
 					.memberId(board.getUser().getMemberId())
 					.build();
 		});
@@ -246,19 +258,21 @@ public class BoardController {
 			@AuthenticationPrincipal UserDetails userDetails,
 			@PageableDefault(size = 5, sort = "boardId", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		Page<BoardEntity> feeds = br.findByCategoryName("일상", pageable);
+		Slice<BoardEntity> feeds = br.findByCategoryName("일상", pageable);
 		String loginId = (userDetails != null) ? userDetails.getUsername() : null;
 		
+		List<Long> likedBoardIds = new ArrayList<>();
+		if (loginId != null && !feeds.isEmpty()) {
+			List<Long> boardIds = feeds.getContent().stream()
+					.map(BoardEntity::getBoardId)
+					.collect(Collectors.toList());
+			likedBoardIds = lr.findLikedBoardIds(loginId, boardIds);
+		}
+		
+		final List<Long> myLikes = likedBoardIds;
+		
 		List<BoardDTO> dtoList = feeds.stream().map(board -> {
-			
-			boolean isLiked = false;
-			// if(loginId != null) { isLiked = ... }
-			
-			
-			if (loginId != null) {
-				isLiked = board.getLikes().stream()
-						.anyMatch(like -> like.getUser().getMemberId().equals(loginId));
-			}
+			boolean isLiked = myLikes.contains(board.getBoardId());
 			
 			return BoardDTO.builder()
 					.boardId(board.getBoardId())
@@ -267,15 +281,16 @@ public class BoardController {
 					.profileImageName(board.getUser().getProfileImageName())
 					.filePath(board.getFilePath())
 					.likeCnt(board.getLikeCnt() != null ? board.getLikeCnt() : 0)
-					.liked(isLiked) // ★ 중요
+					.liked(isLiked)
 					.createdDate(board.getCreatedAt())
+					.nation(board.getUser().getNation())
 					.memberId(board.getUser().getMemberId())
 					.build();
 		}).collect(Collectors.toList());
 		
 		Map<String, Object> response = new HashMap<>();
 		response.put("content", dtoList);
-		response.put("last", feeds.isLast()); // 마지막 페이지 여부
+		response.put("last", feeds.isLast()); // Slice도 isLast() 지원함
 		
 		return ResponseEntity.ok(response);
 	}

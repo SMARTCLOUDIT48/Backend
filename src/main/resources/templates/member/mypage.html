@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LANG:MATE - 마이페이지</title>
+    <title>Musubi - 마이페이지</title>
 
     <link rel="stylesheet" th:href="@{/css/member/mypage.css}" />
         <link rel="stylesheet" th:href="@{/css/member/interest.css}" />
@@ -16,6 +16,7 @@
         /*]]>*/
     </script>
 <script type="module" th:src="@{/js/member/mypage.js}"></script>
+
 </head>
 
 <body>
@@ -78,7 +79,7 @@
             프로필 수정
         </button>
 </div>
-        <!-- 🔥 언어 라인 (핵심 구조) -->
+        <!--  언어 라인 (핵심 구조) -->
     <div class="profile-lang-block">
 
         <!-- 1줄: 언어 흐름 + 레벨 -->
@@ -121,9 +122,8 @@
                     </a>
                     <a class="menu-item" href="#">
                         <span class="mi-ico">📘</span><span>내 게시글</span>
-                        <span class="badge">3</span>
                     </a>
-                    <a class="menu-item" href="@{/chat}">
+                    <a class="menu-item" th:href="@{/chat}">
                         <span class="mi-ico">💬</span><span>채팅</span>
                     </a>
                     <a class="menu-item" href="#">
@@ -131,20 +131,27 @@
                     </a>
                 </nav>
 
-                <!-- 3 작은 카드 : 친한 목록 -->
-                <div class="glass card mini-card">
-                    <div class="mini-head">
-                        <h4>친한 목록</h4>
-                        <span class="mini-pill">Active</span>
-                    </div>
+                <!-- 3 작은 카드 : 최근 대화 -->
+            <div class="glass card mini-card">
+                <div class="mini-head">
+                    <h4>💬 최근 대화</h4>
+<span class="mini-pill" style="cursor:pointer" onclick="location.href='/chat'">
+    더보기
+</span>
+                </div>
+            
+                <div id="recentChatList">
+            
                     <div class="mini-row">
-                        <div class="mini-avatar"></div>
+                        <div class="mini-avatar">👤</div>
                         <div class="mini-text">
-                            <div class="mini-name">스라</div>
-                            <div class="mini-sub">여행 · 영화</div>
+                            <div class="mini-name">최근 대화가 없습니다</div>
+                            <div class="mini-sub">채팅을 시작해보세요</div>
                         </div>
                     </div>
+            
                 </div>
+            </div>
 
                 <!-- 4 작은 카드 : 관심사 -->
         <div class="glass card mini-card">
@@ -174,72 +181,13 @@
                                 <h2>관심사에 맞는 친구 추천</h2>
                                 <p>내 관심사에 맞는 친구를 추천해드려요.</p>
                             </div>
-                            <button class="btn btn-member" type="button" href="@{/recommend}" >더보기</button>
+                        <button type="button" class="btn btn-member" onclick="location.href='/recommend'">
+                            더보기
+                        </button>
                         </div>
 
-                        <div class="reco-grid">
-                            <!-- 샘플 카드들 -->
-                            <article class="reco">
-                                <div class="reco-top">
-                                    <div class="reco-avatar"></div>
-                                    <div class="reco-name">
-                                        <strong>스라</strong> <span class="flag">🇯🇵</span>
-                                        <div class="reco-sub">여행 · 영화</div>
-                                    </div>
-                                    <div class="stars">★★★★☆</div>
-                                </div>
-                                <div class="reco-tags">
-                                    <span class="tag">대결</span>
-                                    <span class="tag">토론</span>
-                                    <span class="tag blue">음악</span>
-                                </div>
-                            </article>
-                            <article class="reco">
-                                <div class="reco-top">
-                                    <div class="reco-avatar"></div>
-                                    <div class="reco-name">
-                                        <strong>스라</strong> <span class="flag">🇯🇵</span>
-                                        <div class="reco-sub">여행 · 영화</div>
-                                    </div>
-                                    <div class="stars">★★★★☆</div>
-                                </div>
-                                <div class="reco-tags">
-                                    <span class="tag">대결</span>
-                                    <span class="tag">토론</span>
-                                    <span class="tag blue">음악</span>
-                                </div>
-                            </article>
-                            <article class="reco">
-                                <div class="reco-top">
-                                    <div class="reco-avatar"></div>
-                                    <div class="reco-name">
-                                        <strong>스라</strong> <span class="flag">🇯🇵</span>
-                                        <div class="reco-sub">여행 · 영화</div>
-                                    </div>
-                                    <div class="stars">★★★★☆</div>
-                                </div>
-                                <div class="reco-tags">
-                                    <span class="tag">대결</span>
-                                    <span class="tag">토론</span>
-                                    <span class="tag blue">음악</span>
-                                </div>
-                            </article>
-                            <article class="reco">
-                                <div class="reco-top">
-                                    <div class="reco-avatar"></div>
-                                    <div class="reco-name">
-                                        <strong>스라</strong> <span class="flag">🇯🇵</span>
-                                        <div class="reco-sub">여행 · 영화</div>
-                                    </div>
-                                    <div class="stars">★★★★☆</div>
-                                </div>
-                                <div class="reco-tags">
-                                    <span class="tag">대결</span>
-                                    <span class="tag">토론</span>
-                                    <span class="tag blue">음악</span>
-                                </div>
-                            </article>
-                        </div>
+                    <div class="reco-grid" id="recommendGrid"></div>
+
                     </div>
 
                     <!-- 중간 2단 카드 -->
@@ -293,7 +241,7 @@
                 
                         <div class="stat-item likes">
                             <span class="stat-label">❤️ 좋아요</span>
-                            <span class="stat-value" id="likeCount">0</span>
+                            <span class="stat-value" id="postLikeCount">0</span>
                         </div>
                 
                         <div class="stat-item comments">
@@ -302,13 +250,13 @@
                         </div>
                     </div>
                 
-                    <div class="extra-container">
-                        <div class="stat-extra">
-                            <span class="extra-label">💌 현재 연락 중인 이성</span>
-                            <strong class="extra-value" id="chattingCount">0</strong>
-                            <span class="extra-unit">명</span>
-                        </div>
+                <div class="extra-container">
+                    <div class="stat-extra">
+                        <span class="extra-label">💌 현재 연락 중인 이성</span>
+                        <strong class="extra-value" id="chattingCount">0</strong>
+                        <span class="extra-unit">명</span>
                     </div>
+                </div>
                 
                 </div>
 

@@ -1,5 +1,6 @@
 package com.scit48.recommend.service;
 
+import com.scit48.chat.service.RedisService;
 import com.scit48.common.domain.entity.UserEntity;
 import com.scit48.common.domain.entity.UserInterestEntity;
 import com.scit48.common.dto.UserDTO;
@@ -31,6 +32,7 @@ public class RecommendService {
 	//의존성 주입 DI
 	private final UserRepository ur;
 	private final UserInterestRepository uir;
+	private final RedisService redisService;
 	
 	
 	public List<RecommendDTO> firstRecommend(Long user) {

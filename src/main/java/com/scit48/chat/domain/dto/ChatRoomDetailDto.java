@@ -18,10 +18,12 @@ public class ChatRoomDetailDto {
 	private Long opponentId;
 	private String opponentNickname;
 	private String opponentProfileImg;
+	private String opponentProfileImgName;
 	private String opponentNation;
 	private String opponentIntro;
 	private Integer opponentAge;
-	
-	// ✅ 매너 점수 (이게 없어서 안 뜬 것)
-	private Double opponentManner;
+	private String opponentNativeLanguage; // 상대방 모국어
+	private String opponentStudyLanguage;  // 상대방 학습 언어
+	private String opponentLevelLanguage;  // 상대방 언어 레벨 (Enum의 name)
+	private Double opponentManner;         // 상대방 매너 점수
 }

@@ -612,21 +612,28 @@ function checkPartnerActivity(partnerId) {
 
 
 // ==========================================================
-// ✅ [NEW] 16. 상대방 프로필 정보 로드 (사이드바용) - 수정됨
+// ✅ 16. 상대방 프로필 정보 로드 (사이드바용) - 초기화 로직 추가됨
 // ==========================================================
 function loadPartnerInfo(roomId) {
     const sidebar = document.getElementById("partnerProfileArea");
     if (!sidebar) return;
 
-    // 1. 초기화 (로딩 중 표시)
-    // 기존 데이터가 잠깐 보이는 것을 방지하기 위해 초기화합니다.
+    // 1. 초기화 (로딩 중 표시) - 이전 사람 정보가 남지 않도록 비워줍니다.
     document.getElementById("partnerName").innerText = "Loading...";
     document.getElementById("partnerIntro").innerText = "...";
     document.getElementById("partnerImg").src = "/images/profile/default.png";
     document.getElementById("partnerNationText").innerText = "";
     document.getElementById("partnerAge").innerText = "";
+
+    // ✨ [추가된 부분] 언어/매너 점수 초기화
+    const langMainEl = document.getElementById("partnerLangMain");
+    if (langMainEl) langMainEl.innerText = "";
+    const langLearnEl = document.getElementById("partnerLangLearn");
+    if (langLearnEl) langLearnEl.innerText = "";
     const levelEl = document.getElementById("partnerLevel");
     if (levelEl) levelEl.innerText = "";
+    const mannerEl = document.getElementById("partnerManner");
+    if (mannerEl) mannerEl.innerText = "";
 
     // 2. 실제 API 호출
     fetch(`/api/chat/room/${roomId}`)
@@ -647,7 +654,7 @@ function loadPartnerInfo(roomId) {
 }
 
 // ==========================================================
-// UI 업데이트 함수 (최신 DTO 반영 완료)
+// ✅ UI 업데이트 함수 (언어, 레벨, 매너점수 반영됨)
 // ==========================================================
 function updatePartnerProfileUI(data) {
     const sidebar = document.getElementById("partnerProfileArea");
@@ -657,56 +664,82 @@ function updatePartnerProfileUI(data) {
     document.getElementById("partnerName").innerText = data.opponentNickname || "알 수 없음";
 
     // 2. 프로필 이미지
-    const imgPath = data.opponentProfileImg ? data.opponentProfileImg : "/images/profile/default.png";
+    const imgPath = data.opponentProfileImg ? data.opponentProfileImg : "/images/profile";
+    const imgName = data.opponentProfileImgName ? data.opponentProfileImgName : "default.png";
+    const imgPathName = imgPath + "/" + imgName;
+    console.log(imgPathName);
     const imgTag = document.getElementById("partnerImg");
-    if (imgTag) imgTag.src = imgPath;
+    if (imgTag) imgTag.src = imgPathName;
 
-    // 3. 국적 (DB에서 가져온 값 표시)
-    document.getElementById("partnerNationText").innerText = data.opponentNation || "Unknown";
-    document.getElementById("partnerNationFlag").innerText = "🏳️"; // 국기는 일단 고정 (추후 매핑 가능)
+    // 3. 국적 (대한민국, 일본 판별)
+    const nationText = data.opponentNation || "Unknown";
+    document.getElementById("partnerNationText").innerText = nationText;
+
+    let flagEmoji = "🏳️"; // 기본값
+
+    // DB에 저장된 "대한민국", "일본" 텍스트를 기준으로 국기 달아주기
+    if (nationText === "대한민국" || nationText.includes("한국") || nationText === "KR") {
+        flagEmoji = "🇰🇷";
+    } else if (nationText === "일본" || nationText === "JP") {
+        flagEmoji = "🇯🇵";
+    }
+
+    document.getElementById("partnerNationFlag").innerText = flagEmoji;
+
 
     // 4. 자기소개
     document.getElementById("partnerIntro").innerText = data.opponentIntro || "자기소개가 없습니다.";
 
-    // 5. [NEW] 나이 표시 (백엔드에서 가져옴!)
+    // 5. 나이 표시
     const ageElem = document.getElementById("partnerAge");
     if (ageElem) {
         if (data.opponentAge && data.opponentAge > 0) {
             ageElem.innerText = data.opponentAge + "세";
         } else {
-            ageElem.innerText = ""; // 나이 정보 없으면 공란
+            ageElem.innerText = "";
         }
     }
 
-    // 6. [NEW] '상대방 프로필 확인' 버튼 링크 걸기
+    // 6. '상대방 프로필 확인' 버튼 링크 걸기
     const profileBtn = document.getElementById("opponentProfileBtn");
     if (profileBtn) {
         if (data.opponentId && data.opponentId !== 0) {
-            // 예: /member/profile/3 (상대방 ID로 이동)
             profileBtn.href = "/member/profile/" + data.opponentId;
             profileBtn.style.display = "inline-block";
             profileBtn.innerText = "상대방 프로필 확인 >";
         } else {
-            // 상대방 정보가 없으면 버튼 숨김
             profileBtn.href = "#";
             profileBtn.style.display = "none";
         }
     }
-    // ✅ [NEW] 매너 점수 표시 (partnerLevel 영역 사용)
-    const levelEl = document.getElementById("partnerLevel");
-    if (levelEl) {
-        const manner = data.opponentManner; // 🔥 백엔드에서 내려오는 키 이름
 
-        if (manner === null || manner === undefined) {
-            levelEl.innerText = "";
-        } else {
-            const score = Number(manner);
-            levelEl.innerText = isNaN(score)
-                ? `매너 ${manner}`
-                : `매너 ${score.toFixed(1)}점`;
-        }
+    // ✨ 7. 언어 및 레벨 연동
+    const langMainEl = document.getElementById("partnerLangMain");
+    if (langMainEl && data.opponentNativeLanguage) {
+        langMainEl.innerText = data.opponentNativeLanguage;
     }
 
+    const langLearnEl = document.getElementById("partnerLangLearn");
+    if (langLearnEl && data.opponentStudyLanguage) {
+        langLearnEl.innerText = data.opponentStudyLanguage;
+    }
+
+    const levelEl = document.getElementById("partnerLevel");
+    if (levelEl && data.opponentLevelLanguage) {
+        levelEl.innerText = data.opponentLevelLanguage;
+    }
+
+    // ✨ 8. 매너 점수 표시
+    const mannerEl = document.getElementById("partnerManner");
+    if (mannerEl) {
+        const manner = data.opponentManner;
+        if (manner !== null && manner !== undefined) {
+            const score = Number(manner);
+            mannerEl.innerText = isNaN(score) ? `매너 ${manner}` : `매너 ${score.toFixed(1)}점`;
+        } else {
+            mannerEl.innerText = "";
+        }
+    }
 }
 function addUnreadDotToRoom(roomId) {
     const roomItem = document.querySelector(`.room-item[data-room-id="${String(roomId)}"]`);

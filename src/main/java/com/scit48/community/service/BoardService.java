@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -515,5 +516,22 @@ public class BoardService {
 		cr.delete(comment);
 	}
 	
+	// 피드 댓글 목록 조회
+	@Transactional
+	public List<CommentDTO> getCommentsByBoardId(Long boardId) {
+		BoardEntity board = br.findById(boardId)
+				.orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
+		
+		// Entity 리스트를 DTO 리스트로 변환하여 반환
+		return board.getComments().stream().map(comment -> CommentDTO.builder()
+				.commentId(comment.getCommentId())
+				.content(comment.getContent())
+				.writerNickname(comment.getUser().getNickname())
+				.writerProfileImage(comment.getUser().getProfileImageName()) // 파일명만 전달
+				.memberId(comment.getUser().getMemberId())
+				.createdDate(comment.getCreatedAt())
+				.build()
+		).collect(Collectors.toList());
+	}
 }
 
