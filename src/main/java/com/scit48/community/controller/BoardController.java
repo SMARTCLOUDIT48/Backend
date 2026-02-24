@@ -179,6 +179,8 @@ public class BoardController {
 			@RequestParam(required = false) String searchType, // title, content, writer
 			@RequestParam(required = false) String keyword) {  // 검색어
 		
+		if (cateName != null && cateName.trim().isEmpty()) cateName = null;
+		if (keyword != null && keyword.trim().isEmpty()) keyword = null;
 		
 		// 카테고리 목록 (필터 선택용, '일상' 제외하고 가져오기)
 		List<CategoryEntity> categories = cr.findByNameNot("일상");

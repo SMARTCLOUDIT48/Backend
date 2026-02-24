@@ -93,23 +93,25 @@
         </table>
     </div>
 
-    <div class="pagination">
-        <a th:href="@{/board/list(page=1)}" class="page-btn first">First</a>
+    <div class="pagination" th:if="${!boardList.isEmpty()}">
+        <a th:href="@{/board/list(page=1, cateName=${param.cateName}, searchType=${param.searchType}, keyword=${param.keyword})}"
+           class="page-btn first">First</a>
 
-        <a th:href="${boardList.first} ? '#' : @{/board/list(page=${boardList.number})}"
+        <a th:href="${boardList.first} ? '#' : @{/board/list(page=${boardList.number}, cateName=${param.cateName}, searchType=${param.searchType}, keyword=${param.keyword})}"
            class="page-btn prev">Prev</a>
 
         <span th:each="page: ${#numbers.sequence(startPage, endPage)}">
             <span th:if="${page == boardList.number + 1}" class="page-number current" th:text="${page}">1</span>
             <a th:unless="${page == boardList.number + 1}"
-               th:href="@{/board/list(page=${page})}"
+               th:href="@{/board/list(page=${page}, cateName=${param.cateName}, searchType=${param.searchType}, keyword=${param.keyword})}"
                class="page-number" th:text="${page}">2</a>
         </span>
 
-        <a th:href="${boardList.last} ? '#' : @{/board/list(page=${boardList.number + 2})}"
+        <a th:href="${boardList.last} ? '#' : @{/board/list(page=${boardList.number + 2}, cateName=${param.cateName}, searchType=${param.searchType}, keyword=${param.keyword})}"
            class="page-btn next">Next</a>
 
-        <a th:href="@{/board/list(page=${boardList.totalPages})}" class="page-btn last">Last</a>
+        <a th:href="@{/board/list(page=${boardList.totalPages}, cateName=${param.cateName}, searchType=${param.searchType}, keyword=${param.keyword})}"
+           class="page-btn last">Last</a>
     </div>
 
 </main>
