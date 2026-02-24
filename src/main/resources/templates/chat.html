@@ -1,36 +1,36 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LangMate - Global Chat</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Musubi -  채팅</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" th:href="@{/css/layout.css}">
-    <link rel="stylesheet" href="/css/style.css?v=2.6">
+	<link rel="stylesheet" th:href="@{/css/layout.css}">
+	<link rel="stylesheet" href="/css/style.css?v=2.6">
 
-    <style>
-        /* 프로필 확인 버튼 스타일 (임시 추가) */
-        .btn-profile-check {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: #f0f7ff;
-            color: #007bff;
-            border-radius: 20px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .btn-profile-check:hover {
-            background-color: #e0efff;
-            transform: translateY(-2px);
-        }
-    </style>
+	<style>
+		/* 프로필 확인 버튼 스타일 (임시 추가) */
+		.btn-profile-check {
+			display: inline-block;
+			margin-top: 15px;
+			padding: 10px 20px;
+			background-color: #f0f7ff;
+			color: #007bff;
+			border-radius: 20px;
+			text-decoration: none;
+			font-size: 14px;
+			font-weight: 600;
+			transition: all 0.2s;
+		}
+		.btn-profile-check:hover {
+			background-color: #e0efff;
+			transform: translateY(-2px);
+		}
+	</style>
 </head>
 <body class="chat-page-body">
 
