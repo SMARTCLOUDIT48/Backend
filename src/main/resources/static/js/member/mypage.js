@@ -474,42 +474,19 @@ function convertInterestType(type) {
 
   return map[type] ?? type;
 }
-
 async function loadMyActivity(userId) {
-  console.log("🔥 loadMyActivity 호출됨", userId);
-
   if (!userId) return;
 
   try {
     const res = await authFetch(`${CONTEXT_PATH}chat/activity/${userId}`);
-    console.log("📡 요청 상태:", res.status);
-
     if (!res.ok) return;
 
     const count = await res.json();
-    console.log("📦 서버 응답:", count);
 
-    const badge = document.getElementById("activityBadge");
     const countEl = document.getElementById("chattingCount");
-
-    console.log("🧩 DOM 확인:", badge, countEl);
-
-    if (!badge || !countEl) return;
+    if (!countEl) return;
 
     countEl.textContent = count;
-
-    badge.style.display = "inline-block";
-    badge.className = "activity-badge";
-
-    if (count >= 10) {
-      badge.classList.add("badge-hot");
-      badge.textContent = `🔥 ${count}명과 대화 중`;
-    } else if (count > 0) {
-      badge.classList.add("badge-normal");
-      badge.textContent = `💬 현재 ${count}명과 대화 중`;
-    } else {
-      badge.classList.add("badge-normal");
-    }
 
   } catch (err) {
     console.error("❌ 내 활동량 조회 실패:", err);
