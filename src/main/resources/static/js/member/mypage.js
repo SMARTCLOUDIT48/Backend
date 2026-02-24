@@ -56,11 +56,14 @@ document.addEventListener("DOMContentLoaded", async () => {
      마이페이지 정보 로드
   =============================== */
   try {
-    const res = await authFetch(`${CONTEXT_PATH}api/members/me`);
-    const result = await res.json();
-    if (result.status !== "SUCCESS") return;
+const res = await authFetch(`${CONTEXT_PATH}api/members/me`);
+const result = await res.json();
+if (result.status !== "SUCCESS") return;
 
-    const user = result.data;
+const user = result.data;
+
+const myUserId = user.id;
+loadMyActivity(myUserId);
 
     nicknameEl.textContent = user.nickname;
     ageEl.textContent = `(${user.age})`;
@@ -92,6 +95,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadInterestChips();
   await loadLikedMeList();
   await loadRecommendList();
+  await loadRecentChats();
 
   window.addEventListener("interest:updated", loadInterestChips);
 
@@ -155,6 +159,9 @@ async function loadInterestChips() {
     console.error(e);
   }
 }
+
+
+
 
 function renderInterestChips(interests) {
   const wrap = document.getElementById("interestChips");
@@ -466,4 +473,94 @@ function convertInterestType(type) {
   };
 
   return map[type] ?? type;
+}
+
+async function loadMyActivity(userId) {
+  console.log("🔥 loadMyActivity 호출됨", userId);
+
+  if (!userId) return;
+
+  try {
+    const res = await authFetch(`${CONTEXT_PATH}chat/activity/${userId}`);
+    console.log("📡 요청 상태:", res.status);
+
+    if (!res.ok) return;
+
+    const count = await res.json();
+    console.log("📦 서버 응답:", count);
+
+    const badge = document.getElementById("activityBadge");
+    const countEl = document.getElementById("chattingCount");
+
+    console.log("🧩 DOM 확인:", badge, countEl);
+
+    if (!badge || !countEl) return;
+
+    countEl.textContent = count;
+
+    badge.style.display = "inline-block";
+    badge.className = "activity-badge";
+
+    if (count >= 10) {
+      badge.classList.add("badge-hot");
+      badge.textContent = `🔥 ${count}명과 대화 중`;
+    } else if (count > 0) {
+      badge.classList.add("badge-normal");
+      badge.textContent = `💬 현재 ${count}명과 대화 중`;
+    } else {
+      badge.classList.add("badge-normal");
+    }
+
+  } catch (err) {
+    console.error("❌ 내 활동량 조회 실패:", err);
+  }
+}
+async function loadRecentChats() {
+    try {
+        const res = await authFetch(`${CONTEXT_PATH}api/chat/rooms`);
+        if (!res.ok) return;
+
+        const rooms = await res.json();
+        const wrap = document.getElementById("recentChatList");
+
+        if (!wrap) return;
+
+        wrap.innerHTML = "";
+
+        if (!rooms || rooms.length === 0) {
+            wrap.innerHTML = `
+                <div class="mini-row">
+                    <div class="mini-avatar">👤</div>
+                    <div class="mini-text">
+                        <div class="mini-name">최근 대화가 없습니다</div>
+                        <div class="mini-sub">채팅을 시작해보세요</div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        const room = rooms[0]; // 1개만
+
+        const row = document.createElement("div");
+        row.className = "mini-row";
+
+        row.innerHTML = `
+            <div class="mini-avatar">💬</div>
+            <div class="mini-text">
+                <div class="mini-name">${room.roomName}</div>
+                <div class="mini-sub">채팅 계속하기</div>
+            </div>
+        `;
+
+        row.onclick = () => {
+            sessionStorage.setItem("openRoomId", room.roomId);
+            location.href = `${CONTEXT_PATH}chat`;
+        };
+
+        wrap.appendChild(row);
+
+    } catch (e) {
+        console.error("최근 대화 로드 실패:", e);
+    }
 }
