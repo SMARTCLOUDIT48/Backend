@@ -16,6 +16,7 @@
         /*]]>*/
     </script>
 <script type="module" th:src="@{/js/member/mypage.js}"></script>
+
 </head>
 
 <body>
@@ -121,7 +122,6 @@
                     </a>
                     <a class="menu-item" href="#">
                         <span class="mi-ico">📘</span><span>내 게시글</span>
-                        <span class="badge">3</span>
                     </a>
                     <a class="menu-item" th:href="@{/chat}">
                         <span class="mi-ico">💬</span><span>채팅</span>
@@ -131,20 +131,27 @@
                     </a>
                 </nav>
 
-                <!-- 3 작은 카드 : 친한 목록 -->
-                <div class="glass card mini-card">
-                    <div class="mini-head">
-                        <h4>친한 목록</h4>
-                        <span class="mini-pill">Active</span>
-                    </div>
+                <!-- 3 작은 카드 : 최근 대화 -->
+            <div class="glass card mini-card">
+                <div class="mini-head">
+                    <h4>💬 최근 대화</h4>
+<span class="mini-pill" style="cursor:pointer" onclick="location.href='/chat'">
+    더보기
+</span>
+                </div>
+            
+                <div id="recentChatList">
+            
                     <div class="mini-row">
-                        <div class="mini-avatar"></div>
+                        <div class="mini-avatar">👤</div>
                         <div class="mini-text">
-                            <div class="mini-name">스라</div>
-                            <div class="mini-sub">여행 · 영화</div>
+                            <div class="mini-name">최근 대화가 없습니다</div>
+                            <div class="mini-sub">채팅을 시작해보세요</div>
                         </div>
                     </div>
+            
                 </div>
+            </div>
 
                 <!-- 4 작은 카드 : 관심사 -->
         <div class="glass card mini-card">
@@ -234,7 +241,7 @@
                 
                         <div class="stat-item likes">
                             <span class="stat-label">❤️ 좋아요</span>
-                            <span class="stat-value" id="likeCount">0</span>
+                            <span class="stat-value" id="postLikeCount">0</span>
                         </div>
                 
                         <div class="stat-item comments">
@@ -243,13 +250,13 @@
                         </div>
                     </div>
                 
-                    <div class="extra-container">
-                        <div class="stat-extra">
-                            <span class="extra-label">💌 현재 연락 중인 이성</span>
-                            <strong class="extra-value" id="chattingCount">0</strong>
-                            <span class="extra-unit">명</span>
-                        </div>
+                <div class="extra-container">
+                    <div class="stat-extra">
+                        <span class="extra-label">💌 현재 연락 중인 이성</span>
+                        <strong class="extra-value" id="chattingCount">0</strong>
+                        <span class="extra-unit">명</span>
                     </div>
+                </div>
                 
                 </div>
 

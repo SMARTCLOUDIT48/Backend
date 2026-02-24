@@ -10,11 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -25,7 +23,7 @@ public class CommentController {
 	
 	private final BoardService bs;
 	
-	// 댓글 작성 (AJAX)
+	// 게시글 댓글 작성 (AJAX)
 	@PostMapping("/write")
 	@ResponseBody // JSON 반환
 	public ResponseEntity<CommentDTO> write(@RequestBody CommentDTO commentDTO,
@@ -46,7 +44,7 @@ public class CommentController {
 		return ResponseEntity.ok(createdComment);
 	}
 	
-	// 댓글 수정 (AJAX)
+	// 게시글 댓글 수정 (AJAX)
 	@PostMapping("/update")
 	@ResponseBody
 	public ResponseEntity<CommentDTO> updateComment(@RequestBody Map<String, Object> params,
@@ -67,7 +65,7 @@ public class CommentController {
 		return ResponseEntity.ok(updatedComment);
 	}
 	
-	// 2. 댓글 삭제
+	// 게시글 댓글 삭제
 	@PostMapping("/delete")
 	@ResponseBody
 	public ResponseEntity<String> deleteComment(@RequestBody Map<String, Long> params,
@@ -87,4 +85,32 @@ public class CommentController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		}
 	}
+	
+	// 피드의 댓글 목록 조회
+	@GetMapping("/list/{boardId}")
+	@ResponseBody
+	public ResponseEntity<List<CommentDTO>> getFeedComments(@PathVariable Long boardId) {
+		List<CommentDTO> comments = bs.getCommentsByBoardId(boardId);
+		return ResponseEntity.ok(comments);
+	}
+	
+	// 피드 댓글 작성
+	@PostMapping("/feedWrite")
+	@ResponseBody
+	public ResponseEntity<CommentDTO> writeComment(@RequestBody Map<String, Object> params,
+												   @AuthenticationPrincipal UserDetails userDetails) {
+		// 로그인 체크
+		if (userDetails == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+		
+		Long boardId = Long.parseLong(params.get("boardId").toString());
+		String content = params.get("content").toString();
+		String memberId = userDetails.getUsername();
+		
+		CommentDTO savedComment = bs.commentWrite(boardId, memberId, content);
+		
+		return ResponseEntity.ok(savedComment);
+	}
+	
 }

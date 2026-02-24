@@ -21,15 +21,12 @@
 
     <div class="login-wrapper">
 
-        <div class="brand">
-<h1 class="logo">
-    <a th:href="@{/}">
-        <span>LANG</span>:MATE
-    </a>
-</h1>
-
-            <p>새로운 언어로 새로운 인연을 만나보세요!</p>
+   
+        <div class="logo" th:onclick="|location.href='@{/}'|">
+            <img th:src="@{/images/homeimgs/Logo_3.png}" alt="Musubi Logo" class="logo-img">
         </div>
+
+
 
         <form class="login-card" id="loginForm">
             <h2>로그인</h2>
