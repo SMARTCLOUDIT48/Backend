@@ -30,6 +30,7 @@ public class ChatMessageDto {
 	// ⭐ [추가 필수] 컨트롤러 오류 해결용 (로그인 ID)
 	private String senderMemberId; // 로그인 ID (예: test01)
 	
+	private String profileImageName;
 	// ============================
 	// 추가 기능
 	// ============================
