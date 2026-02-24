@@ -115,6 +115,11 @@ public class ChatService {
 		Integer oppAge = null;
 		Double oppManner = null;
 		
+		// ✨ [추가] 언어 관련 기본값 설정
+		String oppNativeLanguage = null;
+		String oppStudyLanguage = null;
+		String oppLevelLanguage = null;
+		
 		// 5) 상대방 정보 세팅
 		if (opponent != null) {
 			oppId = opponent.getId();
@@ -122,17 +127,27 @@ public class ChatService {
 			oppIntro = opponent.getIntro();
 			oppNation = opponent.getNation();
 			oppAge = opponent.getAge();
+			oppManner = opponent.getManner();
 			
 			if (StringUtils.hasText(opponent.getProfileImagePath())) {
 				oppProfileImg = opponent.getProfileImagePath();
 				oppProfileImgName = opponent.getProfileImageName();
 			}
-			oppManner = opponent.getManner();
+			
+			// ✨ [추가] 상대방 언어 및 레벨 정보 추출
+			oppNativeLanguage = opponent.getNativeLanguage();
+			oppStudyLanguage = opponent.getStudyLanguage();
+			// Enum 타입일 경우 name()으로 문자열 변환 (null 체크 필수)
+			if (opponent.getLevelLanguage() != null) {
+				oppLevelLanguage = opponent.getLevelLanguage().name();
+			}
+			
 		} else {
 			log.warn("⚠ 방번호 {}에서 상대방을 찾을 수 없음. (내 ID: {}, 멤버 수: {})",
 					roomId, myId, members.size());
 		}
 		
+		// 6) DTO 변환 및 반환
 		return ChatRoomDetailDto.builder()
 				.roomId(roomId)
 				.roomName(room.getName())
@@ -144,6 +159,10 @@ public class ChatService {
 				.opponentProfileImgName(oppProfileImgName)
 				.opponentAge(oppAge)
 				.opponentManner(oppManner)
+				// ✨ [추가] DTO에 언어/레벨 데이터 꽂아주기
+				.opponentNativeLanguage(oppNativeLanguage)
+				.opponentStudyLanguage(oppStudyLanguage)
+				.opponentLevelLanguage(oppLevelLanguage)
 				.build();
 	}
 	
