@@ -110,7 +110,8 @@ public class ChatService {
 		String oppName = "(알 수 없음)";
 		String oppNation = "Unknown";
 		String oppIntro = "대화 상대가 없습니다.";
-		String oppProfileImg = "/images/profile/default.png";
+		String oppProfileImg = "/images/profile/";
+		String oppProfileImgName = "default.png";
 		Integer oppAge = null;
 		Double oppManner = null;
 		
@@ -130,6 +131,7 @@ public class ChatService {
 			
 			if (StringUtils.hasText(opponent.getProfileImagePath())) {
 				oppProfileImg = opponent.getProfileImagePath();
+				oppProfileImgName = opponent.getProfileImageName();
 			}
 			
 			// ✨ [추가] 상대방 언어 및 레벨 정보 추출
@@ -154,6 +156,7 @@ public class ChatService {
 				.opponentNation(oppNation)
 				.opponentIntro(oppIntro)
 				.opponentProfileImg(oppProfileImg)
+				.opponentProfileImgName(oppProfileImgName)
 				.opponentAge(oppAge)
 				.opponentManner(oppManner)
 				// ✨ [추가] DTO에 언어/레벨 데이터 꽂아주기

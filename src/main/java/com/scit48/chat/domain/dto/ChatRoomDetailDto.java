@@ -18,6 +18,7 @@ public class ChatRoomDetailDto {
 	private Long opponentId;
 	private String opponentNickname;
 	private String opponentProfileImg;
+	private String opponentProfileImgName;
 	private String opponentNation;
 	private String opponentIntro;
 	private Integer opponentAge;

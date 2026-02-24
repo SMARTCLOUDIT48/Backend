@@ -664,12 +664,12 @@ function updatePartnerProfileUI(data) {
     document.getElementById("partnerName").innerText = data.opponentNickname || "알 수 없음";
 
     // 2. 프로필 이미지
-    const imgPath = data.opponentProfileImg
-        ? "/images/profile/upload/" + data.opponentProfileImg
-        : "/images/default_profile.png";
-
+    const imgPath = data.opponentProfileImg ? data.opponentProfileImg : "/images/profile";
+    const imgName = data.opponentProfileImgName ? data.opponentProfileImgName : "default.png";
+    const imgPathName = imgPath + "/" + imgName;
+    console.log(imgPathName);
     const imgTag = document.getElementById("partnerImg");
-    if (imgTag) imgTag.src = imgPath;
+    if (imgTag) imgTag.src = imgPathName;
 
     // 3. 국적 (대한민국, 일본 판별)
     const nationText = data.opponentNation || "Unknown";
