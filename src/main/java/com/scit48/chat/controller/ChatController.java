@@ -120,6 +120,9 @@ public class ChatController {
 				
 				// 발신자 제외(나한테는 알림 보낼 필요 없음)
 				if (targetUserId.equals(userId)) continue;
+				// 1. 내가 상대방과 대화했음을 기록
+				redisService.recordInteraction(userId, targetUserId);
+				redisService.recordInteraction(targetUserId, userId);
 				
 				Map<String, Object> payload = new HashMap<>();
 				payload.put("roomId", roomIdLong);
