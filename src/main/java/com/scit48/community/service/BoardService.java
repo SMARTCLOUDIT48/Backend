@@ -144,7 +144,9 @@ public class BoardService {
 	 */
 	public Page<BoardDTO> getBoardList(Pageable pageable) {
 		// 실제 페이지 번호 보정 (사용자는 1페이지를 요청하지만 DB는 0페이지부터 시작)
-		int page = pageable.getPageNumber() - 1;
+		int requestPage = pageable.getPageNumber();
+		int page = (requestPage <= 0) ? 0 : requestPage - 1;
+		
 		PageRequest pageRequest = PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "id"));
 		
 		Page<BoardEntity> boardEntityList = br.findAll(pageRequest);
@@ -167,7 +169,8 @@ public class BoardService {
 	
 	public Page<BoardDTO> searchPosts(Pageable pageable, String cateName, String searchType, String keyword) {
 		
-		int page = pageable.getPageNumber() - 1;
+		int requestPage = pageable.getPageNumber();
+		int page = (requestPage <= 0) ? 0 : requestPage - 1;
 		PageRequest pageRequest = PageRequest.of(page, pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "boardId"));
 		
 		String excludeName = "일상"; // 제외할 카테고리명

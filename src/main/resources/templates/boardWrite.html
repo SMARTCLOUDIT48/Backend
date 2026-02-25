@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
-                xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Musubi - 게시글 작성</title>
@@ -24,12 +24,11 @@
                 </svg>게시글 쓰기</h2>
 
                 <select id="viewSelect" class="category-select" onchange="syncCategory()">
-                    <option th:each="cate : ${categories}"
-                            th:if="${cate.name != '일상'}"
-                            th:value="${cate.name}"
-                            th:text="${cate.name}">카테고리명</option>
+                    <option value="" disabled selected>카테고리 선택</option>
+                    <option value="친구 찾기">친구 찾기</option>
+                    <option value="질문">질문</option>
+                    <option value="소모임">소모임</option>
                 </select>
-
                 <p style="margin-top: 10px;">작성하실 글의 주제에 맞는 카테고리를 선택해주세요.</p>
             </div>
         </div>
@@ -38,10 +37,7 @@
     </section>
 
     <form th:action="@{/board/write}" method="post" enctype="multipart/form-data" class="write-card">
-        <!--
-        <input type="hidden" name="id" th:value="${userDTO.id}">
-        <input type="hidden" name="userId" th:value="${session.loginUserId}">
-        -->
+
         <input type="hidden" id="realCategoryId" name="categoryName" value="">
 
         <div class="writer-info">
@@ -100,7 +96,6 @@
         }
     });
 
-    // [중요] 셀렉트 박스 동기화 스크립트
     // 화면상의 select 값이 바뀌면 form 안의 hidden input 값을 업데이트합니다.
     function syncCategory() {
         const selectBox = document.getElementById('viewSelect');
