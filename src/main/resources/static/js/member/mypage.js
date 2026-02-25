@@ -220,21 +220,21 @@ async function loadLikedMeList() {
       const item = document.createElement("div");
       item.className = "viewer-item";
 
-      item.innerHTML = `
-        <div class="viewer-left">
-          <img src="${imagePath}" class="viewer-avatar">
-          <div class="viewer-info">
-            <strong>${user.nickname}</strong>
-            <div class="viewer-sub">
-              ${user.age ?? ""} · ${getLanguageFlag(user.nativeLanguage)} → ${getLanguageFlag(user.studyLanguage)}
-            </div>
-          </div>
-        </div>
+     item.innerHTML = `
+  <img src="${imagePath}" class="viewer-avatar">
 
-        <button class="btn-view" data-user-id="${user.id}">
-          프로필
-        </button>
-      `;
+  <span class="viewer-name">${user.nickname}</span>
+
+  <span class="viewer-meta">
+    ${user.age ?? ""} · 
+    ${getLanguageFlag(user.nativeLanguage)} →
+    ${getLanguageFlag(user.studyLanguage)}
+  </span>
+
+  <button class="btn-view" data-user-id="${user.id}">
+    프로필
+  </button>
+`;
 
       wrap.appendChild(item);
     });
@@ -614,17 +614,21 @@ async function loadProfileViewList() {
       const item = document.createElement("div");
       item.className = "viewer-item";
 
-      item.innerHTML = `
-        <div class="viewer-left">
-          <img src="${imagePath}" class="viewer-avatar">
-          <div class="viewer-info">
-            <strong>${user.nickname}</strong>
-            <div class="viewer-sub">
-              ${user.age ?? ""} · ${getLanguageFlag(user.nativeLanguage)} → ${getLanguageFlag(user.studyLanguage)}
-            </div>
-          </div>
-        </div>
-      `;
+     item.innerHTML = `
+  <img src="${imagePath}" class="viewer-avatar">
+
+  <span class="viewer-name">${user.nickname}</span>
+
+  <span class="viewer-meta">
+    ${user.age ?? ""} · 
+    ${getLanguageFlag(user.nativeLanguage)} →
+    ${getLanguageFlag(user.studyLanguage)}
+  </span>
+
+  <button class="btn-view" data-user-id="${user.id}">
+    프로필
+  </button>
+`;
 
       wrap.appendChild(item);
     });
@@ -634,6 +638,8 @@ async function loadProfileViewList() {
     wrap.innerHTML = `<p class="muted">오류 발생</p>`;
   }
 }
+
+
 document.addEventListener("click", async (e) => {
   const card = e.target.closest(".reco");
   if (!card) return;
