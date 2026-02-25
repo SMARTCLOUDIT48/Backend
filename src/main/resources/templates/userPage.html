@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -23,13 +23,10 @@
 
 <main class="page">
     <section class="shell">
-
         <section class="grid">
 
             <aside class="sidebar">
-
                 <div class="glass card profile-card">
-
                     <div class="avatar-wrap">
                         <img id="profileImage" class="avatar"
                              th:src="${user.profileImageName != null ? '/images/profile/upload/' + user.profileImageName : '/images/profile/default.png'}"
@@ -59,12 +56,13 @@
                                 <span id="nativeLang" class="lang-flag">🇰🇷</span>
                                 <span class="arrow">→</span>
                                 <span id="studyLang" class="lang-flag">🇯🇵</span>
-                                <span id="levelLanguage" class="level-text">Intermediate</span>
+
+                                <span id="levelLanguage" class="level-text" th:text="${user.levelLanguage != null ? user.levelLanguage : 'BEGINNER'}">Intermediate</span>
                             </div>
 
-                            <div class="manner-line" data-value="36.5">
-                                <div class="manner-fill"></div>
-                                <span id="manner" class="manner"></span>
+                            <div class="manner-line" th:data-value="${user.manner != null ? user.manner : 36.5}">
+                                <div class="manner-fill" th:style="'width: ' + (${user.manner != null ? user.manner : 36.5}) + '%;'"></div>
+                                <span id="manner" class="manner" th:text="${user.manner != null ? user.manner + '°C' : '36.5°C'}">36.5°C</span>
                             </div>
                         </div>
                     </div>
@@ -76,28 +74,6 @@
                     </div>
                 </div>
 
-                <nav class="glass card menu">
-                    <a class="menu-item active" th:href="@{/member/userPage/{id}/userBoardList(id=${user.memberId})}">
-                        <span class="mi-ico">📘</span>
-                        <span th:text="|${user.nickname}님의 게시글|">닉네임님의 게시글</span>
-                        <span class="badge">3</span>
-                    </a>
-                </nav>
-
-                <div class="glass card mini-card">
-                    <div class="mini-head">
-                        <h4>친한 목록</h4>
-                        <span class="mini-pill">Active</span>
-                    </div>
-                    <div class="mini-row">
-                        <div class="mini-avatar"></div>
-                        <div class="mini-text">
-                            <div class="mini-name">스라</div>
-                            <div class="mini-sub">여행 · 영화</div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="glass card mini-card">
                     <div class="mini-head">
                         <h4>관심사</h4>
@@ -106,57 +82,35 @@
                     </div>
                 </div>
 
+                <div class="glass card mini-card">
+                    <div class="mini-head" style="margin-bottom: 8px;">
+                        <h4>💌 현재 연락 중인 이성</h4>
+                    </div>
+                    <div style="display: flex; align-items: baseline; justify-content: flex-end; gap: 4px;">
+                        <strong class="extra-value" id="chattingCount">0</strong>
+                        <span class="extra-unit">명</span>
+                    </div>
+                </div>
             </aside>
 
-
             <section class="content">
-
                 <div class="glass card content-card">
                     <div class="card-head">
                         <div>
-                            <h2 th:text="|${user.nickname}님과 관심사가 비슷한 친구|">관심사에 맞는 친구 추천</h2>
-                            <p th:text="|${user.nickname}님의 관심사를 바탕으로 추천해드려요.|">내 관심사에 맞는 친구를 추천해드려요.</p>
+                            <h2 th:text="|${user.nickname}님의 게시글|">닉네임님의 게시글</h2>
+                            <p>작성한 게시글 목록을 확인할 수 있습니다.</p>
                         </div>
-                        <button type="button" class="btn btn-member" onclick="location.href='/recommend'">
+                        <a th:href="@{/member/userPage/{id}/userBoardList(id=${user.memberId})}" class="btn-member" style="text-decoration: none;">
                             더보기
-                        </button>
-                    </div>
-                    <div class="reco-grid" id="recommendGrid"></div>
-                </div>
-
-                <div class="glass card content-card stat-card">
-                    <div class="stat-head">
-                        <h3 th:text="|${user.nickname}님의 게시글 통계|">게시글 통계</h3>
-                        <span class="muted">누적</span>
+                        </a>
                     </div>
 
-                    <div class="stat-body">
-                        <div class="stat-item posts">
-                            <span class="stat-label">📝 게시글</span>
-                            <span class="stat-value" id="postCount">0</span>
-                        </div>
-
-                        <div class="stat-item likes">
-                            <span class="stat-label">❤️ 좋아요</span>
-                            <span class="stat-value" id="likeCount2">0</span>
-                        </div>
-
-                        <div class="stat-item comments">
-                            <span class="stat-label">💬 댓글</span>
-                            <span class="stat-value" id="commentCount">0</span>
-                        </div>
-                    </div>
-
-                    <div class="extra-container">
-                        <div class="stat-extra">
-                            <span class="extra-label">💌 현재 연락 중인 이성</span>
-                            <strong class="extra-value" id="chattingCount">0</strong>
-                            <span class="extra-unit">명</span>
-                        </div>
+                    <div class="reco-grid" id="userBoardGrid">
+                        <p class="muted">게시글을 불러오는 중입니다...</p>
                     </div>
                 </div>
-
             </section>
+
         </section>
     </section>
 </main>

@@ -32,12 +32,4 @@ public class ProfileRestController {
 		return ResponseEntity.ok(interests);
 	}
 	
-	// 2. '추천 유저 목록'을 반환하는 API (recommendGrid 영역용)
-	@GetMapping("/recommend/{memberId}")
-	public ResponseEntity<List<RecommendDTO>> getRecommendations(@PathVariable("memberId") String memberId) {
-		log.info("API 요청: {} 님의 추천 유저 목록 조회", memberId);
-		
-		List<RecommendDTO> recommendedUsers = profileService.getRecommendedUsers(memberId);
-		return ResponseEntity.ok(recommendedUsers);
-	}
 }

@@ -110,6 +110,4 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	
 	
 	
-	@Query("SELECT u FROM UserEntity u WHERE u.memberId != :memberId")
-	List<UserEntity> findAllExceptMe(@Param("memberId") String memberId);
 }
