@@ -1,6 +1,7 @@
 package com.scit48.common.controller;
 
 import com.scit48.auth.member.service.CustomUserDetails;
+import com.scit48.common.dto.UserDTO;
 import com.scit48.common.enums.ReactionType;
 import com.scit48.common.exception.UnauthorizedException;
 import com.scit48.common.response.ApiResponse;
@@ -47,7 +48,7 @@ public class UserReactionController {
      * GET /api/reactions/liked-me
      */
     @GetMapping("/liked-me")
-    public ApiResponse<List<Long>> likedMe(
+    public ApiResponse<List<UserDTO>> likedMe(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         if (userDetails == null) {

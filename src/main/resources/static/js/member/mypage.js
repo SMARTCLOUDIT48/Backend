@@ -56,11 +56,14 @@ document.addEventListener("DOMContentLoaded", async () => {
      마이페이지 정보 로드
   =============================== */
   try {
-    const res = await authFetch(`${CONTEXT_PATH}api/members/me`);
-    const result = await res.json();
-    if (result.status !== "SUCCESS") return;
+const res = await authFetch(`${CONTEXT_PATH}api/members/me`);
+const result = await res.json();
+if (result.status !== "SUCCESS") return;
 
-    const user = result.data;
+const user = result.data;
+
+const myUserId = user.id;
+loadMyActivity(myUserId);
 
     nicknameEl.textContent = user.nickname;
     ageEl.textContent = `(${user.age})`;
@@ -91,7 +94,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   await loadInterestChips();
   await loadLikedMeList();
+  await loadProfileViewList(); 
   await loadRecommendList();
+  await loadRecentChats();
 
   window.addEventListener("interest:updated", loadInterestChips);
 
@@ -156,6 +161,9 @@ async function loadInterestChips() {
   }
 }
 
+
+
+
 function renderInterestChips(interests) {
   const wrap = document.getElementById("interestChips");
   if (!wrap) return;
@@ -194,11 +202,7 @@ async function loadLikedMeList() {
     const result = await res.json();
     const list = result.data ?? [];
 
-    /* ===============================
-        좋아요 개수만 여기서 처리
-    =============================== */
     likeCountEl.textContent = list.length.toLocaleString();
-
     wrap.innerHTML = "";
 
     if (list.length === 0) {
@@ -206,17 +210,32 @@ async function loadLikedMeList() {
       return;
     }
 
-    list.forEach(userId => {
+    list.forEach(user => {
+
+      const imagePath =
+        user.profileImagePath && user.profileImageName
+          ? `${user.profileImagePath}/${user.profileImageName}`
+          : "/images/profile/default.png";
+
       const item = document.createElement("div");
       item.className = "viewer-item";
+
       item.innerHTML = `
-        <div class="viewer-info">
-          <strong>USER #${userId}</strong>
+        <div class="viewer-left">
+          <img src="${imagePath}" class="viewer-avatar">
+          <div class="viewer-info">
+            <strong>${user.nickname}</strong>
+            <div class="viewer-sub">
+              ${user.age ?? ""} · ${getLanguageFlag(user.nativeLanguage)} → ${getLanguageFlag(user.studyLanguage)}
+            </div>
+          </div>
         </div>
-        <button class="btn-view" data-user-id="${userId}">
+
+        <button class="btn-view" data-user-id="${user.id}">
           프로필
         </button>
       `;
+
       wrap.appendChild(item);
     });
 
@@ -466,4 +485,126 @@ function convertInterestType(type) {
   };
 
   return map[type] ?? type;
+}
+async function loadMyActivity(userId) {
+  if (!userId) return;
+
+  try {
+    const res = await authFetch(`${CONTEXT_PATH}chat/activity/${userId}`);
+    if (!res.ok) return;
+
+    const count = await res.json();
+
+    const countEl = document.getElementById("chattingCount");
+    if (!countEl) return;
+
+    countEl.textContent = count;
+
+  } catch (err) {
+    console.error("❌ 내 활동량 조회 실패:", err);
+  }
+}
+async function loadRecentChats() {
+    try {
+        const res = await authFetch(`${CONTEXT_PATH}api/chat/rooms`);
+        if (!res.ok) return;
+
+        const rooms = await res.json();
+        const wrap = document.getElementById("recentChatList");
+
+        if (!wrap) return;
+
+        wrap.innerHTML = "";
+
+        if (!rooms || rooms.length === 0) {
+            wrap.innerHTML = `
+                <div class="mini-row">
+                    <div class="mini-avatar">👤</div>
+                    <div class="mini-text">
+                        <div class="mini-name">최근 대화가 없습니다</div>
+                        <div class="mini-sub">채팅을 시작해보세요</div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        const room = rooms[0]; // 1개만
+
+        const row = document.createElement("div");
+        row.className = "mini-row";
+
+        row.innerHTML = `
+            <div class="mini-avatar">💬</div>
+            <div class="mini-text">
+                <div class="mini-name">${room.roomName}</div>
+                <div class="mini-sub">채팅 계속하기</div>
+            </div>
+        `;
+
+        row.onclick = () => {
+            sessionStorage.setItem("openRoomId", room.roomId);
+            location.href = `${CONTEXT_PATH}chat`;
+        };
+
+        wrap.appendChild(row);
+
+    } catch (e) {
+        console.error("최근 대화 로드 실패:", e);
+    }
+}
+
+/* ===============================
+   내 프로필을 본 사람
+=============================== */
+async function loadProfileViewList() {
+  const wrap = document.getElementById("profileViewList");
+  if (!wrap) return;
+
+  try {
+    const res = await authFetch(`${CONTEXT_PATH}api/profile-views/me`);
+    if (!res.ok) {
+      wrap.innerHTML = `<p class="muted">불러오기 실패</p>`;
+      return;
+    }
+
+    const result = await res.json();
+    const list = result.data ?? [];
+
+    wrap.innerHTML = "";
+
+    if (list.length === 0) {
+      wrap.innerHTML = `<p class="muted">아직 방문자가 없습니다.</p>`;
+      return;
+    }
+
+    list.forEach(user => {
+
+      const imagePath =
+        user.profileImagePath && user.profileImageName
+          ? `${user.profileImagePath}/${user.profileImageName}`
+          : "/images/profile/default.png";
+
+      const item = document.createElement("div");
+      item.className = "viewer-item";
+
+      item.innerHTML = `
+        <div class="viewer-left">
+          <img src="${imagePath}" class="viewer-avatar">
+          <div class="viewer-info">
+            <strong>${user.nickname}</strong>
+            <div class="viewer-sub">
+              ${user.age ?? ""} · ${getLanguageFlag(user.nativeLanguage)} → ${getLanguageFlag(user.studyLanguage)}
+            </div>
+          </div>
+        </div>
+      `;
+
+      wrap.appendChild(item);
+    });
+
+  } catch (e) {
+    console.error(e);
+    wrap.innerHTML = `<p class="muted">오류 발생</p>`;
+  }
 }
