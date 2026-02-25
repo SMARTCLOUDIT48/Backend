@@ -28,7 +28,7 @@ public class NoticeEntity {
 	private String title;
 	
 	@Lob
-	@Column(nullable = false)
+	@Column(nullable = false, columnDefinition = "LONGTEXT")
 	private String content;
 	
 	@Column(nullable = false, length = 20)

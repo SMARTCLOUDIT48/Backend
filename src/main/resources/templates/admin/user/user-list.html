@@ -6,24 +6,41 @@
 
     <link rel="stylesheet" th:href="@{/css/layout.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/user.css}" />
-
 </head>
 <body>
+
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main class="admin-container">
     <h2 class="page-title">회원 관리</h2>
 
-    <form class="admin-filter">
-        <input name="keyword" placeholder="닉네임 / 아이디">
+    <!-- 🔎 검색 폼 -->
+    <form class="admin-filter" method="get" th:action="@{/admin/users}">
+        <input name="keyword"
+               th:value="${keyword}"
+               placeholder="닉네임 / 아이디">
+
         <select name="nation">
-            <option value="">전체 국가</option>
-            <option value="KOREA">KOREA</option>
-            <option value="JAPAN">JAPAN</option>
+            <option value=""
+                    th:selected="${nation == null}">
+                전체 국가
+            </option>
+
+            <option value="KOREA"
+                    th:selected="${nation == 'KOREA'}">
+                KOREA
+            </option>
+
+            <option value="JAPAN"
+                    th:selected="${nation == 'JAPAN'}">
+                JAPAN
+            </option>
         </select>
-        <button>검색</button>
+
+        <button type="submit">검색</button>
     </form>
 
+    <!-- 👤 회원 테이블 -->
     <table class="admin-table">
         <thead>
         <tr>
@@ -47,30 +64,45 @@
         </tr>
         </tbody>
     </table>
+
+    <!-- 📄 페이징 -->
     <div class="pagination">
+
         <!-- 이전 -->
         <a th:if="${currentPage > 0}"
-           th:href="@{/admin/users(page=${currentPage - 1})}">
+           th:href="@{/admin/users(
+                page=${currentPage - 1},
+                keyword=${param.keyword},
+                nation=${nation}
+           )}">
             ‹
         </a>
 
         <!-- 페이지 번호 -->
         <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-           th:href="@{/admin/users(page=${i})}"
+           th:href="@{/admin/users(
+                page=${i},
+                keyword=${param.keyword},
+                nation=${nation}
+           )}"
            th:text="${i + 1}"
            th:classappend="${i == currentPage} ? 'active'">
         </a>
 
         <!-- 다음 -->
         <a th:if="${currentPage < totalPages - 1}"
-           th:href="@{/admin/users(page=${currentPage + 1})}">
+           th:href="@{/admin/users(
+                page=${currentPage + 1},
+                keyword=${param.keyword},
+                nation=${nation}
+           )}">
             ›
         </a>
+
     </div>
 
 </main>
 
-<!-- 푸터 -->
 <div th:replace="~{fragments/footer :: footer}"></div>
 
 </body>
