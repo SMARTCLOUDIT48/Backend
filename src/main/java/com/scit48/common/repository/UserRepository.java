@@ -107,4 +107,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	
 	
 	List<UserEntity> findByIdNot(Long user);
+	
+	
+	
+	@Query("SELECT u FROM UserEntity u WHERE u.memberId != :memberId")
+	List<UserEntity> findAllExceptMe(@Param("memberId") String memberId);
 }
