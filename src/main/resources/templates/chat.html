@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>LangMate - Global Chat</title>
+	<title>Musubi -  채팅</title>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
@@ -37,133 +37,136 @@
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main class="chat-main-wrapper">
-	<input type="hidden" id="myUserId" th:value="${myUserId}">
-	<input type="hidden" id="myNickname" th:value="${myNickname}">
+    <input type="hidden" id="myUserId" th:value="${myUserId}">
+    <input type="hidden" id="myNickname" th:value="${myNickname}">
 
-	<div class="app-container">
-		<div class="sidebar">
-			<div class="sidebar-header">채팅 목록 💬</div>
-			<ul class="room-list" id="roomListArea"></ul>
-		</div>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">채팅 목록 💬</div>
+            <ul class="room-list" id="roomListArea"></ul>
+        </div>
 
-		<div class="chat-area">
-			<div class="chat-header">
-				<div class="header-info">
-					<div class="chat-title" id="roomTitle">채팅방을 선택해주세요</div>
-					<span id="activityBadge" class="activity-badge" style="display:none;"></span>
-				</div>
-				<button onclick="checkLoveSignal()" class="love-btn-header" title="호감도 분석">
-					<i class="fa-solid fa-heart-pulse"></i>
-					<span>호감도 분석</span>
-				</button>
-				<div id="connectionStatus" style="display:none;"></div>
-			</div>
+        <div class="chat-area">
+            <div class="chat-header">
+                <div class="header-info">
+                    <div class="chat-title" id="roomTitle">채팅방을 선택해주세요</div>
+                    <span id="activityBadge" class="activity-badge" style="display:none;"></span>
+                </div>
+                <button onclick="checkLoveSignal()" class="love-btn-header" title="호감도 분석">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <span>호감도 분석</span>
+                </button>
+                <div id="connectionStatus" style="display:none;"></div>
+            </div>
 
-			<ul id="messageList" class="message-box">
-				<li class="message-li center">
-					<div class="bubble">왼쪽 목록에서 채팅방을 선택하여 대화를 시작하세요!</div>
-				</li>
-			</ul>
+            <ul id="messageList" class="message-box">
+                <li class="message-li center">
+                    <div class="bubble">왼쪽 목록에서 채팅방을 선택하여 대화를 시작하세요!</div>
+                </li>
+            </ul>
 
-			<div id="aiModal" class="ai-modal">
-				<div class="ai-header">
-					<div class="ai-title">🤖 AI 문법 선생님</div>
-					<div class="ai-close" onclick="closeAiModal()">✕</div>
-				</div>
-				<div class="ai-result-box">
-					<div class="ai-corrected" id="aiCorrectedText">Thinking...</div>
-				</div>
-				<div class="ai-tabs">
-					<div class="ai-tab active" id="tabKr" onclick="switchTab('kr')">🇰🇷 한국어 설명</div>
-					<div class="ai-tab" id="tabJp" onclick="switchTab('jp')">🇯🇵 日本語 説明</div>
-				</div>
-				<div class="ai-explanation" id="aiExplanationText">잠시만 기다려주세요...</div>
-				<button onclick="applyCorrection()" style="width:100%; margin-top:10px; background:#333; color:white; height:35px; border-radius:8px; border:none; cursor:pointer;">적용하기</button>
-			</div>
+            <div id="aiModal" class="ai-modal">
+                <div class="ai-header">
+                    <div class="ai-title">🤖 AI 문법 선생님</div>
+                    <div class="ai-close" onclick="closeAiModal()">✕</div>
+                </div>
+                <div class="ai-result-box">
+                    <div class="ai-corrected" id="aiCorrectedText">Thinking...</div>
+                </div>
+                <div class="ai-tabs">
+                    <div class="ai-tab active" id="tabKr" onclick="switchTab('kr')">🇰🇷 한국어 설명</div>
+                    <div class="ai-tab" id="tabJp" onclick="switchTab('jp')">🇯🇵 日本語 説明</div>
+                </div>
+                <div class="ai-explanation" id="aiExplanationText">잠시만 기다려주세요...</div>
+                <button onclick="applyCorrection()" style="width:100%; margin-top:10px; background:#333; color:white; height:35px; border-radius:8px; border:none; cursor:pointer;">적용하기</button>
+            </div>
 
-			<div id="loveModal" class="modal">
-				<div class="modal-content">
-					<span class="close" onclick="closeLoveModal()">&times;</span>
-					<h2 id="loveModalTitle" style="color:#ff4081; margin-top:0;">💘 분석 결과</h2>
-					<div class="ai-result-box" style="text-align: center; background: white;">
-						<div id="loveScore" style="font-size: 2.5rem; font-weight: bold; color: #ff4081; margin: 10px 0;">Calculating...</div>
-						<div id="loveRiskBadge" style="display:none;"></div>
-					</div>
-					<div id="loveFeedback" style="text-align:left; background:#fff0f5; padding:20px; border-radius:15px; font-size:14px; color:#555; line-height:1.6;">분석 중입니다...</div>
-					<div id="loveRecommendationBox" style="display:none;"></div>
-				</div>
-			</div>
+            <div id="loveModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeLoveModal()">&times;</span>
+                    <h2 id="loveModalTitle" style="color:#ff4081; margin-top:0;">💘 분석 결과</h2>
+                    <div class="ai-result-box" style="text-align: center; background: white;">
+                        <div id="loveScore" style="font-size: 2.5rem; font-weight: bold; color: #ff4081; margin: 10px 0;">Calculating...</div>
+                        <div id="loveRiskBadge" style="display:none;"></div>
+                    </div>
+                    <div id="loveFeedback" style="text-align:left; background:#fff0f5; padding:20px; border-radius:15px; font-size:14px; color:#555; line-height:1.6;">분석 중입니다...</div>
+                    <div id="loveRecommendationBox" style="display:none;"></div>
+                </div>
+            </div>
 
-			<div class="input-area" style="position: relative;">
-				<div id="loveTooltip" class="love-tooltip">
-					<div class="tooltip-header">
-						<span id="tooltipScore" class="score-number">...</span>
-						<button class="tooltip-close" onclick="closeLoveTooltip()">✕</button>
-					</div>
-					<div id="tooltipFeedback" class="tooltip-content">...</div>
-					<div id="tooltipRecommendBox" class="tooltip-recommend" onclick="applyTooltipCorrection()" style="display:none;"></div>
-				</div>
+            <div class="input-area" style="position: relative;">
+                <div id="loveTooltip" class="love-tooltip">
+                    <div class="tooltip-header">
+                        <span id="tooltipScore" class="score-number">...</span>
+                        <button class="tooltip-close" onclick="closeLoveTooltip()">✕</button>
+                    </div>
+                    <div id="tooltipFeedback" class="tooltip-content">...</div>
+                    <div id="tooltipRecommendBox" class="tooltip-recommend" onclick="applyTooltipCorrection()" style="display:none;"></div>
+                </div>
 
-				<div id="preview-box">
-					<span style="font-size:13px; color:#555;">🎤 녹음 완료</span>
-					<audio id="preview-player" controls style="height:30px; flex:1; margin: 0 10px;"></audio>
-					<button onclick="cancelVoice()" style="width:30px; height:30px; background:#ff5252; color:white; font-size:12px; border-radius:50%;">✕</button>
-				</div>
+                <div id="preview-box">
+                    <span style="font-size:13px; color:#555;">🎤 녹음 완료</span>
+                    <audio id="preview-player" controls style="height:30px; flex:1; margin: 0 10px;"></audio>
+                    <button onclick="cancelVoice()" style="width:30px; height:30px; background:#ff5252; color:white; font-size:12px; border-radius:50%;">✕</button>
+                </div>
 
-				<div class="input-wrapper">
-					<input type="text" id="msg" placeholder="메시지를 입력하세요..." autocomplete="off" onkeypress="if(event.keyCode==13) sendMessage()">
-					<div class="btn-group">
-						<button id="btn-love-check" class="btn-love-check" onclick="checkMessageScore()" title="이 말이 괜찮을까?"><i class="fa-solid fa-heart"></i></button>
-						<button id="btn-ai" onclick="checkGrammar()" title="문법/표현 검사"><i class="fa-solid fa-robot"></i></button>
-						<button id="btn-mic" onclick="toggleRecording()" title="음성 메시지"><i class="fa-solid fa-microphone"></i></button>
-						<button id="btn-send" onclick="sendMessage()" title="전송"><i class="fa-solid fa-paper-plane"></i></button>
-					</div>
-				</div>
-			</div>
-		</div>
+                <div class="input-wrapper">
+                    <input type="text" id="msg" placeholder="메시지를 입력하세요..." autocomplete="off" onkeypress="if(event.keyCode==13) sendMessage()">
+                    <div class="btn-group">
+                        <button id="btn-love-check" class="btn-love-check" onclick="checkMessageScore()" title="이 말이 괜찮을까?"><i class="fa-solid fa-heart"></i></button>
+                        <button id="btn-ai" onclick="checkGrammar()" title="문법/표현 검사"><i class="fa-solid fa-robot"></i></button>
+                        <button id="btn-mic" onclick="toggleRecording()" title="음성 메시지"><i class="fa-solid fa-microphone"></i></button>
+                        <button id="btn-send" onclick="sendMessage()" title="전송"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-		<div class="partner-sidebar" id="partnerProfileArea" style="display:none;">
-			<div class="profile-card-inner">
-				<div class="avatar-wrap">
-					<img id="partnerImg" class="avatar" src="/images/profile/default.png" alt="partner profile" />
-				</div>
-				<div class="profile-meta">
-					<h3 class="nickname">
-						<span id="partnerName">상대방 ID</span>
-						<span id="partnerAge" class="age" style="font-size: 0.8em; color: #888; margin-left: 5px;"></span>
-					</h3>
-					<div class="nation">
-						<span id="partnerNationFlag" class="flag">🏳️</span>
-						<span id="partnerNationText">Unknown</span>
-					</div>
+        <div class="partner-sidebar" id="partnerProfileArea" style="display:none;">
+            <div class="profile-card-inner">
+                <div class="avatar-wrap">
+                    <img id="partnerImg" class="avatar" src="/images/default_profile.png" alt="partner profile" />
+                </div>
+                <div class="profile-meta">
+                    <h3 class="nickname">
+                        <span id="partnerName">상대방 ID</span>
+                        <span id="partnerAge" class="age" style="font-size: 0.8em; color: #888; margin-left: 5px;"></span>
+                    </h3>
+                    <div class="nation">
+                        <span id="partnerNationFlag" class="flag">🏳️</span>
+                        <span id="partnerNationText">Unknown</span>
+                    </div>
 
-					<div class="lang">
-						<span class="lang-pill" id="partnerLangMain">KR</span>
-						<i class="fa-solid fa-arrow-right" style="font-size:12px; color:#999;"></i>
-						<span class="lang-pill" id="partnerLangLearn">EN</span>
-						<span id="partnerLevel" class="level-pill">Beginner</span>
-					</div>
+                    <div class="lang">
+                        <span class="lang-pill" id="partnerLangMain"></span>
+                        <i class="fa-solid fa-arrow-right" style="font-size:12px; color:#999;"></i>
+                        <span class="lang-pill" id="partnerLangLearn"></span>
 
-					<hr style="opacity: 0.2; margin: 15px 0;">
+                        <span id="partnerLevel" class="level-pill"></span>
 
-					<p class="intro-label">자기소개</p>
-					<p id="partnerIntro" class="intro">
-						채팅방을 선택하면 상대방의 프로필이 여기에 표시됩니다.
-					</p>
+                        <span id="partnerManner" class="level-pill" style="background-color: #e8f5e9; color: #2e7d32; margin-left: 5px;"></span>
+                    </div>
 
-					<div style="text-align: center; margin-top: 20px;">
-						<a id="opponentProfileBtn" href="#" class="btn-profile-check" style="display: none;">
-							상대방 프로필 확인 >
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                    <hr style="opacity: 0.2; margin: 15px 0;">
+
+                    <p class="intro-label">자기소개</p>
+                    <p id="partnerIntro" class="intro">
+                        채팅방을 선택하면 상대방의 프로필이 여기에 표시됩니다.
+                    </p>
+
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a id="opponentProfileBtn" href="#" class="btn-profile-check" style="display: none;">
+                            상대방 프로필 확인 >
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
 
-<script src="/js/chat.js?v=2.6"></script>
+<script src="/js/chat.js?v=2.5"></script>
 </body>
 </html>
