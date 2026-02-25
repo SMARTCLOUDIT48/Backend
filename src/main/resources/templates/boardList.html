@@ -31,13 +31,11 @@
     <div class="filter-search-bar">
 
         <select class="filter-select" onchange="location.href=this.value">
-            <option value="/board/list" th:selected="${cateName == null}">전체보기</option>
-            <option th:each="cate : ${categories}"
-                    th:value="@{/board/list(cateName=${cate.Name})}"
-                    th:text="${cate.name}"
-                    th:selected="${cateName == cate.Name}"></option>
+            <option value="/board/list" th:selected="${cateName == null or cateName == ''}">전체보기</option>
+            <option value="/board/list?cateName=친구 찾기" th:selected="${cateName == '친구 찾기'}">친구 찾기</option>
+            <option value="/board/list?cateName=질문" th:selected="${cateName == '질문'}">질문</option>
+            <option value="/board/list?cateName=소모임" th:selected="${cateName == '소모임'}">소모임</option>
         </select>
-
         <form action="/board/list" method="get" class="search-form">
             <select name="searchType" class="search-select">
                 <option value="title" th:selected="${searchType == 'title'}">제목</option>
@@ -77,12 +75,22 @@
                     <span class="comment-count" th:if="${board.comments != null and board.comments.size() > 0}"
                           th:text="'[' + ${board.comments.size()} + ']'">[2]</span>
                 </td>
+
                 <td class="writer-cell">
-                    <a th:href="${#authentication.name == board.memberId} ? @{/member/mypage} : @{/member/userPage/{memberId}(memberId=${board.memberId})}"
+                    <a th:if="${#authentication.name == board.memberId}"
+                       th:href="@{/member/mypage}"
                        style="display: block; cursor: pointer;">
                         <img th:src="${board.profileImageName != null ? '/images/profile/upload/' + board.profileImageName : '/images/default_profile.png'}"
-                            class="profile-img-sm"
-                            alt="프로필">
+                             class="profile-img-sm"
+                             alt="프로필">
+                    </a>
+
+                    <a th:unless="${#authentication.name == board.memberId}"
+                       th:href="@{/member/userPage/{memberId}(memberId=${board.memberId})}"
+                       style="display: block; cursor: pointer;">
+                        <img th:src="${board.profileImageName != null ? '/images/profile/upload/' + board.profileImageName : '/images/default_profile.png'}"
+                             class="profile-img-sm"
+                             alt="프로필">
                     </a>
                     <span th:text="${board.writerNickname}"></span>
                 </td>
@@ -94,22 +102,26 @@
     </div>
 
     <div class="pagination">
-        <a th:href="@{/board/list(page=1)}" class="page-btn first">First</a>
+        <a th:href="@{/board/list(page=1, cateName=${cateName}, searchType=${searchType}, keyword=${keyword})}" class="page-btn first">First</a>
 
-        <a th:href="${boardList.first} ? '#' : @{/board/list(page=${boardList.number})}"
+        <a th:if="${boardList.first}" href="#" class="page-btn prev">Prev</a>
+        <a th:unless="${boardList.first}"
+           th:href="@{/board/list(page=${boardList.number}, cateName=${cateName}, searchType=${searchType}, keyword=${keyword})}"
            class="page-btn prev">Prev</a>
 
         <span th:each="page: ${#numbers.sequence(startPage, endPage)}">
             <span th:if="${page == boardList.number + 1}" class="page-number current" th:text="${page}">1</span>
             <a th:unless="${page == boardList.number + 1}"
-               th:href="@{/board/list(page=${page})}"
+               th:href="@{/board/list(page=${page}, cateName=${cateName}, searchType=${searchType}, keyword=${keyword})}"
                class="page-number" th:text="${page}">2</a>
         </span>
 
-        <a th:href="${boardList.last} ? '#' : @{/board/list(page=${boardList.number + 2})}"
+        <a th:if="${boardList.last}" href="#" class="page-btn next">Next</a>
+        <a th:unless="${boardList.last}"
+           th:href="@{/board/list(page=${boardList.number + 2}, cateName=${cateName}, searchType=${searchType}, keyword=${keyword})}"
            class="page-btn next">Next</a>
 
-        <a th:href="@{/board/list(page=${boardList.totalPages})}" class="page-btn last">Last</a>
+        <a th:href="@{/board/list(page=${boardList.totalPages}, cateName=${cateName}, searchType=${searchType}, keyword=${keyword})}" class="page-btn last">Last</a>
     </div>
 
 </main>
