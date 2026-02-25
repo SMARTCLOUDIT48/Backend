@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Musubi - 사용자 페이지</title>
+
+    <link rel="stylesheet" th:href="@{/css/userPage.css}" />
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const CONTEXT_PATH = /*[[@{/}]]*/ "/";
+        /*]]>*/
+    </script>
+    <script type="module" th:src="@{/js/member/userPage.js}"></script>
+</head>
+
+<body>
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="page">
+    <section class="shell">
+        <section class="grid">
+
+            <aside class="sidebar">
+                <div class="glass card profile-card">
+                    <div class="avatar-wrap">
+                        <img id="profileImage" class="avatar"
+                             th:src="${user.profileImageName != null ? '/images/profile/upload/' + user.profileImageName : '/images/profile/default.png'}"
+                             alt="profile" />
+                    </div>
+
+                    <div class="profile-meta">
+                        <h3 class="nickname">
+                            <span id="nickname" th:text="${user.nickname}">닉네임</span>
+                            <span id="age" class="age" th:if="${user.age != null}" th:text="'(' + ${user.age} + ')'">(24)</span>
+                            <span id="nationFlag" th:text="${user.nation}">🇰🇷</span>
+                        </h3>
+
+                        <div class="likeAndProfileContainer">
+                            <div class="like-dislike">
+                                <button id="likeBtn" class="likeBtn">
+                                    👍 <span id="likeCount1">0</span>
+                                </button>
+                                <button id="dislikeBtn" class="likeBtn">
+                                    👎
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="profile-lang-block">
+                            <div class="lang-line">
+                                <span id="nativeLang" class="lang-flag">🇰🇷</span>
+                                <span class="arrow">→</span>
+                                <span id="studyLang" class="lang-flag">🇯🇵</span>
+
+                                <span id="levelLanguage" class="level-text" th:text="${user.levelLanguage != null ? user.levelLanguage : 'BEGINNER'}">Intermediate</span>
+                            </div>
+
+                            <div class="manner-line" th:data-value="${user.manner != null ? user.manner : 36.5}">
+                                <div class="manner-fill" th:style="'width: ' + (${user.manner != null ? user.manner : 36.5}) + '%;'"></div>
+                                <span id="manner" class="manner" th:text="${user.manner != null ? user.manner + '°C' : '36.5°C'}">36.5°C</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass card profile-card">
+                    <div class="profile-intro">
+                        <p id="intro" th:text="${user.intro}">자기소개가 없습니다.</p>
+                    </div>
+                </div>
+
+                <div class="glass card mini-card">
+                    <div class="mini-head">
+                        <h4>관심사</h4>
+                    </div>
+                    <div class="chip-wrap" id="interestChips">
+                    </div>
+                </div>
+
+                <div class="glass card mini-card">
+                    <div class="mini-head" style="margin-bottom: 8px;">
+                        <h4>💌 현재 연락 중인 이성</h4>
+                    </div>
+                    <div style="display: flex; align-items: baseline; justify-content: flex-end; gap: 4px;">
+                        <strong class="extra-value" id="chattingCount">0</strong>
+                        <span class="extra-unit">명</span>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="content">
+                <div class="glass card content-card">
+                    <div class="card-head">
+                        <div>
+                            <h2 th:text="|${user.nickname}님의 게시글|">닉네임님의 게시글</h2>
+                            <p>작성한 게시글 목록을 확인할 수 있습니다.</p>
+                        </div>
+                        <a th:href="@{/member/userPage/{id}/userBoardList(id=${user.memberId})}" class="btn-member" style="text-decoration: none;">
+                            더보기
+                        </a>
+                    </div>
+
+                    <div class="reco-grid" id="userBoardGrid">
+                        <p class="muted">게시글을 불러오는 중입니다...</p>
+                    </div>
+                </div>
+            </section>
+
+        </section>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>
