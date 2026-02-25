@@ -231,9 +231,9 @@ async function loadLikedMeList() {
     ${getLanguageFlag(user.studyLanguage)}
   </span>
 
-  <button class="btn-view" data-user-id="${user.id}">
-    프로필
-  </button>
+<button class="btn-view" data-member-id="${user.memberId}">
+  프로필
+</button>
 `;
 
       wrap.appendChild(item);
@@ -264,13 +264,12 @@ function formatTime(isoString) {
 document.addEventListener("click", (e) => {
   const btn = e.target.closest(".btn-view");
   if (!btn) return;
-
-  const userId = btn.dataset.userId;
-  if (userId) {
-    location.href = `${CONTEXT_PATH}members/${userId}`;
+ e.stopPropagation();
+  const memberId = btn.dataset.memberId;
+  if (memberId) {
+    location.href = `${CONTEXT_PATH}member/userPage/${memberId}`;
   }
 });
-
 /* ===============================
    enum → 한글
 =============================== */
@@ -625,9 +624,9 @@ async function loadProfileViewList() {
     ${getLanguageFlag(user.studyLanguage)}
   </span>
 
-  <button class="btn-view" data-user-id="${user.id}">
-    프로필
-  </button>
+<button class="btn-view" data-member-id="${user.memberId}">
+  프로필
+</button>
 `;
 
       wrap.appendChild(item);
