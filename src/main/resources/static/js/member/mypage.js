@@ -325,7 +325,6 @@ function convertInterestToLabel(item) {
 
 
 
-
 /* ===============================
    추천 친구 로드
 =============================== */
@@ -355,67 +354,54 @@ async function loadRecommendList() {
           ? `${user.profileImagePath}/${user.profileImageName}`
           : "/images/profile/default.png";
 
-  const interests = user.interests ?? [];
+      const interests = user.interests ?? [];
+      const visibleInterests = interests.slice(0, 3);
 
-const visibleInterests = interests.slice(0, 3);
+      let interestsHtml = visibleInterests
+        .map(type => `<span class="tag">${convertInterestType(type)}</span>`)
+        .join("");
 
-let interestsHtml = visibleInterests
-  .map(type => `
-    <span class="tag">${convertInterestType(type)}</span>
-  `)
-  .join("");
-
-if (interests.length > 3) {
-  const extraCount = interests.length - 3;
-  interestsHtml += `
-    <span class="tag more">+${extraCount}</span>
-  `;
-}
-
+      if (interests.length > 3) {
+        interestsHtml += `<span class="tag more">+${interests.length - 3}</span>`;
+      }
 
       const item = document.createElement("article");
       item.className = "reco";
+      item.dataset.userId = user.id; 
 
       item.innerHTML = `
-      <div class="reco-top">
+        <div class="reco-top">
+          <div class="reco-avatar">
+            <img src="${imagePath}"
+                 style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+          </div>
 
-  <div class="reco-avatar">
-    <img src="${imagePath}"
-         style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
-  </div>
+          <div class="reco-info">
+            <strong>${user.nickname}</strong>
+            <span class="flag">${getFlag(user.nation)}</span>
 
-  <div class="reco-info">
-    <strong>${user.nickname}</strong>
-    <span class="flag">${getFlag(user.nation)}</span>
+            <div class="reco-sub-row">
+              <div class="lang">
+                ${getLanguageFlag(user.nativeLanguage)}
+                →
+                ${getLanguageFlag(user.studyLanguage)}
+              </div>
 
-<div class="reco-sub-row">
-  <div class="lang">
-    ${getLanguageFlag(user.nativeLanguage)}
-    →
-    ${getLanguageFlag(user.studyLanguage)}
-  </div>
+              <div class="stars">
+                ${renderLevelStars(user.levelLanguage)}
+              </div>
+            </div>
 
-  <div class="stars">
-    ${renderLevelStars(user.levelLanguage)}
-  </div>
-</div>
-    
-
-    <div class="match">
-      매칭 ${user.matchPoint ?? 0}% · ${formatTemp(user.manner)}
-    </div>
-  </div>
-
-</div>
+            <div class="match">
+              매칭 ${user.matchPoint ?? 0}% · ${formatTemp(user.manner)}
+            </div>
+          </div>
+        </div>
 
         <div class="reco-tags">
           ${interestsHtml || `<span class="tag empty">관심사 없음</span>`}
         </div>
       `;
-
-      item.addEventListener("click", () => {
-        location.href = `${CONTEXT_PATH}members/${user.id}`;
-      });
 
       wrap.appendChild(item);
     });
@@ -425,7 +411,6 @@ if (interests.length > 3) {
     wrap.innerHTML = `<p class="muted">오류 발생</p>`;
   }
 }
-
 
 function renderLevelStars(level) {
   const levelMap = {
@@ -499,6 +484,23 @@ async function loadMyActivity(userId) {
     if (!countEl) return;
 
     countEl.textContent = count;
+
+    /* 🔥 단계 표시 */
+    const hotLevelEl = document.getElementById("hotLevel"); 
+    if (!hotLevelEl) return;
+
+    if (count >= 11) {
+      hotLevelEl.textContent = "👑 인플루언서";
+      hotLevelEl.className = "hot-level hot-3";
+    } 
+    else if (count >= 6) {
+      hotLevelEl.textContent = "🔥 인기";
+      hotLevelEl.className = "hot-level hot-2";
+    } 
+    else {
+      hotLevelEl.textContent = "✨ 지금 대화하면 칼답 가능성!";
+      hotLevelEl.className = "hot-level hot-1";
+    }
 
   } catch (err) {
     console.error("❌ 내 활동량 조회 실패:", err);
@@ -608,3 +610,31 @@ async function loadProfileViewList() {
     wrap.innerHTML = `<p class="muted">오류 발생</p>`;
   }
 }
+document.addEventListener("click", async (e) => {
+  const card = e.target.closest(".reco");
+  if (!card) return;
+
+  const partnerId = card.dataset.userId;
+  if (!partnerId) return;
+
+  card.style.pointerEvents = "none";
+
+  try {
+    const res = await authFetch(
+      `${CONTEXT_PATH}api/chat/rooms/direct/${partnerId}`,
+      { method: "POST" }
+    );
+
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    const data = await res.json();
+
+    sessionStorage.setItem("openRoomId", data.roomId);
+    location.href = `${CONTEXT_PATH}chat`;
+
+  } catch (err) {
+    console.error(err);
+    alert("채팅방 생성 실패");
+    card.style.pointerEvents = "auto";
+  }
+});
