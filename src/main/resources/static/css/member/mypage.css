@@ -867,8 +867,20 @@ body {
 
 .stat-card {
     padding: 22px;
+        display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 0;
 }
 
+
+
+/* 리스트 영역이 남은 공간 차지 + 스크롤 */
+.profile-view-list {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
 .stat-head {
     display: flex;
     align-items: baseline;
@@ -1122,7 +1134,7 @@ body {
     font-size: 13px;
 }
 .hot-1 {
-    background: rgba(120, 130, 150, 0.10);
+    /* background: rgba(120, 130, 150, 0.10); */
 }
 
 .hot-2 {
@@ -1211,13 +1223,36 @@ body {
     color: rgba(60, 70, 90, 0.6);
 }
 
+.viewer-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.viewer-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.viewer-name {
+    font-weight: 600;
+}
+
+.viewer-meta {
+    color: #666;
+    font-size: 14px;
+}
+
+
+
 .btn-view {
     margin-left: auto;
     padding: 6px 12px;
     border-radius: 999px;
     border: none;
     cursor: pointer;
-
     background: rgba(74, 108, 255, 0.15);
     color: rgba(74, 108, 255, 0.95);
     font-size: 12px;
