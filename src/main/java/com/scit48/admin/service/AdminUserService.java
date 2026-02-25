@@ -18,6 +18,15 @@ public class AdminUserService {
 	public Page<AdminUserListDTO> getUserList(
 			String keyword, String nation, int page
 	) {
+		
+		if (keyword != null && keyword.isBlank()) {
+			keyword = null;
+		}
+		
+		if (nation != null && nation.isBlank()) {
+			nation = null;
+		}
+		
 		return userRepository.findAdminUsers(
 				keyword, nation,
 				PageRequest.of(page, 10)

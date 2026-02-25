@@ -29,6 +29,10 @@ public class AdminUserController {
 		model.addAttribute("currentPage", page);
 		model.addAttribute("totalPages", result.getTotalPages());
 		
+		// 🔥 추가
+		model.addAttribute("keyword", keyword);
+		model.addAttribute("nation", nation);
+		
 		return "admin/user/user-list";
 	}
 	

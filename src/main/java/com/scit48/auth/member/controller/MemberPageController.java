@@ -13,6 +13,13 @@ public class MemberPageController {
     public String myPage() {
         return "member/mypage";
     }
+	
+	// 마이페이지 내 게시글 목록
+	@GetMapping("/mypage/myBoardList")
+	public String myBoardList () {
+		
+		return "myBoardList";
+	}
 
     // 회원가입
     @GetMapping("/signup")
