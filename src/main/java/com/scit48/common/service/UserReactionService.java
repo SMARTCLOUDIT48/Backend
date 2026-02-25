@@ -2,12 +2,15 @@ package com.scit48.common.service;
 
 import java.util.Optional;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
 import com.scit48.common.domain.entity.UserReactionEntity;
+import com.scit48.common.domain.entity.UserEntity;
+import com.scit48.common.dto.UserDTO;
 import com.scit48.common.enums.ReactionType;
 import com.scit48.common.repository.UserReactionRepository;
 import com.scit48.common.repository.UserRepository;
@@ -23,22 +26,15 @@ public class UserReactionService {
 
     /**
      * 좋아요 / 싫어요 처리
-     *
-     * 1. 처음 반응 → 저장 + 반영
-     * 2. 같은 반응 재클릭 → 삭제 + 취소
-     * // LIKE ↔ DISLIKE 변경 → 총 ±0.4
      */
     @Transactional
     public void react(Long fromUserId, Long toUserId, ReactionType newReaction) {
 
-        // 자기 자신에게 반응 방지
         if (fromUserId.equals(toUserId)) {
             throw new IllegalArgumentException("자기 자신에게는 할 수 없습니다.");
         }
 
-        Optional<UserReactionEntity> optional = reactionRepository.findByFromUserIdAndToUserId(
-                fromUserId,
-                toUserId);
+        Optional<UserReactionEntity> optional = reactionRepository.findByFromUserIdAndToUserId(fromUserId, toUserId);
 
         // 처음 반응
         if (optional.isEmpty()) {
@@ -70,19 +66,15 @@ public class UserReactionService {
     }
 
     /**
-     * 실제 수치 반영 (DB update 쿼리 사용 → 동시성 안전)
+     * 실제 수치 반영
      */
-    private void applyReaction(
-            Long userId,
-            ReactionType reaction,
-            boolean apply) {
+    private void applyReaction(Long userId, ReactionType reaction, boolean apply) {
+
         double delta = apply ? MANNER_DELTA : -MANNER_DELTA;
 
         switch (reaction) {
             case LIKE -> {
-                userRepository.updateLikeCount(
-                        userId,
-                        apply ? 1 : -1);
+                userRepository.updateLikeCount(userId, apply ? 1 : -1);
                 userRepository.updateManner(userId, delta);
             }
             case DISLIKE -> {
@@ -91,14 +83,28 @@ public class UserReactionService {
         }
     }
 
-    // 리스트불러오기
+    /**
+     * 나를 좋아요 누른 사람 목록
+     */
     @Transactional(readOnly = true)
-    public List<Long> getUsersWhoLikedMe(Long myUserId) {
+    public List<UserDTO> getUsersWhoLikedMe(Long myUserId) {
 
-        return reactionRepository
+        // 좋아요 누른 사람 ID 목록
+        List<Long> fromUserIds = reactionRepository
                 .findByToUserIdAndReaction(myUserId, ReactionType.LIKE)
                 .stream()
                 .map(UserReactionEntity::getFromUserId)
+                .toList();
+
+        if (fromUserIds.isEmpty()) {
+            return List.of();
+        }
+
+        // UserEntity 조회 후 DTO 변환
+        List<UserEntity> users = userRepository.findAllById(fromUserIds);
+
+        return users.stream()
+                .map(UserDTO::fromEntity)
                 .toList();
     }
 }
