@@ -69,11 +69,7 @@ public class BoardController {
 			return "redirect:/login"; // 임시이므로 제대로 된 로그인 화면 경로로 수정할 것
 		}
 		
-		// 카테고리 선택창을 위해 DB에서 카테고리 목록을 가져와서 뷰로 전달
-		List<CategoryEntity> categories = cr.findAll();
-		model.addAttribute("categories", categories);
 		model.addAttribute("userDTO", userDTO);
-		
 		
 		return "boardWrite";
 	}
@@ -104,12 +100,7 @@ public class BoardController {
 		} catch (Exception e) {
 			log.debug("예외 발생: {}", e.getMessage());
 			
-			
-			// 에러 발생 시 카테고리 목록을 다시 담아줘야 페이지가 정상 출력됨
-			List<CategoryEntity> categories = cr.findAll();
-			model.addAttribute("categories", categories);
 			model.addAttribute("error", "글 저장 중 오류가 발생했습니다.");
-			
 			
 			return "redirect:/board/write";
 		}
@@ -169,7 +160,7 @@ public class BoardController {
 		return "redirect:/board/feedView";
 	}
 	
-	
+	// ✅ 수정된 list 컨트롤러 메서드
 	@GetMapping("list")
 	public String list(
 			Model model,
@@ -179,21 +170,18 @@ public class BoardController {
 			@RequestParam(required = false) String searchType, // title, content, writer
 			@RequestParam(required = false) String keyword) {  // 검색어
 		
-		if (cateName != null && cateName.trim().isEmpty()) cateName = null;
-		if (keyword != null && keyword.trim().isEmpty()) keyword = null;
-		
-		// 카테고리 목록 (필터 선택용, '일상' 제외하고 가져오기)
-		List<CategoryEntity> categories = cr.findByNameNot("일상");
-		model.addAttribute("categories", categories);
-		
-		// 검색 로직 수행
+		// 1. 누락되었던 서비스 호출 부분 추가 (DB에서 목록 가져오기)
 		Page<BoardDTO> boardList = bs.searchPosts(pageable, cateName, searchType, keyword);
 		
+		// 2. 페이징 계산 및 방어 코드
 		
-		// 페이징 블록 계산
+		int currentPage = Math.max(1, pageable.getPageNumber());
+		
 		int blockLimit = 5;
-		int startPage = (((int) (Math.ceil((double) pageable.getPageNumber() / blockLimit))) - 1) * blockLimit + 1;
-		int endPage = ((startPage + blockLimit - 1) < boardList.getTotalPages()) ? startPage + blockLimit - 1 : boardList.getTotalPages();
+		int startPage = (((int) (Math.ceil((double) currentPage / blockLimit))) - 1) * blockLimit + 1;
+		
+		int totalPages = boardList.getTotalPages() == 0 ? 1 : boardList.getTotalPages();
+		int endPage = Math.min(startPage + blockLimit - 1, totalPages);
 		
 		model.addAttribute("boardList", boardList);
 		model.addAttribute("startPage", startPage);
