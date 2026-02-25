@@ -107,4 +107,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	
 	
 	List<UserEntity> findByIdNot(Long user);
+	
+	
+	
 }

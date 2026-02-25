@@ -94,6 +94,7 @@ loadMyActivity(myUserId);
   =============================== */
   await loadInterestChips();
   await loadLikedMeList();
+  await loadProfileViewList(); 
   await loadRecommendList();
   await loadRecentChats();
 
@@ -201,11 +202,7 @@ async function loadLikedMeList() {
     const result = await res.json();
     const list = result.data ?? [];
 
-    /* ===============================
-        좋아요 개수만 여기서 처리
-    =============================== */
     likeCountEl.textContent = list.length.toLocaleString();
-
     wrap.innerHTML = "";
 
     if (list.length === 0) {
@@ -213,17 +210,32 @@ async function loadLikedMeList() {
       return;
     }
 
-    list.forEach(userId => {
+    list.forEach(user => {
+
+      const imagePath =
+        user.profileImagePath && user.profileImageName
+          ? `${user.profileImagePath}/${user.profileImageName}`
+          : "/images/profile/default.png";
+
       const item = document.createElement("div");
       item.className = "viewer-item";
+
       item.innerHTML = `
-        <div class="viewer-info">
-          <strong>USER #${userId}</strong>
+        <div class="viewer-left">
+          <img src="${imagePath}" class="viewer-avatar">
+          <div class="viewer-info">
+            <strong>${user.nickname}</strong>
+            <div class="viewer-sub">
+              ${user.age ?? ""} · ${getLanguageFlag(user.nativeLanguage)} → ${getLanguageFlag(user.studyLanguage)}
+            </div>
+          </div>
         </div>
-        <button class="btn-view" data-user-id="${userId}">
+
+        <button class="btn-view" data-user-id="${user.id}">
           프로필
         </button>
       `;
+
       wrap.appendChild(item);
     });
 
@@ -540,4 +552,59 @@ async function loadRecentChats() {
     } catch (e) {
         console.error("최근 대화 로드 실패:", e);
     }
+}
+
+/* ===============================
+   내 프로필을 본 사람
+=============================== */
+async function loadProfileViewList() {
+  const wrap = document.getElementById("profileViewList");
+  if (!wrap) return;
+
+  try {
+    const res = await authFetch(`${CONTEXT_PATH}api/profile-views/me`);
+    if (!res.ok) {
+      wrap.innerHTML = `<p class="muted">불러오기 실패</p>`;
+      return;
+    }
+
+    const result = await res.json();
+    const list = result.data ?? [];
+
+    wrap.innerHTML = "";
+
+    if (list.length === 0) {
+      wrap.innerHTML = `<p class="muted">아직 방문자가 없습니다.</p>`;
+      return;
+    }
+
+    list.forEach(user => {
+
+      const imagePath =
+        user.profileImagePath && user.profileImageName
+          ? `${user.profileImagePath}/${user.profileImageName}`
+          : "/images/profile/default.png";
+
+      const item = document.createElement("div");
+      item.className = "viewer-item";
+
+      item.innerHTML = `
+        <div class="viewer-left">
+          <img src="${imagePath}" class="viewer-avatar">
+          <div class="viewer-info">
+            <strong>${user.nickname}</strong>
+            <div class="viewer-sub">
+              ${user.age ?? ""} · ${getLanguageFlag(user.nativeLanguage)} → ${getLanguageFlag(user.studyLanguage)}
+            </div>
+          </div>
+        </div>
+      `;
+
+      wrap.appendChild(item);
+    });
+
+  } catch (e) {
+    console.error(e);
+    wrap.innerHTML = `<p class="muted">오류 발생</p>`;
+  }
 }

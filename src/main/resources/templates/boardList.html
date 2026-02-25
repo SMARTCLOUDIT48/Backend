@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>MUSUBI - 커뮤니티</title>
+    <title>Musubi - 커뮤니티 게시판</title>
     <link rel="stylesheet" th:href="@{/css/boardList.css}">
     <link rel="stylesheet" th:href="@{/css/layout.css}">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -93,23 +93,25 @@
         </table>
     </div>
 
-    <div class="pagination">
-        <a th:href="@{/board/list(page=1)}" class="page-btn first">First</a>
+    <div class="pagination" th:if="${!boardList.isEmpty()}">
+        <a th:href="@{/board/list(page=1, cateName=${param.cateName}, searchType=${param.searchType}, keyword=${param.keyword})}"
+           class="page-btn first">First</a>
 
-        <a th:href="${boardList.first} ? '#' : @{/board/list(page=${boardList.number})}"
+        <a th:href="${boardList.first} ? '#' : @{/board/list(page=${boardList.number}, cateName=${param.cateName}, searchType=${param.searchType}, keyword=${param.keyword})}"
            class="page-btn prev">Prev</a>
 
         <span th:each="page: ${#numbers.sequence(startPage, endPage)}">
             <span th:if="${page == boardList.number + 1}" class="page-number current" th:text="${page}">1</span>
             <a th:unless="${page == boardList.number + 1}"
-               th:href="@{/board/list(page=${page})}"
+               th:href="@{/board/list(page=${page}, cateName=${param.cateName}, searchType=${param.searchType}, keyword=${param.keyword})}"
                class="page-number" th:text="${page}">2</a>
         </span>
 
-        <a th:href="${boardList.last} ? '#' : @{/board/list(page=${boardList.number + 2})}"
+        <a th:href="${boardList.last} ? '#' : @{/board/list(page=${boardList.number + 2}, cateName=${param.cateName}, searchType=${param.searchType}, keyword=${param.keyword})}"
            class="page-btn next">Next</a>
 
-        <a th:href="@{/board/list(page=${boardList.totalPages})}" class="page-btn last">Last</a>
+        <a th:href="@{/board/list(page=${boardList.totalPages}, cateName=${param.cateName}, searchType=${param.searchType}, keyword=${param.keyword})}"
+           class="page-btn last">Last</a>
     </div>
 
 </main>
