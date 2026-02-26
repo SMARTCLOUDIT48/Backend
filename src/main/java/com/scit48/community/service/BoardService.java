@@ -50,18 +50,17 @@ public class BoardService {
 		UserEntity userEntity = ur.findByMemberId(boardDTO.getMemberId())
 				.orElseThrow(() -> new EntityNotFoundException("사용자가 존재하지 않습니다. id=" + boardDTO.getMemberId()));
 		
-		// 2. 카테고리 조회 (DTO에서 ID를 받아옴)
-		CategoryEntity categoryEntity = ctr.findByName(boardDTO.getCategoryName())
-				.orElseThrow(() -> new EntityNotFoundException("해당 카테고리가 없습니다. name=" + boardDTO.getCategoryName()));
+		// 2. [수정] 카테고리 조회 (이름이 아닌 ID로 조회)
+		CategoryEntity categoryEntity = ctr.findById(boardDTO.getCategoryId()) // findByName -> findById
+				.orElseThrow(() -> new EntityNotFoundException("해당 카테고리가 없습니다. id=" + boardDTO.getCategoryId()));
 		
-		
-		// 4. Entity 변환 및 저장 (Builder 패턴 사용)
+		// 4. Entity 변환 및 저장
 		BoardEntity boardEntity = BoardEntity.builder()
 				.title(boardDTO.getTitle())
 				.content(boardDTO.getContent())
 				.viewCount(0)
-				.category(categoryEntity) // 연관관계 설정
-				.user(userEntity)         // 연관관계 설정
+				.category(categoryEntity)
+				.user(userEntity)
 				.build();
 		
 		// 첨부파일이 있는 경우
