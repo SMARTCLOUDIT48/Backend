@@ -6,10 +6,13 @@ import com.scit48.community.repository.BoardRepository;
 import com.scit48.notice.domain.entity.NoticeEntity;
 import com.scit48.notice.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +24,9 @@ public class AdminPostController {
 	private final AdminPostService adminPostService;
 	private final BoardRepository boardRepository;
 	private final NoticeRepository noticeRepository;
+	
+	@Value("${board.uploadPath}")
+	private String boardUploadPath;
 	
 	@GetMapping
 	public String postList(
@@ -57,24 +63,23 @@ public class AdminPostController {
 			@PathVariable Long id,
 			@RequestParam String board
 	) {
-		String title;
-		String content;
+		Map<String, String> result = new HashMap<>();
 		
 		if ("FAQ".equals(board) || "NOTICE".equals(board)) {
-			NoticeEntity notice = noticeRepository.findById(id)
-					.orElseThrow();
-			title = notice.getTitle();
-			content = notice.getContent();
+			
+			NoticeEntity notice = noticeRepository.findById(id).orElseThrow();
+			result.put("title", notice.getTitle());
+			result.put("content", notice.getContent());
+			result.put("imagePath", null);
+			
 		} else {
-			BoardEntity boardPost = boardRepository.findById(id)
-					.orElseThrow();
-			title = boardPost.getTitle();
-			content = boardPost.getContent();
+			
+			BoardEntity boardPost = boardRepository.findById(id).orElseThrow();
+			result.put("title", boardPost.getTitle());
+			result.put("content", boardPost.getContent());
+			result.put("imagePath", boardPost.getFilePath()); // 🔥 이 줄 추가
 		}
 		
-		Map<String, String> result = new HashMap<>();
-		result.put("title", title);
-		result.put("content", content);
 		return result;
 	}
 	
@@ -84,19 +89,41 @@ public class AdminPostController {
 			@RequestParam Long id,
 			@RequestParam String board,
 			@RequestParam String title,
-			@RequestParam String content
-	) {
+			@RequestParam String content,
+			@RequestParam(required = false) MultipartFile image
+	) throws Exception {
+		
+		String uploadDir = boardUploadPath;
+		
+		 // 네가 쓰는 실제 경로로 수정
+		
 		if ("FAQ".equals(board) || "NOTICE".equals(board)) {
-			NoticeEntity notice = noticeRepository.findById(id)
-					.orElseThrow();
+			
+			NoticeEntity notice = noticeRepository.findById(id).orElseThrow();
 			notice.setTitle(title);
 			notice.setContent(content);
+			
+			// 공지에 이미지 필드 있다면 여기도 동일 처리
+			
 			noticeRepository.save(notice);
+			
 		} else {
-			BoardEntity post = boardRepository.findById(id)
-					.orElseThrow();
+			BoardEntity post = boardRepository.findById(id).orElseThrow();
+			
 			post.setTitle(title);
 			post.setContent(content);
+
+// 🔥 이미지 새 업로드 했을 때만 교체
+			if (image != null && !image.isEmpty()) {
+				
+				String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+				File saveFile = new File(boardUploadPath, fileName);
+				image.transferTo(saveFile);
+				
+				post.setFilePath("/files/" + fileName);
+				post.setFileOriginalName(image.getOriginalFilename());
+			}
+			
 			boardRepository.save(post);
 		}
 		
