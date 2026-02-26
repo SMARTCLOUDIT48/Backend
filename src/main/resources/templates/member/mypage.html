@@ -120,7 +120,7 @@
                         <a class="menu-item active" href="#">
                             <span class="mi-ico">👤</span><span>프로필</span>
                         </a>
-                        <a class="menu-item" href="#">
+                        <a class="menu-item" th:href="@{/member/mypage/myBoardList}">
                             <span class="mi-ico">📘</span><span>내 게시글</span>
                         </a>
                         <a class="menu-item" th:href="@{/chat}">
@@ -235,7 +235,7 @@
 
                         <div class="stat-body">
                             <div class="stat-item posts">
-                                <span class="stat-label">📝 게시글</span>
+                                <span class="stat-label">📝내 게시글 총 개수</span>
                                 <span class="stat-value" id="postCount">0</span>
                             </div>
 

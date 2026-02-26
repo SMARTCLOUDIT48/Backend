@@ -240,7 +240,7 @@ else if (count <= 4) {
   hotLevelEl.style.color = "#ff9f1c";
 }
 else if (count <= 10) {
-  hotLevelEl.textContent = "인기멤버에요 🔥!";
+  hotLevelEl.textContent = "인기멤버에요! 🔥";
   hotLevelEl.style.color = "#ff4d4f";
 }
 else {
