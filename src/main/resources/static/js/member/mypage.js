@@ -517,7 +517,7 @@ else if (count >= 1 && count <= 4) {
   hotLevelEl.className = "hot-level hot-2";
 }
 else if (count >= 5 && count <= 10) {
-  hotLevelEl.textContent = "인기멤버에요 🔥!";
+  hotLevelEl.textContent = "인기멤버에요! 🔥";
   hotLevelEl.className = "hot-level hot-3";
 }
 else {
