@@ -1,7 +1,7 @@
 /* ===== 고객센터 전체 컨테이너 ===== */
 .customer-container {
     max-width: 1200px;
-    margin: 80px auto;
+    margin: 40px auto;
     display: flex;
     gap: 32px;
 }

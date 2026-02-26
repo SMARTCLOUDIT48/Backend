@@ -10,6 +10,7 @@ import com.scit48.common.dto.UserDTO;
 import com.scit48.common.dto.UserInterestDTO;
 import com.scit48.common.exception.UnauthorizedException;
 import com.scit48.common.response.ApiResponse;
+import com.scit48.community.service.BoardService;
 import com.scit48.common.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +32,7 @@ public class MemberController {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final MemberInterestService memberInterestService;
+    private final BoardService boardService;
 
     /*
      * =========================
@@ -185,6 +187,26 @@ public class MemberController {
                 userDetails.getUser().getId());
 
         return ApiResponse.success(interests);
+    }
+
+    /*
+     * =========================
+     * 게시글 개수
+     * =========================
+     */
+
+    @GetMapping("/me/post-count")
+    public ApiResponse<Long> getMyPostCount(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null) {
+            throw new UnauthorizedException("로그인이 필요합니다.");
+        }
+
+        String memberId = userDetails.getUser().getMemberId();
+        long count = boardService.getMyPostCount(memberId);
+
+        return ApiResponse.success(count);
     }
 
 }
