@@ -1,9 +1,6 @@
-console.log(CONTEXT_PATH);
-
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("signupForm");
   if (!form) return;
-
 
   /* =========================
      DOM 요소
@@ -14,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const memberIdInput = document.getElementById("memberId");
   const nicknameInput = document.getElementById("nickname");
-
   const studyLanguage = document.getElementById("studyLanguage");
 
   const tos = document.getElementById("tos");
@@ -27,12 +23,34 @@ document.addEventListener("DOMContentLoaded", () => {
   let isNicknameChecked = false;
 
   /* =========================
+     유효성 검사 함수
+  ========================= */
+
+  // 아이디: 3~12자, 영문 대소문자 + 숫자
+  function validateMemberId(memberId) {
+    const regex = /^[A-Za-z0-9]{3,12}$/;
+    return regex.test(memberId);
+  }
+
+  // 비밀번호: 8~20자, 영문 + 숫자 최소 1개씩
+  function validatePassword(password) {
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
+    return regex.test(password);
+  }
+
+  /* =========================
      아이디 중복 확인
   ========================= */
   document.getElementById("checkIdBtn")?.addEventListener("click", async () => {
     const memberId = memberIdInput.value.trim();
+
     if (!memberId) {
       alert("아이디를 입력하세요");
+      return;
+    }
+
+    if (!validateMemberId(memberId)) {
+      alert("아이디는 3~12자 영문과 숫자만 가능합니다.");
       return;
     }
 
@@ -41,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `${CONTEXT_PATH}api/members/exists?memberId=${encodeURIComponent(memberId)}`
       );
       const result = await res.json();
-
 
       if (res.ok && result.data?.available) {
         alert("사용 가능한 아이디입니다");
@@ -65,6 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================= */
   document.getElementById("checkNicknameBtn")?.addEventListener("click", async () => {
     const nickname = nicknameInput.value.trim();
+
     if (!nickname) {
       alert("닉네임을 입력하세요");
       return;
@@ -94,6 +112,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================
+     비밀번호 실시간 검증 표시
+  ========================= */
+  form.password.addEventListener("input", () => {
+    if (!validatePassword(form.password.value)) {
+      form.password.style.border = "2px solid red";
+    } else {
+      form.password.style.border = "2px solid green";
+    }
+  });
+
+  /* =========================
      이미지 미리보기
   ========================= */
   imageInput?.addEventListener("change", () => {
@@ -117,8 +146,23 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const memberId = memberIdInput.value.trim();
+    const password = form.password.value;
+
+    /* 아이디 형식 */
+    if (!validateMemberId(memberId)) {
+      alert("아이디는 3~12자 영문과 숫자만 가능합니다.");
+      return;
+    }
+
+    /* 비밀번호 형식 */
+    if (!validatePassword(password)) {
+      alert("비밀번호는 8~20자이며 영문과 숫자를 각각 최소 1개 이상 포함해야 합니다.");
+      return;
+    }
+
     /* 비밀번호 확인 */
-    if (form.password.value !== form.passwordConfirm.value) {
+    if (password !== form.passwordConfirm.value) {
       alert("비밀번호가 일치하지 않습니다.");
       return;
     }
@@ -129,29 +173,28 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    /* 중복 확인 여부 */
+    /* 중복 확인 */
     if (!isMemberIdChecked || !isNicknameChecked) {
       alert("아이디와 닉네임 중복 확인을 완료해주세요.");
       return;
     }
 
     /* 나이 검증 */
-  const age = Number(form.age.value);
+    const age = Number(form.age.value);
+    if (Number.isNaN(age) || age < 18) {
+      alert("회원가입은 18세 이상만 가능합니다.");
+      return;
+    }
 
-  if (Number.isNaN(age) || age < 18) {
-  alert("회원가입은 18세 이상만 가능합니다.");
-  return;
-}
-    /* 학습 언어 선택 여부 */
+    /* 학습 언어 선택 */
     if (!studyLanguage.value) {
       alert("학습 언어를 선택해주세요.");
       return;
     }
 
-    /* 전송 데이터 */
     const signupData = {
-      memberId: memberIdInput.value.trim(),
-      password: form.password.value,
+      memberId,
+      password,
       nickname: nicknameInput.value.trim(),
       gender: form.gender.value,
       age,

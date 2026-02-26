@@ -56,19 +56,37 @@ public interface BoardRepository
 	*/
 	
 	// 관리자 페이지에서 불러오기 용
-	@Query(
-			value = """
+	@Query(value = """
     SELECT
-      DATE(created_at) AS label,
-      COUNT(*) AS value
+        DATE(created_at) AS label,
+        COUNT(*) AS value
     FROM board
-    WHERE created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 6 DAY)
     GROUP BY DATE(created_at)
     ORDER BY DATE(created_at)
-  """,
-			nativeQuery = true
-	)
-	List<Object[]> countStatsDaily();
+""", nativeQuery = true)
+	List<Object[]> countDailyStats();
+	
+	
+	@Query(value = """
+    SELECT
+        YEARWEEK(created_at, 1) AS label,
+        COUNT(*) AS value
+    FROM board
+    GROUP BY YEARWEEK(created_at, 1)
+    ORDER BY YEARWEEK(created_at, 1)
+""", nativeQuery = true)
+	List<Object[]> countWeeklyStats();
+	
+	
+	@Query(value = """
+    SELECT
+        DATE_FORMAT(created_at, '%Y-%m') AS label,
+        COUNT(*) AS value
+    FROM board
+    GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+    ORDER BY DATE_FORMAT(created_at, '%Y-%m')
+""", nativeQuery = true)
+	List<Object[]> countMonthlyStats();
 	
 	
 	// 조회수 증가 (update 쿼리)

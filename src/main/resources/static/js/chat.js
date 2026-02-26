@@ -589,15 +589,33 @@ function closeLoveTooltip() { document.getElementById("loveTooltip").style.displ
 function getProfileImage(userId, userName) { return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&color=fff&rounded=true`; }
 function checkPartnerActivity(partnerId) {
     if (!partnerId) return;
-    fetch(`/chat/activity/${partnerId}`).then(res => res.json()).then(count => {
-        const badge = document.getElementById('activityBadge');
-        if (!badge) return;
-        badge.style.display = 'inline-block';
-        badge.className = 'activity-badge';
-        if (count >= 10) { badge.classList.add('badge-hot'); badge.innerHTML = `🔥 ${count}명과 대화 중! (인기)`; }
-        else if (count > 0) { badge.classList.add('badge-normal'); badge.innerHTML = `💬 오늘 ${count}명과 대화함`; }
-        else { badge.classList.add('badge-normal'); badge.innerHTML = `✨ 지금 대화하면 칼답 가능성!`; }
-    }).catch(err => console.error("활동량 조회 실패:", err));
+    fetch(`/chat/activity/${partnerId}`)
+        .then(res => res.json())
+        .then(count => {
+            const badge = document.getElementById('activityBadge');
+            if (!badge) return;
+
+            badge.style.display = 'inline-block';
+            badge.className = 'activity-badge';
+
+          if (count === 0) {
+    badge.classList.add('badge-normal');
+    badge.innerHTML = `지금 대화하면 칼답 가능성! ✨`;
+}
+else if (count >= 1 && count <= 4) {
+    badge.classList.add('badge-normal');
+    badge.innerHTML = `오늘 대화 분위기가 좋은 분이네요 💬 (${count}명)`;
+}
+else if (count >= 5 && count <= 10) {
+    badge.classList.add('badge-hot');
+    badge.innerHTML = `인기멤버에요! 🔥 (${count}명과 대화 중)`;
+}
+else {
+    badge.classList.add('badge-hot');
+    badge.innerHTML = `인플루언서급이에요! 👑 (${count}명과 대화 중)`;
+}
+        })
+        .catch(err => console.error("활동량 조회 실패:", err));
 }
 
 // ==========================================================

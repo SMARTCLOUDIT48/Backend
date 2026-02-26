@@ -220,21 +220,21 @@ async function loadLikedMeList() {
       const item = document.createElement("div");
       item.className = "viewer-item";
 
-      item.innerHTML = `
-        <div class="viewer-left">
-          <img src="${imagePath}" class="viewer-avatar">
-          <div class="viewer-info">
-            <strong>${user.nickname}</strong>
-            <div class="viewer-sub">
-              ${user.age ?? ""} · ${getLanguageFlag(user.nativeLanguage)} → ${getLanguageFlag(user.studyLanguage)}
-            </div>
-          </div>
-        </div>
+     item.innerHTML = `
+  <img src="${imagePath}" class="viewer-avatar">
 
-        <button class="btn-view" data-user-id="${user.id}">
-          프로필
-        </button>
-      `;
+  <span class="viewer-name">${user.nickname}</span>
+
+  <span class="viewer-meta">
+    ${user.age ?? ""} · 
+    ${getLanguageFlag(user.nativeLanguage)} →
+    ${getLanguageFlag(user.studyLanguage)}
+  </span>
+
+<button class="btn-view" data-member-id="${user.memberId}">
+  프로필
+</button>
+`;
 
       wrap.appendChild(item);
     });
@@ -264,13 +264,12 @@ function formatTime(isoString) {
 document.addEventListener("click", (e) => {
   const btn = e.target.closest(".btn-view");
   if (!btn) return;
-
-  const userId = btn.dataset.userId;
-  if (userId) {
-    location.href = `${CONTEXT_PATH}members/${userId}`;
+ e.stopPropagation();
+  const memberId = btn.dataset.memberId;
+  if (memberId) {
+    location.href = `${CONTEXT_PATH}member/userPage/${memberId}`;
   }
 });
-
 /* ===============================
    enum → 한글
 =============================== */
@@ -349,6 +348,21 @@ async function loadRecommendList() {
 
     list.slice(0, 4).forEach(user => {
 
+      /* 매칭 점수 */
+      const matchPoint = user.matchPoint ?? 0;
+      const percent = Math.max(0, Math.min(100, matchPoint)) / 100;
+
+      /* 🔵 시작색 (파랑) */
+      const start = { r: 59, g: 130, b: 246 };   // #3b82f6
+      /* 🔴 끝색 (빨강) */
+      const end   = { r: 239, g: 68,  b: 68 };   // #ef4444
+
+      const r = Math.round(start.r + (end.r - start.r) * percent);
+      const g = Math.round(start.g + (end.g - start.g) * percent);
+      const b = Math.round(start.b + (end.b - start.b) * percent);
+
+      const matchColor = `rgb(${r}, ${g}, ${b})`;
+
       const imagePath =
         user.profileImagePath && user.profileImageName
           ? `${user.profileImagePath}/${user.profileImageName}`
@@ -367,7 +381,7 @@ async function loadRecommendList() {
 
       const item = document.createElement("article");
       item.className = "reco";
-      item.dataset.userId = user.id; 
+      item.dataset.userId = user.id;
 
       item.innerHTML = `
         <div class="reco-top">
@@ -393,8 +407,13 @@ async function loadRecommendList() {
             </div>
 
             <div class="match">
-              매칭 ${user.matchPoint ?? 0}% · ${formatTemp(user.manner)}
+              매칭 
+              <span style="color:${matchColor}; font-weight:900;">
+                ${matchPoint}%
+              </span>
+              · ${formatTemp(user.manner)}
             </div>
+
           </div>
         </div>
 
@@ -489,18 +508,22 @@ async function loadMyActivity(userId) {
     const hotLevelEl = document.getElementById("hotLevel"); 
     if (!hotLevelEl) return;
 
-    if (count >= 11) {
-      hotLevelEl.textContent = "👑 인플루언서";
-      hotLevelEl.className = "hot-level hot-3";
-    } 
-    else if (count >= 6) {
-      hotLevelEl.textContent = "🔥 인기";
-      hotLevelEl.className = "hot-level hot-2";
-    } 
-    else {
-      hotLevelEl.textContent = "✨ 지금 대화하면 칼답 가능성!";
-      hotLevelEl.className = "hot-level hot-1";
-    }
+if (count === 0) {
+  hotLevelEl.textContent = "지금 대화하면 칼답 가능성! ✨";
+  hotLevelEl.className = "hot-level hot-1";
+}
+else if (count >= 1 && count <= 4) {
+  hotLevelEl.textContent = "오늘 대화 분위기가 좋은 분이네요 💬 ";
+  hotLevelEl.className = "hot-level hot-2";
+}
+else if (count >= 5 && count <= 10) {
+  hotLevelEl.textContent = "인기멤버에요 🔥!";
+  hotLevelEl.className = "hot-level hot-3";
+}
+else {
+  hotLevelEl.textContent = "인플루언서급이에요! 👑 ";
+  hotLevelEl.className = "hot-level hot-4";
+}
 
   } catch (err) {
     console.error("❌ 내 활동량 조회 실패:", err);
@@ -590,17 +613,21 @@ async function loadProfileViewList() {
       const item = document.createElement("div");
       item.className = "viewer-item";
 
-      item.innerHTML = `
-        <div class="viewer-left">
-          <img src="${imagePath}" class="viewer-avatar">
-          <div class="viewer-info">
-            <strong>${user.nickname}</strong>
-            <div class="viewer-sub">
-              ${user.age ?? ""} · ${getLanguageFlag(user.nativeLanguage)} → ${getLanguageFlag(user.studyLanguage)}
-            </div>
-          </div>
-        </div>
-      `;
+     item.innerHTML = `
+  <img src="${imagePath}" class="viewer-avatar">
+
+  <span class="viewer-name">${user.nickname}</span>
+
+  <span class="viewer-meta">
+    ${user.age ?? ""} · 
+    ${getLanguageFlag(user.nativeLanguage)} →
+    ${getLanguageFlag(user.studyLanguage)}
+  </span>
+
+<button class="btn-view" data-member-id="${user.memberId}">
+  프로필
+</button>
+`;
 
       wrap.appendChild(item);
     });
@@ -610,6 +637,8 @@ async function loadProfileViewList() {
     wrap.innerHTML = `<p class="muted">오류 발생</p>`;
   }
 }
+
+
 document.addEventListener("click", async (e) => {
   const card = e.target.closest(".reco");
   if (!card) return;
