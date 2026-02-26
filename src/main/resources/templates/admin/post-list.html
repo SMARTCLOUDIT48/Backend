@@ -119,6 +119,31 @@
             <textarea id="modalContent" rows="6"></textarea>
         </div>
 
+        <div class="field">
+            <label>첨부 이미지</label>
+
+            <div id="modalImageWrapper" style="display:none; margin-bottom:10px;">
+                <img id="modalImagePreview"
+                     style="width:100%; max-height:300px; object-fit:contain; border-radius:8px;">
+
+                <!-- 🔥 이미지 변경 버튼 -->
+                <div style="margin-top:10px; text-align:right;">
+                    <button type="button" id="changeImageBtn" class="btn btn-mini">
+                        이미지 변경
+                    </button>
+                </div>
+            </div>
+
+            <!-- 파일 input은 숨김 -->
+            <input type="file" id="modalImageFile" accept="image/*" style="display:none;">
+
+            <p id="noImageText" style="font-size:13px; color:#999;">
+                첨부된 이미지가 없습니다.
+            </p>
+
+
+        </div>
+
         <div class="modal-actions">
             <button type="button" class="btn btn-cancel">취소</button>
             <button type="button" class="btn btn-save">수정</button>

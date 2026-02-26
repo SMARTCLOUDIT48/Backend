@@ -8,12 +8,12 @@
 
     <link rel="stylesheet" th:href="@{/css/userPage.css}" />
     <link rel="stylesheet" th:href="@{/css/layout.css}">
-
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        const CONTEXT_PATH = /*[[@{/}]]*/ "/";
-        /*]]>*/
-    </script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const CONTEXT_PATH = /*[[@{/}]]*/ "/";
+    const TARGET_USER_ID = /*[[${user.id}]]*/ 0;
+    /*]]>*/
+</script>
     <script type="module" th:src="@{/js/member/userPage.js}"></script>
 </head>
 
@@ -81,15 +81,28 @@
                     </div>
                 </div>
 
-                <div class="glass card mini-card">
-                    <div class="mini-head" style="margin-bottom: 8px;">
-                        <h4>💌 현재 연락 중인 이성</h4>
-                    </div>
-                    <div style="display: flex; align-items: baseline; justify-content: flex-end; gap: 4px;">
-                        <strong class="extra-value" id="chattingCount">0</strong>
-                        <span class="extra-unit">명</span>
-                    </div>
-                </div>
+    <div class="glass card mini-card">
+        <div class="mini-head" style="margin-bottom: 8px;">
+            <h4>💌 현재 연락 중인 이성</h4>
+        </div>
+    
+        <div style="display:flex; align-items:center; gap:10px; justify-content:space-between;">
+    
+            <span id="hotLevel" class="hot-level"
+                style="font-size:14px; font-weight:700; padding:6px 12px; border-radius:20px;">
+            </span>
+    
+            <div style="display:flex; align-items:baseline; gap:4px;">
+                <strong class="extra-value" id="chattingCount" style="font-size:22px; font-weight:900; color: rgba(70, 200, 120, 0.95);">
+                    0
+                </strong>
+                <span class="extra-unit" style="font-size:14px; font-weight:600; color:rgba(60, 70, 90, 0.75);">
+                    명
+                </span>
+            </div>
+    
+        </div>
+    </div>
             </aside>
 
             <section class="content">
