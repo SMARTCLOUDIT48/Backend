@@ -534,6 +534,10 @@
     color: #333;
 
     white-space: pre-line;
+
+     /* 🔥 추가 */
+        overflow-wrap: break-word;
+        word-break: break-word;
 }
 
 /* 문단 간격 */
