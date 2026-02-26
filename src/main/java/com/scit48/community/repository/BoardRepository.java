@@ -60,7 +60,7 @@ public interface BoardRepository
     SELECT
         DATE(created_at) AS label,
         COUNT(*) AS value
-    FROM users
+    FROM board
     GROUP BY DATE(created_at)
     ORDER BY DATE(created_at)
 """, nativeQuery = true)
@@ -71,7 +71,7 @@ public interface BoardRepository
     SELECT
         YEARWEEK(created_at, 1) AS label,
         COUNT(*) AS value
-    FROM users
+    FROM board
     GROUP BY YEARWEEK(created_at, 1)
     ORDER BY YEARWEEK(created_at, 1)
 """, nativeQuery = true)
@@ -82,7 +82,7 @@ public interface BoardRepository
     SELECT
         DATE_FORMAT(created_at, '%Y-%m') AS label,
         COUNT(*) AS value
-    FROM users
+    FROM board
     GROUP BY DATE_FORMAT(created_at, '%Y-%m')
     ORDER BY DATE_FORMAT(created_at, '%Y-%m')
 """, nativeQuery = true)

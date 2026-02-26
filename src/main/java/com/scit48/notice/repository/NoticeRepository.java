@@ -37,7 +37,7 @@ public interface NoticeRepository extends JpaRepository<NoticeEntity, Long> {
     SELECT
         DATE(created_at) AS label,
         COUNT(*) AS value
-    FROM users
+    FROM notice
     GROUP BY DATE(created_at)
     ORDER BY DATE(created_at)
 """, nativeQuery = true)
@@ -48,7 +48,7 @@ public interface NoticeRepository extends JpaRepository<NoticeEntity, Long> {
     SELECT
         YEARWEEK(created_at, 1) AS label,
         COUNT(*) AS value
-    FROM users
+    FROM notice
     GROUP BY YEARWEEK(created_at, 1)
     ORDER BY YEARWEEK(created_at, 1)
 """, nativeQuery = true)
@@ -59,7 +59,7 @@ public interface NoticeRepository extends JpaRepository<NoticeEntity, Long> {
     SELECT
         DATE_FORMAT(created_at, '%Y-%m') AS label,
         COUNT(*) AS value
-    FROM users
+    FROM notice
     GROUP BY DATE_FORMAT(created_at, '%Y-%m')
     ORDER BY DATE_FORMAT(created_at, '%Y-%m')
 """, nativeQuery = true)
