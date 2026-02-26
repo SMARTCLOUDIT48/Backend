@@ -172,11 +172,15 @@ public class BoardController {
 			@RequestParam(required = false) String searchType, // title, content, writer
 			@RequestParam(required = false) String keyword) {  // 검색어
 		
-		// 1. 누락되었던 서비스 호출 부분 추가 (DB에서 목록 가져오기)
+		// ⭐ [핵심 추가 코드] 넘어온 파라미터가 빈 문자열("")이면 null로 강제 변환
+		if (cateName != null && cateName.trim().isEmpty()) cateName = null;
+		if (searchType != null && searchType.trim().isEmpty()) searchType = null;
+		if (keyword != null && keyword.trim().isEmpty()) keyword = null;
+		
+		// 1. 서비스 호출 (이제 "" 대신 완벽한 null이 넘어갑니다)
 		Page<BoardDTO> boardList = bs.searchPosts(pageable, cateName, searchType, keyword);
 		
 		// 2. 페이징 계산 및 방어 코드
-		
 		int currentPage = Math.max(1, pageable.getPageNumber());
 		
 		int blockLimit = 5;
@@ -417,5 +421,7 @@ public class BoardController {
 		}
 		return ip;
 	}
+	
+	
 	
 }
