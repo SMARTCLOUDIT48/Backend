@@ -24,6 +24,12 @@
 
 <main class="page">
     <section class="shell">
+
+        <div class="page-hero glass" style="margin-bottom: 30px;">
+            <h1 th:text="|${user.nickname}님의 프로필|">닉네임님의 프로필</h1>
+            <p th:text="|${user.nickname}님의 프로필 · 게시글 · 관심사를 한눈에 확인해보세요.|">닉네임님의 프로필 · 게시글 · 관심사를 한눈에 확인해보세요.</p>
+        </div>
+
         <section class="grid">
 
             <aside class="sidebar">
@@ -37,8 +43,8 @@
                     <div class="profile-meta">
                         <h3 class="nickname">
                             <span id="nickname" th:text="${user.nickname}">닉네임</span>
-                            <span id="age" class="age" th:if="${user.age != null}" th:text="'(' + ${user.age} + ')'">(24)</span>
-                            <span id="nationFlag" th:text="${user.nation}">🇰🇷</span>
+                            <span id="age" class="age" th:if="${user.age != null}" th:text="'(' + ${user.age} + ')'">(24)</span><span id="nationFlag" class="nation"
+                                  th:text="${#strings.toString(user.nation) == 'KOREA' ? '🇰🇷' : (#strings.toString(user.nation) == 'JAPAN' ? '🇯🇵' : user.nation)}">🇯🇵</span>
                         </h3>
 
                         <div class="likeAndProfileContainer">

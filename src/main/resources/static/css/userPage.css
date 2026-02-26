@@ -29,6 +29,35 @@
     --radius-md: 20px;
 }
 
+
+/* ===============================
+   타이틀 영역 (Page Hero)
+=============================== */
+.page-hero {
+    padding: 36px 40px;
+    border-radius: 20px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.page-hero h1 {
+    font-size: 28px;
+    font-weight: 900;
+    color: #131d35; /* 다크 네이비 텍스트 */
+    margin: 0 0 10px 0;
+    letter-spacing: -0.5px;
+}
+
+.page-hero p {
+    font-size: 15px;
+    color: #6e7b8f; /* 부드러운 회색 텍스트 */
+    margin: 0;
+    font-weight: 500;
+}
+
+
 /* =========================
    BODY
 ========================= */
@@ -125,9 +154,30 @@ body {
     box-shadow: 0 20px 40px rgba(40, 60, 120, 0.25), 0 0 0 6px rgba(255, 255, 255, 0.35);
 }
 
-.profile-meta { display: flex; flex-direction: column; gap: 14px; align-items: center; }
-.nickname { font-size: 22px; font-weight: 900; display: flex; align-items: center; gap: 8px; color: rgba(19, 29, 53, 0.92); }
+.profile-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 14px; align-items: center;
+}
+
+.nickname {
+    font-size: 22px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(19, 29, 53, 0.92);
+    }
+
 .age { font-size: 15px; font-weight: 700; color: rgba(60, 70, 90, 0.6); }
+
+
+.nickname .nation {
+    font-size: 20px;
+    color: #3b4252;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
 
 /* 언어, 온도 블록 */
 .profile-lang-block {

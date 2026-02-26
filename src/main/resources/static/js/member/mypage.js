@@ -653,6 +653,11 @@ async function loadProfileViewList() {
 </button>
 `;
 
+    const btn = item.querySelector(".btn-view");
+    btn.addEventListener("click", () => {
+        location.href = `${CONTEXT_PATH}member/userPage/${user.memberId}`;
+    });
+
       wrap.appendChild(item);
     });
 

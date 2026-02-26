@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadTargetChatActivity(PAGE_USER_ID);
     await loadReactionStatus();
 
+    // 방문 기록
+    recordProfileView();
+
     const likeBtn = document.getElementById("likeBtn");
         if (likeBtn) {
             likeBtn.addEventListener("click", () => handleUserReaction("LIKE"));
@@ -19,6 +22,29 @@ document.addEventListener("DOMContentLoaded", async () => {
             dislikeBtn.addEventListener("click", () => handleUserReaction("DISLIKE"));
         }
 });
+
+
+// 방문 기록 남기기
+async function recordProfileView() {
+    try {
+        // 우리가 보고 있는 페이지 주인의 숫자 ID (PAGE_USER_ID)를 주소에 넣어서 POST 요청!
+        const res = await authFetch(`${CONTEXT_PATH}api/profile-views/${PAGE_USER_ID}`, {
+            method: 'POST'
+        });
+
+        // 결과 확인 (디버깅용 - 나중에 지우셔도 됩니다)
+        if (res.ok) {
+            console.log(`[방문 기록 성공] 대상 유저 ID: ${PAGE_USER_ID}`);
+        } else if (res.status === 401) {
+            console.log("로그인하지 않은 유저의 방문이므로 기록하지 않습니다.");
+        } else {
+            console.error("방문 기록 실패:", res.status);
+        }
+    } catch (e) {
+        console.error("방문 기록 전송 중 에러:", e);
+    }
+}
+
 
 /* ===============================
    관심사 로드 (특정 유저용)
