@@ -51,16 +51,34 @@ public class AdminDashboardController {
 		List<Object[]> rows;
 		
 		if ("users".equals(type)) {
-			rows = userRepository.countStatsDaily();
+			rows = switch (range) {
+				case "weekly" -> userRepository.countWeeklyStats();
+				case "monthly" -> userRepository.countMonthlyStats();
+				default -> userRepository.countDailyStats();
+			};
 			
 		} else if ("posts".equals(type)) {
-			// ✅ 공지 + 커뮤니티 게시글 합산
-			List<Object[]> noticeRows = noticeRepository.countStatsDaily();
-			List<Object[]> boardRows  = boardRepository.countStatsDaily();
-			rows = mergeStats(noticeRows, boardRows);
+			rows = switch (range) {
+				case "weekly" -> mergeStats(
+						noticeRepository.countWeeklyStats(),
+						boardRepository.countWeeklyStats()
+				);
+				case "monthly" -> mergeStats(
+						noticeRepository.countMonthlyStats(),
+						boardRepository.countMonthlyStats()
+				);
+				default -> mergeStats(
+						noticeRepository.countDailyStats(),
+						boardRepository.countDailyStats()
+				);
+			};
 			
 		} else {
-			rows = inquiryRepository.countStatsDaily();
+			rows = switch (range) {
+				case "weekly" -> inquiryRepository.countWeeklyStats();
+				case "monthly" -> inquiryRepository.countMonthlyStats();
+				default -> inquiryRepository.countDailyStats();
+			};
 		}
 		
 		List<String> labels = new ArrayList<>();
