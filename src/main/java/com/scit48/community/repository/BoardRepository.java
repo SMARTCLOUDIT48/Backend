@@ -46,6 +46,35 @@ public interface BoardRepository
 	Slice<BoardEntity> findByCategoryName(String categoryName, Pageable pageable);
 	
 	
+	// 마이페이지 - 내 게시글 전용 쿼리 (일상 카테고리 제외)
+	// 1. 카테고리/검색어 없음 (전체 기본)
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.category.name != '일상'")
+	Page<BoardEntity> findMyBoardAll(@Param("memberId") String memberId, Pageable pageable);
+	
+	// 2. 카테고리만 선택됨
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.category.name = :cateName")
+	Page<BoardEntity> findMyBoardByCategory(@Param("memberId") String memberId, @Param("cateName") String cateName, Pageable pageable);
+	
+	// 3. 검색어만 있음 (전체 중 검색)
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.category.name != '일상' AND b.title LIKE %:keyword%")
+	Page<BoardEntity> findMyBoardByTitle(@Param("memberId") String memberId, @Param("keyword") String keyword, Pageable pageable);
+	
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.category.name != '일상' AND b.content LIKE %:keyword%")
+	Page<BoardEntity> findMyBoardByContent(@Param("memberId") String memberId, @Param("keyword") String keyword, Pageable pageable);
+	
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.category.name != '일상' AND (b.title LIKE %:keyword% OR b.content LIKE %:keyword%)")
+	Page<BoardEntity> findMyBoardByBoth(@Param("memberId") String memberId, @Param("keyword") String keyword, Pageable pageable);
+	
+	// 4. 카테고리 + 검색어 동시 적용
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.category.name = :cateName AND b.title LIKE %:keyword%")
+	Page<BoardEntity> findMyBoardByCategoryAndTitle(@Param("memberId") String memberId, @Param("cateName") String cateName, @Param("keyword") String keyword, Pageable pageable);
+	
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.category.name = :cateName AND b.content LIKE %:keyword%")
+	Page<BoardEntity> findMyBoardByCategoryAndContent(@Param("memberId") String memberId, @Param("cateName") String cateName, @Param("keyword") String keyword, Pageable pageable);
+	
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.category.name = :cateName AND (b.title LIKE %:keyword% OR b.content LIKE %:keyword%)")
+	Page<BoardEntity> findMyBoardByCategoryAndBoth(@Param("memberId") String memberId, @Param("cateName") String cateName, @Param("keyword") String keyword, Pageable pageable);
+	
 	
 	// userPage 게시판 목록 출력용
 	// 1. 검색어가 없을 때 (일상피드 제외)

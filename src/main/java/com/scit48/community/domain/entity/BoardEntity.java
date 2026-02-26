@@ -65,7 +65,7 @@ public class BoardEntity {
 	
 	
 	@CreatedDate
-	@Column(name = "created_at", updatable = false)
+	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 	
 	// [수정] 비즈니스 로직 (좋아요 증가/감소 메서드)
