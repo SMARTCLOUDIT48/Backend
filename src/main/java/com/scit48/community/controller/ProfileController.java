@@ -2,6 +2,7 @@ package com.scit48.community.controller;
 
 import com.scit48.common.dto.UserDTO;
 import com.scit48.community.domain.dto.BoardDTO;
+import com.scit48.community.service.BoardService;
 import com.scit48.community.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ProfileController {
 	
 	private final ProfileService ps;
+	private final BoardService bs;
 	
 	@GetMapping("/{memberId}")
 	public String userPage (@PathVariable("memberId") String memberId,
@@ -46,10 +48,24 @@ public class ProfileController {
 		return "userPage";
 	}
 	
-	@GetMapping("/{memberId}/userBoardList")
-	public String userBoardList (@PathVariable("memberId") String memberId) {
+	
+	/**
+	 * 유저 페이지 내에서 특정 게시글 상세 보기
+	 */
+	@GetMapping("/{memberId}/read/{boardId}")
+	public String readUserBoard(
+			@PathVariable("memberId") String memberId,
+			@PathVariable("boardId") Long boardId,
+			Model model) {
 		
-		return "userBoardList";
+		log.info("{} 유저 페이지에서 게시글 {} 조회 요청", memberId, boardId);
+		
+		BoardDTO boardDTO = bs.read(boardId);
+		
+		model.addAttribute("board", boardDTO);
+		model.addAttribute("memberId", memberId); // '목록으로 돌아가기' 버튼 등을 위해 넘겨줌
+		
+		return "boardRead";
 	}
 	
 	

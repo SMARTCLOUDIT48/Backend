@@ -225,7 +225,7 @@ public class BoardService {
 	}
 	
 	@Transactional
-	public BoardDTO readUpdate(Long boardId) {
+	public BoardDTO read(Long boardId) {
 		// 1. 조회수 증가
 		br.updateHits(boardId);
 		

@@ -46,14 +46,24 @@ public interface BoardRepository
 	Slice<BoardEntity> findByCategoryName(String categoryName, Pageable pageable);
 	
 	
-	/*
-	 * 일상공유 피드용 전체 조회 (SNS 스타일)
-	 * @EntityGraph를 사용하여 연관된 Member 정보를 한 번의 쿼리로 가져옵니다.
-	 * 이를 통해 피드 목록에서 작성자의 닉네임, 프로필 이미지를 효율적으로 표시할 수 있습니다.
-	@Override
-	@EntityGraph(attributePaths = {"member", "category"})
-	Page<BoardEntity> findAll(Pageable pageable);
-	*/
+	
+	// userPage 게시판 목록 출력용
+	// 1. 검색어가 없을 때 (일상피드 제외)
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.title != '일상 피드입니다.'")
+	Page<BoardEntity> findAllByMemberId(@Param("memberId") String memberId, Pageable pageable);
+	
+	// 2. 제목으로 검색 (일상피드 제외)
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.title != '일상 피드입니다.' AND b.title LIKE %:keyword%")
+	Page<BoardEntity> findByMemberIdAndTitle(@Param("memberId") String memberId, @Param("keyword") String keyword, Pageable pageable);
+	
+	// 3. 내용으로 검색 (일상피드 제외)
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.title != '일상 피드입니다.' AND b.content LIKE %:keyword%")
+	Page<BoardEntity> findByMemberIdAndContent(@Param("memberId") String memberId, @Param("keyword") String keyword, Pageable pageable);
+	
+	// 4. 제목 + 내용으로 검색 (일상피드 제외)
+	@Query("SELECT b FROM BoardEntity b WHERE b.user.memberId = :memberId AND b.title != '일상 피드입니다.' AND (b.title LIKE %:keyword% OR b.content LIKE %:keyword%)")
+	Page<BoardEntity> findByMemberIdAndTitleOrContent(@Param("memberId") String memberId, @Param("keyword") String keyword, Pageable pageable);
+	
 	
 	// 관리자 페이지에서 불러오기 용
 	@Query(
