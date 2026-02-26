@@ -8,12 +8,12 @@
 
     <link rel="stylesheet" th:href="@{/css/userPage.css}" />
     <link rel="stylesheet" th:href="@{/css/layout.css}">
-
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        const CONTEXT_PATH = /*[[@{/}]]*/ "/";
-        /*]]>*/
-    </script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const CONTEXT_PATH = /*[[@{/}]]*/ "/";
+    const TARGET_USER_ID = /*[[${user.id}]]*/ 0;
+    /*]]>*/
+</script>
     <script type="module" th:src="@{/js/member/userPage.js}"></script>
 </head>
 
@@ -43,7 +43,7 @@
                         <div class="likeAndProfileContainer">
                             <div class="like-dislike">
                                 <button id="likeBtn" class="likeBtn">
-                                    👍 <span id="likeCount1">0</span>
+                                    👍 <span id="likeCount1" th:text="${user.likeCount != null ? user.likeCount : 0}">0</span>
                                 </button>
                                 <button id="dislikeBtn" class="likeBtn">
                                     👎
@@ -56,7 +56,6 @@
                                 <span id="nativeLang" class="lang-flag">🇰🇷</span>
                                 <span class="arrow">→</span>
                                 <span id="studyLang" class="lang-flag">🇯🇵</span>
-
                                 <span id="levelLanguage" class="level-text" th:text="${user.levelLanguage != null ? user.levelLanguage : 'BEGINNER'}">Intermediate</span>
                             </div>
 
@@ -82,31 +81,94 @@
                     </div>
                 </div>
 
-                <div class="glass card mini-card">
-                    <div class="mini-head" style="margin-bottom: 8px;">
-                        <h4>💌 현재 연락 중인 이성</h4>
-                    </div>
-                    <div style="display: flex; align-items: baseline; justify-content: flex-end; gap: 4px;">
-                        <strong class="extra-value" id="chattingCount">0</strong>
-                        <span class="extra-unit">명</span>
-                    </div>
-                </div>
+    <div class="glass card mini-card">
+        <div class="mini-head" style="margin-bottom: 8px;">
+            <h4>💌 현재 연락 중인 이성</h4>
+        </div>
+    
+        <div style="display:flex; align-items:center; gap:10px; justify-content:space-between;">
+    
+            <span id="hotLevel" class="hot-level"
+                style="font-size:14px; font-weight:700; padding:6px 12px; border-radius:20px;">
+            </span>
+    
+            <div style="display:flex; align-items:baseline; gap:4px;">
+                <strong class="extra-value" id="chattingCount" style="font-size:22px; font-weight:900; color: rgba(70, 200, 120, 0.95);">
+                    0
+                </strong>
+                <span class="extra-unit" style="font-size:14px; font-weight:600; color:rgba(60, 70, 90, 0.75);">
+                    명
+                </span>
+            </div>
+    
+        </div>
+    </div>
             </aside>
 
             <section class="content">
-                <div class="glass card content-card">
+                <div class="glass card content-card" style="display: flex; flex-direction: column; height: 100%;">
+
                     <div class="card-head">
                         <div>
                             <h2 th:text="|${user.nickname}님의 게시글|">닉네임님의 게시글</h2>
                             <p>작성한 게시글 목록을 확인할 수 있습니다.</p>
                         </div>
-                        <a th:href="@{/member/userPage/{id}/userBoardList(id=${user.memberId})}" class="btn-member" style="text-decoration: none;">
-                            더보기
-                        </a>
                     </div>
 
-                    <div class="reco-grid" id="userBoardGrid">
-                        <p class="muted">게시글을 불러오는 중입니다...</p>
+                    <form method="get" th:action="@{|/member/userPage/${user.memberId}|}" class="search-form" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                        <select name="searchType" class="form-select" style="padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.7); outline: none;">
+                            <option value="title" th:selected="${searchType == 'title'}">제목</option>
+                            <option value="content" th:selected="${searchType == 'content'}">내용</option>
+                            <option value="titleContent" th:selected="${searchType == 'titleContent'}">제목+내용</option>
+                        </select>
+                        <input type="text" name="searchKeyword" th:value="${searchKeyword}" placeholder="검색어를 입력하세요"
+                               style="flex: 1; padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.7); outline: none;">
+                        <button type="submit" class="btn btn-member" style="padding: 8px 18px;">검색</button>
+                    </form>
+
+                    <div class="board-list" style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 30px;">
+
+                        <div th:if="${boardPage == null or boardPage.isEmpty()}" class="muted" style="text-align: center; padding: 40px 0; font-weight: 600;">
+                            등록된 게시글이 없습니다.
+                        </div>
+
+                        <th:block th:if="${boardPage != null and !boardPage.isEmpty()}">
+                            <a th:each="board : ${boardPage.content}"
+                               th:href="@{|/member/userPage/${user.memberId}/read/${board.boardId}|}"
+                               class="glass" style="padding: 18px 20px; border-radius: 14px; text-decoration: none; display: flex; flex-direction: column; gap: 6px; transition: transform 0.2s, box-shadow 0.2s;">
+
+                                <h4 th:text="${board.title}" style="color: #131d35; font-size: 16px; font-weight: 800; margin:0;">게시글 제목</h4>
+
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                                    <span class="muted" th:text="${#temporals.format(board.createdDate, 'yyyy-MM-dd HH:mm')}" style="font-size: 13px;">2024-05-20 15:48</span>
+                                    <span style="font-size: 12px; color: #4a6cff; font-weight: 700;">조회 <span th:text="${board.viewCount}">0</span></span>
+                                </div>
+                            </a>
+                        </th:block>
+                    </div>
+
+                    <div class="pagination" th:if="${boardPage != null and !boardPage.isEmpty()}" style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: auto;">
+
+                        <a th:if="${boardPage.hasPrevious()}"
+                           th:href="@{|/member/userPage/${user.memberId}?page=${boardPage.number}&searchType=${searchType}&searchKeyword=${searchKeyword}|}"
+                           style="text-decoration: none; color: #4a6cff; font-weight: 800; padding: 6px 12px; background: rgba(255,255,255,0.6); border-radius: 8px;">
+                            &laquo; 이전
+                        </a>
+
+                        <div style="display: flex; gap: 12px;">
+                            <a th:each="pageNum : ${#numbers.sequence(1, boardPage.totalPages)}"
+                               th:href="@{|/member/userPage/${user.memberId}?page=${pageNum}&searchType=${searchType}&searchKeyword=${searchKeyword}|}"
+                               th:text="${pageNum}"
+                               th:style="${pageNum == boardPage.number + 1 ? 'font-weight: 900; color: #ff6f91; text-decoration: underline; text-underline-offset: 4px;' : 'text-decoration: none; color: #555; font-weight: 600;'}">
+                            </a>
+                        </div>
+
+                        <a th:if="${boardPage.hasNext()}"
+                           th:href="@{|/member/userPage/${user.memberId}?page=${boardPage.number + 2}&searchType=${searchType}&searchKeyword=${searchKeyword}|}"
+                           style="text-decoration: none; color: #4a6cff; font-weight: 800; padding: 6px 12px; background: rgba(255,255,255,0.6); border-radius: 8px;">
+                            다음 &raquo;
+                        </a>
+
                     </div>
                 </div>
             </section>

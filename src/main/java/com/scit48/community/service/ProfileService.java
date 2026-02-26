@@ -5,6 +5,8 @@ import com.scit48.common.dto.UserDTO;
 import com.scit48.common.enums.InterestType;
 import com.scit48.common.repository.UserInterestRepository;
 import com.scit48.common.repository.UserRepository;
+import com.scit48.community.domain.dto.BoardDTO;
+import com.scit48.community.domain.entity.BoardEntity;
 import com.scit48.community.repository.BoardRepository;
 import com.scit48.community.repository.CategoryRepository;
 import com.scit48.recommend.domain.dto.RecommendDTO;
@@ -12,6 +14,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -67,6 +71,40 @@ public class ProfileService {
 		
 		return userInterestRepository.findInterestsByUserId(me.getId());
 		
+	}
+	
+	@Transactional
+	public Page<BoardDTO> getUserBoards(String memberId, Pageable pageable, String searchType, String searchKeyword) {
+		
+		Page<BoardEntity> boardEntities;
+		
+		// 1. 검색어가 있는 경우 분기 처리
+		if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+			if ("title".equals(searchType)) {
+				boardEntities = br.findByMemberIdAndTitle(memberId, searchKeyword, pageable);
+			} else if ("content".equals(searchType)) {
+				boardEntities = br.findByMemberIdAndContent(memberId, searchKeyword, pageable);
+			} else if ("titleContent".equals(searchType)) {
+				boardEntities = br.findByMemberIdAndTitleOrContent(memberId, searchKeyword, pageable);
+			} else {
+				boardEntities = br.findAllByMemberId(memberId, pageable);
+			}
+		} else {
+			// 2. 검색어가 없는 경우 전체 목록 조회
+			boardEntities = br.findAllByMemberId(memberId, pageable);
+		}
+		
+		// 3. Page<Entity> 를 Page<DTO> 로 변환하여 반환
+		return boardEntities.map(entity -> BoardDTO.builder()
+				.id(entity.getUser().getId())
+				.title(entity.getTitle())
+				.content(entity.getContent())
+				.viewCount(entity.getViewCount())
+				.createdDate(entity.getCreatedAt())
+				.boardId(entity.getBoardId())
+				// 필요하다면 좋아요 수 등 다른 필드도 매핑
+				.build()
+		);
 	}
 	
 }

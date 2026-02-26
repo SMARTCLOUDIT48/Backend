@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="${title} + ' | LANG:MATE'">고객센터 | LANG:MATE</title>
+    <title th:text="${title} + ' | Musubi'">Musubi -  고객센터</title>
 
     <link rel="stylesheet" th:href="@{/css/layout.css}">
     <link rel="stylesheet" th:href="@{/css/notice/notice.css}" />
@@ -72,7 +72,7 @@
             </span>
 
                     <span class="notice-date"
-                          th:text="${item.createdAt}">
+                          th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}">
                 2026-01-27
             </span>
 

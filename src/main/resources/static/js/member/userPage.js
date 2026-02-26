@@ -1,6 +1,7 @@
 import { authFetch } from "/js/common/authFetch.js";
 console.log("[userPage.js] loaded (Hybrid Mode)");
 
+
 document.addEventListener("DOMContentLoaded", async () => {
 
   // 현재 URL에서 타겟 유저의 memberId 추출 (예: /member/userPage/user123)
@@ -25,8 +26,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadTargetRecommendList(targetMemberId);
 
   // (여기에 게시글 수, 댓글 수 등 통계를 가져오는 fetch 함수를 추가하셔도 좋습니다)
-
-
+ 
+ 
+  // 현재 채팅중인 사람수
+await loadTargetChatActivity(TARGET_USER_ID);
+  
   /* ===============================
      3. 좋아요/싫어요 이벤트
   =============================== */
@@ -201,4 +205,51 @@ function getFlag(nation) {
 function getLanguageFlag(lang) {
   const map = { KOREAN: "🇰🇷", JAPANESE: "🇯🇵" };
   return map[lang] ?? "❓";
+}
+
+
+/* ===============================
+   💌 채팅 활동량 로드
+=============================== */
+async function loadTargetChatActivity(userId) {
+  try {
+
+    const res = await authFetch(`${CONTEXT_PATH}chat/activity/${userId}`);
+
+
+    if (!res.ok) {
+      console.error("API 호출 실패");
+      return;
+    }
+
+    const count = await res.json();
+
+    const countEl = document.getElementById("chattingCount");
+    const hotLevelEl = document.getElementById("hotLevel");
+
+    if (countEl) countEl.textContent = count;
+    if (!hotLevelEl) return;
+
+    if (count === 0) {
+  hotLevelEl.textContent = "지금 대화하면 칼답 가능성! ✨";
+
+  hotLevelEl.style.color = "#6e7b8f";
+}
+else if (count <= 4) {
+  hotLevelEl.textContent = "오늘 대화 분위기가 좋은 분이네요 💬";
+  hotLevelEl.style.color = "#ff9f1c";
+}
+else if (count <= 10) {
+  hotLevelEl.textContent = "인기멤버에요! 🔥";
+  hotLevelEl.style.color = "#ff4d4f";
+}
+else {
+  hotLevelEl.textContent = "인플루언서급이에요! 👑";
+  hotLevelEl.style.color = "#d4af37";
+  hotLevelEl.style.fontWeight = "900";
+}
+
+  } catch (err) {
+    console.error("❌ 타겟 활동량 조회 실패:", err);
+  }
 }

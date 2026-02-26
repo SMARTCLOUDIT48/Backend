@@ -63,7 +63,16 @@ if (result.status !== "SUCCESS") return;
 const user = result.data;
 
 const myUserId = user.id;
-loadMyActivity(myUserId);
+    loadMyActivity(myUserId);
+
+    //  게시글 개수 로드
+const countRes = await authFetch(`${CONTEXT_PATH}api/members/me/post-count`);
+if (countRes.ok) {
+  const countResult = await countRes.json();
+  document.getElementById("postCount").textContent =
+    countResult.data.toLocaleString();
+}
+    
 
     nicknameEl.textContent = user.nickname;
     ageEl.textContent = `(${user.age})`;
@@ -517,7 +526,7 @@ else if (count >= 1 && count <= 4) {
   hotLevelEl.className = "hot-level hot-2";
 }
 else if (count >= 5 && count <= 10) {
-  hotLevelEl.textContent = "인기멤버에요 🔥!";
+  hotLevelEl.textContent = "인기멤버에요! 🔥";
   hotLevelEl.className = "hot-level hot-3";
 }
 else {
@@ -559,13 +568,26 @@ async function loadRecentChats() {
         const row = document.createElement("div");
         row.className = "mini-row";
 
-        row.innerHTML = `
-            <div class="mini-avatar">💬</div>
-            <div class="mini-text">
-                <div class="mini-name">${room.roomName}</div>
-                <div class="mini-sub">채팅 계속하기</div>
-            </div>
-        `;
+
+let profileSrc = "/images/profile/default.png";
+
+if (room.opponentProfileImg && room.opponentProfileImgName) {
+  const basePath = room.opponentProfileImg.endsWith("/")
+    ? room.opponentProfileImg
+    : room.opponentProfileImg + "/";
+
+  profileSrc = basePath + room.opponentProfileImgName;
+}
+
+row.innerHTML = `
+  <div class="mini-avatar">
+    <img src="${profileSrc}" alt="profile">
+  </div>
+  <div class="mini-text">
+    <div class="mini-name">${room.roomName}</div>
+    <div class="mini-sub">채팅 계속하기</div>
+  </div>
+`;
 
         row.onclick = () => {
             sessionStorage.setItem("openRoomId", room.roomId);
@@ -578,6 +600,8 @@ async function loadRecentChats() {
         console.error("최근 대화 로드 실패:", e);
     }
 }
+
+
 
 /* ===============================
    내 프로필을 본 사람
@@ -667,3 +691,5 @@ document.addEventListener("click", async (e) => {
     card.style.pointerEvents = "auto";
   }
 });
+
+

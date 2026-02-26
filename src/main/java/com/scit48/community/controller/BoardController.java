@@ -294,7 +294,7 @@ public class BoardController {
 	@GetMapping("/read/{boardId}")
 	public String read(@PathVariable Long boardId, Model model, HttpSession session) {
 		// 서비스에서 데이터 가져오기
-		BoardDTO boardDTO = bs.readUpdate(boardId);
+		BoardDTO boardDTO = bs.read(boardId);
 		
 		// 현재 로그인한 사용자 ID (수정/삭제 버튼 표시 여부 확인용)
 		Long loginUserId = (Long) session.getAttribute("loginUserId");

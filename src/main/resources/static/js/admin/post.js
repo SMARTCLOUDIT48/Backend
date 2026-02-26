@@ -27,6 +27,12 @@
   const modalTitle = document.getElementById("modalTitle");
   const modalContent = document.getElementById("modalContent");
 
+  const modalImageWrapper = document.getElementById("modalImageWrapper");
+  const modalImagePreview = document.getElementById("modalImagePreview");
+  const modalImageFile = document.getElementById("modalImageFile");
+  const noImageText = document.getElementById("noImageText");
+  const changeImageBtn = document.getElementById("changeImageBtn");
+
   /* =========================
      상세 → 모달 열기
   ========================= */
@@ -43,8 +49,20 @@
         return res.json();
       })
       .then(data => {
+
         modalTitle.value = data.title;
         modalContent.value = data.content;
+
+        if (data.imagePath && data.imagePath.trim() !== "") {
+          modalImagePreview.src = data.imagePath;
+          modalImageWrapper.style.display = "block";
+          noImageText.style.display = "none";
+        } else {
+          modalImageWrapper.style.display = "none";
+          noImageText.style.display = "block";
+        }
+
+        modalImageFile.value = "";
         modal.style.display = "flex";
       })
       .catch(() => {
@@ -53,10 +71,38 @@
   });
 
   /* =========================
+     이미지 변경 버튼 → 파일창 열기
+  ========================= */
+  if (changeImageBtn) {
+    changeImageBtn.addEventListener("click", () => {
+      modalImageFile.click();
+    });
+  }
+
+  /* =========================
+     파일 선택 즉시 미리보기
+  ========================= */
+  modalImageFile.addEventListener("change", function () {
+    if (this.files && this.files[0]) {
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        modalImagePreview.src = e.target.result;
+        modalImageWrapper.style.display = "block";
+        noImageText.style.display = "none";
+      };
+
+      reader.readAsDataURL(this.files[0]);
+    }
+  });
+
+  /* =========================
      모달 닫기
   ========================= */
   modal.addEventListener("click", e => {
-    if (e.target === modal) modal.style.display = "none";
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
   });
 
   document.querySelector(".btn-cancel").addEventListener("click", () => {
@@ -64,22 +110,25 @@
   });
 
   /* =========================
-     수정 저장 (⭐ 핵심 수정)
+     수정 저장 (FormData)
   ========================= */
   document.querySelector(".btn-save").addEventListener("click", () => {
+
     if (!confirm("수정 내용을 저장하시겠습니까?")) return;
+
+    const formData = new FormData();
+    formData.append("id", modalPostId.value);
+    formData.append("board", modalBoard.value);
+    formData.append("title", modalTitle.value);
+    formData.append("content", modalContent.value);
+
+    if (modalImageFile.files[0]) {
+      formData.append("image", modalImageFile.files[0]);
+    }
 
     fetch("/admin/posts/update", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams({
-        id: modalPostId.value,
-        board: modalBoard.value,
-        title: modalTitle.value,
-        content: modalContent.value
-      })
+      body: formData
     })
       .then(res => {
         if (!res.ok) throw new Error();
