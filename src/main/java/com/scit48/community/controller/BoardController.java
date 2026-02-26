@@ -78,12 +78,14 @@ public class BoardController {
 	public String write(
 			BoardDTO boardDTO
 			, @AuthenticationPrincipal UserDetails user
+			, @RequestParam(name = "categoryId") Long categoryId  // [추가] HTML에서 보낸 숫자를 직접 받음
 			, @RequestParam(name = "upload", required = false)
 			MultipartFile upload, Model model
 	) {
 		
 		// 작성한 글 정보에 사용자 아이디 추가
 		boardDTO.setMemberId(user.getUsername());
+		boardDTO.setCategoryId(categoryId);
 		log.debug("저장할 글 정보: {}", boardDTO);
 		
 		// 업로드된 첨부파일
@@ -99,9 +101,9 @@ public class BoardController {
 			bs.write(boardDTO, uploadPath, upload);
 		} catch (Exception e) {
 			log.debug("예외 발생: {}", e.getMessage());
-			
+			e.printStackTrace();
 			model.addAttribute("error", "글 저장 중 오류가 발생했습니다.");
-			
+			model.addAttribute("userDTO", bs.getUserInfo(user));
 			return "redirect:/board/write";
 		}
 		
@@ -288,7 +290,7 @@ public class BoardController {
 	@GetMapping("/read/{boardId}")
 	public String read(@PathVariable Long boardId, Model model, HttpSession session) {
 		// 서비스에서 데이터 가져오기
-		BoardDTO boardDTO = bs.readUpdate(boardId);
+		BoardDTO boardDTO = bs.read(boardId);
 		
 		// 현재 로그인한 사용자 ID (수정/삭제 버튼 표시 여부 확인용)
 		Long loginUserId = (Long) session.getAttribute("loginUserId");

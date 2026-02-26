@@ -40,6 +40,7 @@ public class ProfileViewController {
      */
     private final ProfileViewService service;
 
+	// userPage 들어갈 때
     @PostMapping("/{targetId}")
     public void record(
             @AuthenticationPrincipal CustomUserDetails user,
