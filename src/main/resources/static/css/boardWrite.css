@@ -607,3 +607,60 @@ body {
     font-size: 22px;
   }
 }
+
+
+/* =========================
+   CUSTOM ALERT (Toast) - Glass Style
+========================= */
+#customAlert {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120px);
+
+    /* 기존 Glass 변수 활용 */
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(15px) saturate(150%);
+    -webkit-backdrop-filter: blur(15px) saturate(150%);
+
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 16px 32px;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+
+    /* Home 스타일의 그림자 활용 */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
+}
+
+#customAlert.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* 알림 아이콘 (원형 그라데이션) */
+.alert-icon-wrapper {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #ff6f91, #ff9f7f);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(255, 111, 145, 0.3);
+}
+
+#alertMessage {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--hero-text);
+    letter-spacing: -0.3px;
+}
