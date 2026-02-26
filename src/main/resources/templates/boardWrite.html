@@ -84,24 +84,70 @@
     <div th:replace="~{fragments/footer :: footer}"></div>
 </footer>
 
-<script>
+<script th:inline="javascript">
+    // 오늘 날짜 표시
     document.getElementById('currentDate').innerText = new Date().toLocaleDateString();
 
+    // 파일 선택 이벤트
     document.getElementById('file-upload').addEventListener('change', function(e) {
         if(e.target.files.length > 0) {
-            alert(e.target.files[0].name + " 파일이 선택되었습니다.");
+            showAlert(e.target.files[0].name + " 파일이 선택되었습니다.");
         }
     });
 
+    // 카테고리 동기화
     function syncCategory() {
         const selectBox = document.getElementById('viewSelect');
         const hiddenInput = document.getElementById('realCategoryId');
-        hiddenInput.value = selectBox.value; // 이제 "1", "2", "3" 같은 숫자가 들어갑니다.
+        hiddenInput.value = selectBox.value;
     }
+
+    // ✨ 기존 스타일 톤에 맞춘 알림 함수
+    function showAlert(message) {
+        const alertBox = document.getElementById('customAlert');
+        const alertMsg = document.getElementById('alertMessage');
+
+        alertMsg.innerText = message;
+        alertBox.classList.add('show');
+
+        // 3초 후 자동 소멸
+        setTimeout(() => {
+            alertBox.classList.remove('show');
+        }, 3000);
+    }
+
+    // 폼 제출 유효성 검사
+    document.querySelector('.write-card').addEventListener('submit', function(e) {
+        const categoryValue = document.getElementById('realCategoryId').value;
+        const title = document.querySelector('.input-title').value.trim();
+        const content = document.querySelector('.input-content').value.trim();
+
+        if (!categoryValue || categoryValue === "") {
+            e.preventDefault();
+            showAlert("글의 주제(카테고리)를 선택해 주세요.");
+            return false;
+        }
+
+        if (title === "") {
+            e.preventDefault();
+            showAlert("제목을 입력해 주세요.");
+            return false;
+        }
+
+        if (content === "") {
+            e.preventDefault();
+            showAlert("내용을 입력해 주세요.");
+            return false;
+        }
+    });
 
     window.onload = function() {
         syncCategory();
     };
 </script>
+<div id="customAlert">
+    <div class="alert-icon-wrapper">!</div>
+    <span id="alertMessage">메시지 내용</span>
+</div>
 </body>
 </html>
