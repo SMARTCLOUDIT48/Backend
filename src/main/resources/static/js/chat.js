@@ -705,7 +705,7 @@ function updatePartnerProfileUI(data) {
     if (imgTag) imgTag.src = imgPathName.replace("default.png/default.png", "default.png");
 
     const nationText = data.opponentNation || "Unknown";
-    document.getElementById("partnerNationText").innerText = nationText;
+    document.getElementById("partnerNationText").innerText = "";
 
     let flagEmoji = "🏳️";
     // 대소문자 구분을 없애기 위해 전부 대문자로 변환 (korea -> KOREA)
