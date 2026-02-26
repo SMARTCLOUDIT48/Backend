@@ -87,25 +87,25 @@
                     <article class="community-card">
                         <img th:src="@{/images/homeimgs/community_1.png}" alt="community 1" />
                         <div class="card-content">
-                            <h3>커뮤니티 공간</h3>
+                            <h3>커뮤니티 게시판</h3>
                             <p>
                                 카테고리별 게시판에서<br />
-                                Q&A, 모임, 일상 공유를 즐겨보세요
+                                Q&A, 모임을 즐겨보세요
                             </p>
-                            <a th:href="@{/community}"><button>커뮤니티 둘러보기</button></a>
+                            <a th:href="@{/board/list}"><button>커뮤니티 게시판 둘러보기</button></a>
                         </div>
                     </article>
 
                     <!-- 카드 2 (기본 활성) -->
                     <article class="community-card active">
-                        <img th:src="@{/images/homeimgs/community_2.jpg}" alt="community 2" />
+                        <img th:src="@{/images/homeimgs/community_5.png}" alt="community 2" />
                         <div class="card-content">
-                            <h3>오늘의 인기글</h3>
+                            <h3>커뮤니티 일상공유</h3>
                             <p>
-                                지금 커뮤니티에서 가장 화제가 된<br />
-                                게시글을 바로 확인해보세요
+                                지금 커뮤니티에서 회원들이 올린<br />
+                                일상공유 게시글을 바로 확인해보세요
                             </p>
-                            <button>오늘의 인기글</button>
+                            <a th:href="@{/board/feedView}"><button>일상공유 확인하기</button></a>
                         </div>
                     </article>
 
