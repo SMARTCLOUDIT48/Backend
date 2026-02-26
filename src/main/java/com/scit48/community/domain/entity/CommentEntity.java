@@ -33,6 +33,7 @@ public class CommentEntity {
 	private BoardEntity board;
 	
 	// 1. 필드 직접 추가
+	@Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private LocalDateTime createdAt;
 	
 	// 2. 저장 전 자동으로 현재 시간을 세팅하는 메소드
