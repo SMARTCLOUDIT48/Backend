@@ -220,7 +220,59 @@ public class BoardService {
 				.memberId(board.getUser().getMemberId())
 				.build());
 	}
-
+	
+	// 마이페이지 - 내 게시글 목록 조회 로직
+	// =========================================================
+	public Page<BoardDTO> getMyBoardList(String memberId, int page, String cateName, String searchType, String keyword) {
+		
+		// 페이지 요청 설정 (10개씩, 최신순 정렬)
+		int requestPage = (page <= 0) ? 0 : page - 1;
+		PageRequest pageRequest = PageRequest.of(requestPage, 10, Sort.by(Sort.Direction.DESC, "boardId"));
+		
+		Page<BoardEntity> entities;
+		
+		boolean hasCategory = (cateName != null && !cateName.isBlank());
+		boolean hasKeyword = (keyword != null && !keyword.isBlank());
+		
+		// 카테고리 여부와 검색어 여부에 따라 알맞은 Repository 메서드 호출
+		if (hasCategory && hasKeyword) {
+			// [카테고리 + 검색어]
+			switch (searchType) {
+				case "title": entities = br.findMyBoardByCategoryAndTitle(memberId, cateName, keyword, pageRequest); break;
+				case "content": entities = br.findMyBoardByCategoryAndContent(memberId, cateName, keyword, pageRequest); break;
+				case "both": entities = br.findMyBoardByCategoryAndBoth(memberId, cateName, keyword, pageRequest); break;
+				default: entities = br.findMyBoardByCategory(memberId, cateName, pageRequest);
+			}
+		} else if (hasCategory && !hasKeyword) {
+			// [카테고리만 적용]
+			entities = br.findMyBoardByCategory(memberId, cateName, pageRequest);
+		} else if (!hasCategory && hasKeyword) {
+			// [검색어만 적용 (일상 제외)]
+			switch (searchType) {
+				case "title": entities = br.findMyBoardByTitle(memberId, keyword, pageRequest); break;
+				case "content": entities = br.findMyBoardByContent(memberId, keyword, pageRequest); break;
+				case "both": entities = br.findMyBoardByBoth(memberId, keyword, pageRequest); break;
+				default: entities = br.findMyBoardAll(memberId, pageRequest);
+			}
+		} else {
+			// [조건 없음 (기본 목록)]
+			entities = br.findMyBoardAll(memberId, pageRequest);
+		}
+		
+		// Entity -> DTO 변환 후 반환
+		return entities.map(board -> BoardDTO.builder()
+				.id(board.getUser().getId())
+				.title(board.getTitle())
+				.boardId(board.getBoardId())
+				.viewCount(board.getViewCount())
+				.createdDate(board.getCreatedAt())
+				.categoryName(board.getCategory().getName())
+				.writerNickname(board.getUser().getNickname())
+				.profileImageName(board.getUser().getProfileImageName())
+				.memberId(board.getUser().getMemberId())
+				.build());
+	}
+	
 	@Transactional
 	public BoardDTO read(Long boardId) {
 		// 1. 조회수 증가

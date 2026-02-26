@@ -1,10 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>MUSUBI - 내 게시글</title>
+    <link rel="stylesheet" th:href="@{/css/boardList.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
+<header>
+    <div th:replace="~{fragments/header :: header}"></div>
+</header>
+
+<main class="container">
+    <section class="hero-section">
+        <div class="hero-content">
+            <h2><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-journal-bookmark" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M6 8V1h1v6.117L8.743 6.07a.5.5 0 0 1 .514 0L11 7.117V1h1v7a.5.5 0 0 1-.757.429L9 7.083 6.757 8.43A.5.5 0 0 1 6 8z"/>
+                <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
+                <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
+            </svg> 내 게시글</h2>
+            <p>내가 작성한 커뮤니티 게시글을 한눈에 모아보세요.</p>
+        </div>
+        <a href="/board/write" class="write-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+            <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
+        </svg>새 글 쓰기</a>
+    </section>
+
+    <form action="/member/mypage/myBoardList" method="get" class="filter-search-bar" id="searchForm">
+        <select name="cateName" class="filter-select" onchange="document.getElementById('searchForm').submit();">
+            <option value="" th:selected="${cateName == null or cateName == ''}">전체보기</option>
+            <option value="친구 찾기" th:selected="${cateName == '친구 찾기'}">친구 찾기</option>
+            <option value="질문" th:selected="${cateName == '질문'}">질문</option>
+            <option value="소모임" th:selected="${cateName == '소모임'}">소모임</option>
+        </select>
+
+        <div class="search-form">
+            <select name="searchType" class="search-select">
+                <option value="title" th:selected="${searchType == 'title'}">제목</option>
+                <option value="content" th:selected="${searchType == 'content'}">내용</option>
+                <option value="both" th:selected="${searchType == 'both'}">제목+내용</option>
+            </select>
+            <input type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요" th:value="${keyword}">
+            <button type="submit" class="search-btn">검색</button>
+        </div>
+    </form>
+
+    <div class="board-list-wrapper">
+        <table class="board-table">
+            <thead>
+            <tr>
+                <th width="10%">번호</th>
+                <th width="15%">카테고리</th>
+                <th width="55%">제목</th>
+                <th width="10%">작성일</th>
+                <th width="10%">조회수</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${boardList.isEmpty()}">
+                <td colspan="5" class="empty-message">작성한 게시글이 없습니다.</td>
+            </tr>
+
+            <tr th:each="board : ${boardList}">
+                <td th:text="${board.boardId}"></td>
+                <td>
+                    <span class="category-badge" th:text="${board.categoryName}">카테고리명</span>
+                </td>
+                <td class="title-cell">
+                    <a th:href="@{|/board/read/${board.boardId}|}" th:text="${board.title}">제목입니다</a>
+                    <span class="comment-count" th:if="${board.comments != null and board.comments.size() > 0}"
+                          th:text="'[' + ${board.comments.size()} + ']'">[2]</span>
+                </td>
+                <td th:text="${#temporals.format(board.createdDate, 'yyyy-MM-dd')}"></td>
+                <td th:text="${board.viewCount}">0</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" th:if="${!boardList.isEmpty()}">
+        <a th:href="@{/member/mypage/myBoardList(page=1, cateName=${cateName}, searchType=${searchType}, keyword=${keyword})}" class="page-btn first">First</a>
+
+        <a th:if="${boardList.first}" href="#" class="page-btn prev">Prev</a>
+        <a th:unless="${boardList.first}"
+           th:href="@{/member/mypage/myBoardList(page=${boardList.number}, cateName=${cateName}, searchType=${searchType}, keyword=${keyword})}"
+           class="page-btn prev">Prev</a>
+
+        <span th:each="page: ${#numbers.sequence(startPage, endPage)}">
+            <span th:if="${page == boardList.number + 1}" class="page-number current" th:text="${page}">1</span>
+            <a th:unless="${page == boardList.number + 1}"
+               th:href="@{/member/mypage/myBoardList(page=${page}, cateName=${cateName}, searchType=${searchType}, keyword=${keyword})}"
+               class="page-number" th:text="${page}">2</a>
+        </span>
+
+        <a th:if="${boardList.last}" href="#" class="page-btn next">Next</a>
+        <a th:unless="${boardList.last}"
+           th:href="@{/member/mypage/myBoardList(page=${boardList.number + 2}, cateName=${cateName}, searchType=${searchType}, keyword=${keyword})}"
+           class="page-btn next">Next</a>
+
+        <a th:href="@{/member/mypage/myBoardList(page=${boardList.totalPages}, cateName=${cateName}, searchType=${searchType}, keyword=${keyword})}" class="page-btn last">Last</a>
+    </div>
+</main>
+
+<footer>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</footer>
 
 </body>
 </html>
