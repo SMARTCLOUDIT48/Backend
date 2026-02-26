@@ -608,18 +608,22 @@ function checkPartnerActivity(partnerId) {
             badge.style.display = 'inline-block';
             badge.className = 'activity-badge';
 
-            if (count >= 11) {
-                badge.classList.add('badge-hot');
-                badge.innerHTML = `👑 인플루언서 (${count}명과 대화 중)`;
-            }
-            else if (count >= 6) {
-                badge.classList.add('badge-hot');
-                badge.innerHTML = `🔥 인기 (${count}명과 대화 중)`;
-            }
-            else {
-                badge.classList.add('badge-normal');
-                badge.innerHTML = `✨ 지금 대화하면 칼답 가능성!`;
-            }
+          if (count === 0) {
+    badge.classList.add('badge-normal');
+    badge.innerHTML = `지금 대화하면 칼답 가능성! ✨`;
+}
+else if (count >= 1 && count <= 4) {
+    badge.classList.add('badge-normal');
+    badge.innerHTML = `오늘 대화 분위기가 좋은 분이네요 💬 (${count}명)`;
+}
+else if (count >= 5 && count <= 10) {
+    badge.classList.add('badge-hot');
+    badge.innerHTML = `인기멤버에요! 🔥 (${count}명과 대화 중)`;
+}
+else {
+    badge.classList.add('badge-hot');
+    badge.innerHTML = `인플루언서급이에요! 👑 (${count}명과 대화 중)`;
+}
         })
         .catch(err => console.error("활동량 조회 실패:", err));
 }
