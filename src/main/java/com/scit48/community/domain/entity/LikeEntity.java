@@ -33,7 +33,10 @@ public class LikeEntity {
 	private BoardEntity board;
 	
 	@CreatedDate
-	@Column(name = "created_At", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(name = "created_At", nullable = false,
+			insertable = false,
+			updatable = false,
+			columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private LocalDateTime inputDate;
 	
 	
