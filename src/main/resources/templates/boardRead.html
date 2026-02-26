@@ -148,9 +148,17 @@
             </div>
         </div>
         <div class="bottom-nav">
-            <button type="button" class="list-btn" th:onclick="|location.href='@{/board/list}'|">
+
+            <button th:if="${memberId != null}" type="button" class="list-btn"
+                    th:onclick="|location.href='@{/member/userPage/{id}(id=${memberId})}'|">
                 게시글 목록
             </button>
+
+            <button th:unless="${memberId != null}" type="button" class="list-btn"
+                    th:onclick="|location.href='@{/board/list}'|">
+                게시글 목록
+            </button>
+
         </div>
     </div>
 </main>
