@@ -29,20 +29,19 @@
     </section>
 
     <div class="filter-search-bar">
-
         <select class="filter-select" onchange="location.href=this.value">
-            <option value="/board/list" th:selected="${cateName == null or cateName == ''}">전체보기</option>
-            <option value="/board/list?cateName=친구 찾기" th:selected="${cateName == '친구 찾기'}">친구 찾기</option>
-            <option value="/board/list?cateName=질문" th:selected="${cateName == '질문'}">질문</option>
-            <option value="/board/list?cateName=소모임" th:selected="${cateName == '소모임'}">소모임</option>
+            <option th:value="@{/board/list}" th:selected="${cateName == null or cateName == ''}">전체보기</option>
+            <option th:value="@{/board/list(cateName='친구 찾기')}" th:selected="${cateName == '친구 찾기'}">친구 찾기</option>
+            <option th:value="@{/board/list(cateName='질문')}" th:selected="${cateName == '질문'}">질문</option>
+            <option th:value="@{/board/list(cateName='소모임')}" th:selected="${cateName == '소모임'}">소모임</option>
         </select>
+
         <form action="/board/list" method="get" class="search-form">
             <select name="searchType" class="search-select">
                 <option value="title" th:selected="${searchType == 'title'}">제목</option>
                 <option value="content" th:selected="${searchType == 'content'}">내용</option>
                 <option value="writer" th:selected="${searchType == 'writer'}">작성자</option>
             </select>
-
             <input type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요" th:value="${keyword}">
             <button type="submit" class="search-btn">검색</button>
         </form>
@@ -68,7 +67,7 @@
             <tr th:each="board : ${boardList}">
                 <td th:text="${board.boardId}"></td>
                 <td>
-                    <span class="category-badge" th:text="${board.categoryName}">질문</span>
+                    <span class="category-badge" th:text="${board.categoryName}">카테고리명</span>
                 </td>
                 <td class="title-cell">
                     <a th:href="@{|/board/read/${board.boardId}|}" th:text="${board.title}">제목입니다</a>
@@ -77,20 +76,13 @@
                 </td>
 
                 <td class="writer-cell">
-                    <a th:if="${#authentication.name == board.memberId}"
-                       th:href="@{/member/mypage}"
-                       style="display: block; cursor: pointer;">
+                    <a th:if="${#authentication.name == board.memberId}" th:href="@{/member/mypage}">
                         <img th:src="${board.profileImageName != null ? '/images/profile/upload/' + board.profileImageName : '/images/default_profile.png'}"
-                             class="profile-img-sm"
-                             alt="프로필">
+                             class="profile-img-sm" alt="프로필">
                     </a>
-
-                    <a th:unless="${#authentication.name == board.memberId}"
-                       th:href="@{/member/userPage/{memberId}(memberId=${board.memberId})}"
-                       style="display: block; cursor: pointer;">
+                    <a th:unless="${#authentication.name == board.memberId}" th:href="@{/member/userPage/{memberId}(memberId=${board.memberId})}">
                         <img th:src="${board.profileImageName != null ? '/images/profile/upload/' + board.profileImageName : '/images/default_profile.png'}"
-                             class="profile-img-sm"
-                             alt="프로필">
+                             class="profile-img-sm" alt="프로필">
                     </a>
                     <span th:text="${board.writerNickname}"></span>
                 </td>
@@ -123,7 +115,6 @@
 
         <a th:href="@{/board/list(page=${boardList.totalPages}, cateName=${cateName}, searchType=${searchType}, keyword=${keyword})}" class="page-btn last">Last</a>
     </div>
-
 </main>
 
 <footer>
