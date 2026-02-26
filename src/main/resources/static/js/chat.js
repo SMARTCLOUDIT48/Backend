@@ -86,8 +86,17 @@ function loadChatRooms() {
 
                 const unreadDot = room.hasUnread ? `<span class="unread-dot"></span>` : ``;
 
+                // ✅ 백엔드에서 넘어오는 프로필 이미지 경로 조합 (없으면 기본 이미지)
+                let profileSrc = "/images/profile/default.png";
+                if (room.opponentProfileImg && room.opponentProfileImgName) {
+                    const basePath = room.opponentProfileImg.endsWith("/") ? room.opponentProfileImg : room.opponentProfileImg + "/";
+                    profileSrc = basePath + room.opponentProfileImgName;
+                }
+
                 li.innerHTML = `
-                    <div class="room-avatar">💬</div>
+                    <div class="room-avatar" style="overflow: hidden; border-radius: 50%;">
+                        <img src="${profileSrc}" alt="프로필" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
                     <div class="room-info">
                         <div class="room-name">
                             ${roomName}
@@ -410,6 +419,7 @@ function checkGrammar() {
             switchTab('kr');
         });
 }
+
 function switchTab(lang) {
     if (!aiData.corrected) return;
     document.getElementById("tabKr").className = (lang === 'kr') ? "ai-tab active" : "ai-tab";
@@ -417,7 +427,11 @@ function switchTab(lang) {
     const text = (lang === 'kr') ? aiData.explanation_kr : aiData.explanation_jp;
     document.getElementById("aiExplanationText").innerText = text || "설명 없음";
 }
-function closeAiModal() { document.getElementById("aiModal").style.display = 'none'; }
+
+function closeAiModal() {
+    document.getElementById("aiModal").style.display = 'none';
+}
+
 function applyCorrection() {
     if (aiData.corrected) {
         document.getElementById("msg").value = aiData.corrected;
@@ -452,6 +466,7 @@ function toggleRecording() {
         document.getElementById("btn-mic").classList.remove("recording");
     }
 }
+
 function cancelVoice() {
     currentVoiceBlob = null;
     document.getElementById("preview-box").style.display = "none";
@@ -534,6 +549,7 @@ function checkLoveSignal() {
         .catch(err => { console.error(err); alert("분석 실패!"); })
         .finally(() => { btnSpan.innerText = originalText; btn.disabled = false; if (overlay) overlay.style.display = "none"; });
 }
+
 function showLoveModal(data) {
     const modal = document.getElementById("loveModal");
     const scoreDiv = document.getElementById("loveScore");
@@ -547,7 +563,10 @@ function showLoveModal(data) {
     feedbackDiv.innerHTML = `<b>[평가]</b> ${data.comment}<br><br><b>[💡 조언]</b> ${data.advice}`;
     modal.style.display = "block";
 }
-function closeLoveModal() { document.getElementById("loveModal").style.display = "none"; }
+
+function closeLoveModal() {
+    document.getElementById("loveModal").style.display = "none";
+}
 
 function checkMessageScore() {
     var msgInput = document.getElementById("msg");
@@ -556,6 +575,7 @@ function checkMessageScore() {
     var btn = document.getElementById("btn-love-check");
     var originalHTML = btn.innerHTML;
     btn.innerText = "⏳"; btn.disabled = true;
+
     fetch('/api/ai/pre-check', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ "message": content })
@@ -563,30 +583,44 @@ function checkMessageScore() {
         .catch(err => { console.error(err); alert("오류 발생!"); })
         .finally(() => { btn.innerHTML = originalHTML; btn.disabled = false; });
 }
+
 function showLoveTooltip(data) {
     const tooltip = document.getElementById("loveTooltip");
     const scoreSpan = document.getElementById("tooltipScore");
     const feedbackDiv = document.getElementById("tooltipFeedback");
     const recommendBox = document.getElementById("tooltipRecommendBox");
+
     let emoji = "😐";
     if (data.score >= 90) emoji = "😍"; else if (data.score >= 70) emoji = "😘"; else if (data.score <= 30) emoji = "😱";
+
     scoreSpan.innerHTML = `${data.score}점 ${emoji} <span style="font-size:0.8rem; color:#666;">(${data.risk})</span>`;
     feedbackDiv.innerText = data.feedback;
+
     if (data.better_version && data.better_version.trim() !== "") {
         recommendBox.style.display = "block";
         recommendBox.innerHTML = `<span class="recommend-label">✨ 추천 멘트</span><div class="recommend-text">"${data.better_version}"</div>`;
         recommendBox.dataset.text = data.better_version;
-    } else { recommendBox.style.display = "none"; }
+    } else {
+        recommendBox.style.display = "none";
+    }
     tooltip.style.display = "block";
 }
+
 function applyTooltipCorrection() {
     const recommendBox = document.getElementById("tooltipRecommendBox");
     const newText = recommendBox.dataset.text;
     const msgInput = document.getElementById("msg");
-    if (newText) { msgInput.value = newText; closeLoveTooltip(); msgInput.focus(); }
+    if (newText) {
+        msgInput.value = newText;
+        closeLoveTooltip();
+        msgInput.focus();
+    }
 }
-function closeLoveTooltip() { document.getElementById("loveTooltip").style.display = "none"; }
-function getProfileImage(userId, userName) { return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&color=fff&rounded=true`; }
+
+function closeLoveTooltip() {
+    document.getElementById("loveTooltip").style.display = "none";
+}
+
 function checkPartnerActivity(partnerId) {
     if (!partnerId) return;
     fetch(`/chat/activity/${partnerId}`)
@@ -598,22 +632,22 @@ function checkPartnerActivity(partnerId) {
             badge.style.display = 'inline-block';
             badge.className = 'activity-badge';
 
-          if (count === 0) {
-    badge.classList.add('badge-normal');
-    badge.innerHTML = `지금 대화하면 칼답 가능성! ✨`;
-}
-else if (count >= 1 && count <= 4) {
-    badge.classList.add('badge-normal');
-    badge.innerHTML = `오늘 대화 분위기가 좋은 분이네요 💬 (${count}명)`;
-}
-else if (count >= 5 && count <= 10) {
-    badge.classList.add('badge-hot');
-    badge.innerHTML = `인기멤버에요! 🔥 (${count}명과 대화 중)`;
-}
-else {
-    badge.classList.add('badge-hot');
-    badge.innerHTML = `인플루언서급이에요! 👑 (${count}명과 대화 중)`;
-}
+            if (count === 0) {
+                badge.classList.add('badge-normal');
+                badge.innerHTML = `지금 대화하면 칼답 가능성! ✨`;
+            }
+            else if (count >= 1 && count <= 4) {
+                badge.classList.add('badge-normal');
+                badge.innerHTML = `오늘 대화 분위기가 좋은 분이네요 💬 (${count}명)`;
+            }
+            else if (count >= 5 && count <= 10) {
+                badge.classList.add('badge-hot');
+                badge.innerHTML = `인기멤버에요! 🔥 (${count}명과 대화 중)`;
+            }
+            else {
+                badge.classList.add('badge-hot');
+                badge.innerHTML = `인플루언서급이에요! 👑 (${count}명과 대화 중)`;
+            }
         })
         .catch(err => console.error("활동량 조회 실패:", err));
 }
@@ -674,11 +708,22 @@ function updatePartnerProfileUI(data) {
     document.getElementById("partnerNationText").innerText = nationText;
 
     let flagEmoji = "🏳️";
-    if (nationText === "대한민국" || nationText.includes("한국") || nationText === "KR") {
+    // 대소문자 구분을 없애기 위해 전부 대문자로 변환 (korea -> KOREA)
+    const upperNation = nationText.toUpperCase();
+
+    // 한국 (KR, KOR, KOREA, 대한민국, 한국 포함)
+    if (upperNation === "대한민국" || upperNation.includes("한국") || upperNation === "KR" || upperNation === "KOR" || upperNation.includes("KOREA")) {
         flagEmoji = "🇰🇷";
-    } else if (nationText === "일본" || nationText === "JP") {
+    }
+    // 일본 (JP, JPN, JAPAN, 일본 포함)
+    else if (upperNation === "일본" || upperNation.includes("일본") || upperNation === "JP" || upperNation === "JPN" || upperNation === "JAPAN") {
         flagEmoji = "🇯🇵";
     }
+    // 미국 (US, USA, AMERICA, 미국)
+    else if (upperNation === "미국" || upperNation === "US" || upperNation === "USA" || upperNation.includes("AMERICA")) {
+        flagEmoji = "🇺🇸";
+    }
+
     document.getElementById("partnerNationFlag").innerText = flagEmoji;
 
     document.getElementById("partnerIntro").innerText = data.opponentIntro || "자기소개가 없습니다.";
@@ -769,6 +814,7 @@ function showHeaderUnreadDot() {
     if (!dot) return;
     dot.style.display = "inline-block";
 }
+
 function hideHeaderUnreadDot() {
     const dot = document.getElementById("headerUnreadDot");
     if (!dot) return;
