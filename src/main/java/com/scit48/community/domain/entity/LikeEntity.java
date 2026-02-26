@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -32,11 +33,10 @@ public class LikeEntity {
 	@JoinColumn(name = "board_id")
 	private BoardEntity board;
 	
-	@CreatedDate
+	@CreationTimestamp
 	@Column(name = "created_At", nullable = false,
 			insertable = false,
-			updatable = false,
-			columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+			updatable = false)
 	private LocalDateTime inputDate;
 	
 	
