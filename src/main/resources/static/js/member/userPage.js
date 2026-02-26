@@ -1,167 +1,189 @@
 import { authFetch } from "/js/common/authFetch.js";
 console.log("[userPage.js] loaded (Hybrid Mode)");
 
+let currentReaction = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
+    // 페이지 로드 시 관심사 불러오기 실행
+    await loadInterestChips();
+    await loadTargetChatActivity(PAGE_USER_ID);
+    await loadReactionStatus();
 
-  // 현재 URL에서 타겟 유저의 memberId 추출 (예: /member/userPage/user123)
-  const pathParts = window.location.pathname.split('/');
-  const targetMemberId = pathParts[pathParts.length - 1];
+    const likeBtn = document.getElementById("likeBtn");
+        if (likeBtn) {
+            likeBtn.addEventListener("click", () => handleUserReaction("LIKE"));
+        }
 
-  if (!targetMemberId) {
-    console.error("대상 유저 ID를 찾을 수 없습니다.");
-    return;
-  }
-
-  /* ===============================
-     1. 이미 HTML에 타임리프로 닉네임, 프사 등 기본 정보가 다 그려졌으므로
-        기본 정보를 fetch로 또 가져오는 로직은 과감히 삭제했습니다!
-  =============================== */
-
-
-  /* ===============================
-     2. 타겟 유저의 관심사 및 추천 친구 데이터 로드 (이것만 JS가 담당)
-  =============================== */
-  await loadTargetInterestChips(targetMemberId);
-  await loadTargetRecommendList(targetMemberId);
-
-  // (여기에 게시글 수, 댓글 수 등 통계를 가져오는 fetch 함수를 추가하셔도 좋습니다)
- 
- 
-  // 현재 채팅중인 사람수
-await loadTargetChatActivity(TARGET_USER_ID);
-  
-  /* ===============================
-     3. 좋아요/싫어요 이벤트
-  =============================== */
-  const likeBtn = document.getElementById("likeBtn");
-  const dislikeBtn = document.getElementById("dislikeBtn");
-
-  if (likeBtn) {
-      likeBtn.addEventListener("click", async () => {
-          console.log(`${targetMemberId}님에게 좋아요 클릭! (API 연동 필요)`);
-      });
-  }
-
-  if (dislikeBtn) {
-      dislikeBtn.addEventListener("click", async () => {
-          console.log(`${targetMemberId}님에게 싫어요 클릭! (API 연동 필요)`);
-      });
-  }
+    const dislikeBtn = document.getElementById("dislikeBtn");
+        if (dislikeBtn) {
+            dislikeBtn.addEventListener("click", () => handleUserReaction("DISLIKE"));
+        }
 });
 
 /* ===============================
-   타겟 유저 관심사 로드
+   관심사 로드 (특정 유저용)
 =============================== */
-async function loadTargetInterestChips(memberId) {
+async function loadInterestChips() {
   try {
-    // 🚨 [주의] 백엔드에 이 경로의 @RestController API가 있어야 합니다!
-    const res = await authFetch(`${CONTEXT_PATH}api/members/${memberId}/interests`);
-    if (!res.ok) return;
+      const res = await authFetch(`${CONTEXT_PATH}api/member/userPage/${PAGE_MEMBER_ID}/interests`);
 
-    const result = await res.json();
-    renderInterestChips(result.data ?? []);
-  } catch (e) {
-    console.error(e);
-  }
+      if (!res.ok) {
+          console.error("관심사 API 실패:", res.status);
+          renderInterestChips([]);
+          return;
+      }
+
+      const result = await res.json();
+      console.log("관심사 응답 데이터:", result); // F12 콘솔에서 데이터가 잘 오는지 확인용!
+
+      const interests = result.data !== undefined ? result.data : (Array.isArray(result) ? result : []);
+      renderInterestChips(interests);
+    } catch (e) {
+      console.error("관심사 에러:", e);
+      renderInterestChips([]);
+    }
 }
 
 function renderInterestChips(interests) {
   const wrap = document.getElementById("interestChips");
-  if (!wrap) return;
+    if (!wrap) return;
 
-  wrap.innerHTML = "";
-
-  if (interests.length === 0) {
-    wrap.innerHTML = `<span class="chip empty">관심사 없음</span>`;
-    return;
-  }
-
-  interests.forEach(item => {
-    const chip = document.createElement("span");
-    chip.className = "chip";
-    chip.textContent = convertInterestToLabel(item);
-    wrap.appendChild(chip);
-  });
-}
-
-/* ===============================
-   타겟 유저 기준 추천 친구 로드
-=============================== */
-async function loadTargetRecommendList(memberId) {
-  const wrap = document.getElementById("recommendGrid");
-  if (!wrap) return;
-
-  try {
-    // 🚨 [주의] 백엔드에 이 경로의 @RestController API가 있어야 합니다!
-    const res = await authFetch(`${CONTEXT_PATH}api/recommend/${memberId}`);
-    if (!res.ok) {
-      wrap.innerHTML = `<p class="muted">추천 불러오기 실패</p>`;
-      return;
-    }
-
-    const list = await res.json();
     wrap.innerHTML = "";
 
-    if (!list || list.length === 0) {
-      wrap.innerHTML = `<p class="muted">추천 결과가 없습니다.</p>`;
+    if (!interests || interests.length === 0) {
+      wrap.innerHTML = `<span style="font-size:13px; color:#888; font-weight:600;">등록된 관심사가 없습니다.</span>`;
       return;
     }
 
-    list.slice(0, 4).forEach(user => {
-      const imagePath = user.profileImagePath && user.profileImageName
-          ? `${user.profileImagePath}/${user.profileImageName}`
-          : "/images/profile/default.png";
-
-      const interests = user.interests ?? [];
-      const visibleInterests = interests.slice(0, 3);
-
-      let interestsHtml = visibleInterests
-        .map(type => `<span class="tag">${convertInterestType(type)}</span>`)
-        .join("");
-
-      if (interests.length > 3) {
-        const extraCount = interests.length - 3;
-        interestsHtml += `<span class="tag more">+${extraCount}</span>`;
-      }
-
-      const item = document.createElement("article");
-      item.className = "reco";
-
-      item.innerHTML = `
-        <div class="reco-top">
-          <div class="reco-avatar">
-            <img src="${imagePath}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
-          </div>
-          <div class="reco-info">
-            <strong>${user.nickname}</strong>
-            <span class="flag">${getFlag(user.nation)}</span>
-            <div class="reco-sub-row">
-              <div class="lang">
-                ${getLanguageFlag(user.nativeLanguage)} → ${getLanguageFlag(user.studyLanguage)}
-              </div>
-              <div class="stars">${renderLevelStars(user.levelLanguage)}</div>
-            </div>
-            <div class="match">매칭 ${user.matchPoint ?? 0}%</div>
-          </div>
-        </div>
-        <div class="reco-tags">
-          ${interestsHtml || `<span class="tag empty">관심사 없음</span>`}
-        </div>
-      `;
-
-      item.addEventListener("click", () => {
-        location.href = `${CONTEXT_PATH}member/userPage/${user.id}`;
-      });
-
-      wrap.appendChild(item);
+    interests.forEach(item => {
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = convertInterestToLabel(item);
+      wrap.appendChild(chip);
     });
-
-  } catch (e) {
-    console.error(e);
-    wrap.innerHTML = `<p class="muted">오류 발생</p>`;
-  }
 }
+
+async function handleUserReaction(reactionType) {
+    try {
+        // 1. 백엔드 컨트롤러가 @RequestParam으로 받으므로, 쿼리 파라미터 형태로 만들어줍니다.
+        const params = new URLSearchParams({
+            toUserId: PAGE_USER_ID,    // 우리가 HTML 상단에 선언해둔 대상 유저의 PK 숫자!
+            reaction: reactionType     // 'LIKE' 또는 'DISLIKE'
+        });
+
+        // 2. POST 요청 전송
+        const res = await authFetch(`${CONTEXT_PATH}api/reactions?${params.toString()}`, {
+            method: 'POST'
+        });
+
+        // 3. 비로그인 예외 처리
+        if (res.status === 401) {
+            if (confirm("로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?")) {
+                location.href = '/login'; // 로그인 경로에 맞게 수정 가능
+            }
+            return;
+        }
+
+        // 4. 중복 클릭(이미 좋아요를 누름) 등 백엔드 에러 발생 시
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            alert(errorData.message || "이미 반응을 남기셨거나 처리 중 오류가 발생했습니다.");
+            return;
+        }
+
+        // 5. 서버 처리가 성공했다면 화면의 숫자와 온도계를 부드럽게 업데이트!
+        updateReactionUI(reactionType);
+
+    } catch (error) {
+        console.error("반응 전송 중 에러:", error);
+        alert("서버와 통신 중 문제가 발생했습니다.");
+    }
+}
+
+function updateReactionUI(clickedReaction) {
+    const likeCountSpan = document.getElementById("likeCount1");
+    const mannerSpan = document.getElementById("manner");
+    const mannerFill = document.querySelector(".manner-fill");
+
+    const likeBtn = document.getElementById("likeBtn");
+    const dislikeBtn = document.getElementById("dislikeBtn");
+
+    let currentLikes = parseInt(likeCountSpan.innerText) || 0;
+    let currentTemp = parseFloat(mannerSpan.innerText.replace("°C", "")) || 36.5;
+
+    if (clickedReaction === "LIKE") {
+        if (currentReaction === "LIKE") {
+            currentLikes -= 1;
+            currentTemp -= 0.1;
+            currentReaction = null;
+            likeBtn.classList.remove("active-like");
+        }
+        else if (currentReaction === "DISLIKE") {
+            currentLikes += 1;
+            currentTemp += 0.2;
+            currentReaction = "LIKE";
+            dislikeBtn.classList.remove("active-dislike");
+            likeBtn.classList.add("active-like");
+        }
+        else {
+            currentLikes += 1;
+            currentTemp += 0.1;
+            currentReaction = "LIKE";
+            likeBtn.classList.add("active-like");
+        }
+    }
+    else if (clickedReaction === "DISLIKE") {
+        if (currentReaction === "DISLIKE") {
+            currentTemp += 0.1;
+            currentReaction = null;
+            dislikeBtn.classList.remove("active-dislike");
+        }
+        else if (currentReaction === "LIKE") {
+            currentLikes -= 1;
+            currentTemp -= 0.2;
+            currentReaction = "DISLIKE";
+            likeBtn.classList.remove("active-like");
+            dislikeBtn.classList.add("active-dislike");
+        }
+        else {
+            currentTemp -= 0.1;
+            currentReaction = "DISLIKE";
+            dislikeBtn.classList.add("active-dislike");
+        }
+    }
+
+    if (likeCountSpan) likeCountSpan.innerText = currentLikes;
+    if (mannerSpan) {
+        const newTemp = currentTemp.toFixed(1);
+        mannerSpan.innerText = newTemp + "°C";
+        if (mannerFill) mannerFill.style.width = newTemp + "%";
+    }
+}
+
+async function loadReactionStatus() {
+    try {
+        const res = await authFetch(`${CONTEXT_PATH}api/reactions/status?toUserId=${PAGE_USER_ID}`);
+        if (!res.ok) return;
+
+        const result = await res.json();
+        const savedStatus = result.data; // "LIKE", "DISLIKE", 또는 null
+
+        const likeBtn = document.getElementById("likeBtn");
+        const dislikeBtn = document.getElementById("dislikeBtn");
+
+        // DB에서 가져온 상태에 맞춰 버튼 색상 활성화 및 변수 셋팅
+        if (savedStatus === "LIKE") {
+            currentReaction = "LIKE";
+            if (likeBtn) likeBtn.classList.add("active-like");
+        } else if (savedStatus === "DISLIKE") {
+            currentReaction = "DISLIKE";
+            if (dislikeBtn) dislikeBtn.classList.add("active-dislike");
+        }
+    } catch (e) {
+        console.error("반응 상태 로드 에러:", e);
+    }
+}
+
 
 /* ===============================
    유틸리티 함수 모음
@@ -178,7 +200,8 @@ const INTEREST_DETAIL_LABEL = {
 };
 
 function convertInterestToLabel(item) {
-  return INTEREST_DETAIL_LABEL[item.interestDetail] ?? INTEREST_DETAIL_LABEL[item.interest] ?? "알 수 없음";
+  const key = typeof item === 'object' ? (item.interestDetail || item.interest) : item;
+  return INTEREST_DETAIL_LABEL[key] ?? "알 수 없음";
 }
 
 function convertInterestType(type) {
@@ -213,43 +236,37 @@ function getLanguageFlag(lang) {
 =============================== */
 async function loadTargetChatActivity(userId) {
   try {
+      // 이제 userId로 정확히 숫자(예: 1, 2)가 들어갑니다!
+      const res = await authFetch(`${CONTEXT_PATH}chat/activity/${userId}`);
 
-    const res = await authFetch(`${CONTEXT_PATH}chat/activity/${userId}`);
+      if (!res.ok) {
+        console.error("채팅 API 호출 실패");
+        return;
+      }
 
+      const count = await res.json();
+      const countEl = document.getElementById("chattingCount");
+      const hotLevelEl = document.getElementById("hotLevel");
 
-    if (!res.ok) {
-      console.error("API 호출 실패");
-      return;
+      if (countEl) countEl.textContent = count;
+      if (!hotLevelEl) return;
+
+      if (count === 0) {
+        hotLevelEl.textContent = "지금 대화하면 칼답 가능성! ✨";
+        hotLevelEl.style.color = "#6e7b8f";
+      } else if (count <= 4) {
+        hotLevelEl.textContent = "오늘 대화 분위기가 좋은 분이네요 💬";
+        hotLevelEl.style.color = "#ff9f1c";
+      } else if (count <= 10) {
+        hotLevelEl.textContent = "인기멤버에요! 🔥";
+        hotLevelEl.style.color = "#ff4d4f";
+      } else {
+        hotLevelEl.textContent = "인플루언서급이에요! 👑";
+        hotLevelEl.style.color = "#d4af37";
+        hotLevelEl.style.fontWeight = "900";
+      }
+
+    } catch (err) {
+      console.error("❌ 타겟 활동량 조회 실패:", err);
     }
-
-    const count = await res.json();
-
-    const countEl = document.getElementById("chattingCount");
-    const hotLevelEl = document.getElementById("hotLevel");
-
-    if (countEl) countEl.textContent = count;
-    if (!hotLevelEl) return;
-
-    if (count === 0) {
-  hotLevelEl.textContent = "지금 대화하면 칼답 가능성! ✨";
-
-  hotLevelEl.style.color = "#6e7b8f";
-}
-else if (count <= 4) {
-  hotLevelEl.textContent = "오늘 대화 분위기가 좋은 분이네요 💬";
-  hotLevelEl.style.color = "#ff9f1c";
-}
-else if (count <= 10) {
-  hotLevelEl.textContent = "인기멤버에요! 🔥";
-  hotLevelEl.style.color = "#ff4d4f";
-}
-else {
-  hotLevelEl.textContent = "인플루언서급이에요! 👑";
-  hotLevelEl.style.color = "#d4af37";
-  hotLevelEl.style.fontWeight = "900";
-}
-
-  } catch (err) {
-    console.error("❌ 타겟 활동량 조회 실패:", err);
-  }
 }
