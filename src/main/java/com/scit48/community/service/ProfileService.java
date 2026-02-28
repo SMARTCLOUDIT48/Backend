@@ -64,21 +64,10 @@ public class ProfileService {
 	
 	
 	@Transactional
-	public List<InterestType> getUserInterests(String memberId) {
-		
-		UserEntity me = ur.findByMemberId(memberId)
-				.orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-		
-		return userInterestRepository.findInterestsByUserId(me.getId());
-		
-	}
-	
-	@Transactional
 	public Page<BoardDTO> getUserBoards(String memberId, Pageable pageable, String searchType, String searchKeyword) {
 		
 		Page<BoardEntity> boardEntities;
 		
-		// 1. 검색어가 있는 경우 분기 처리
 		if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
 			if ("title".equals(searchType)) {
 				boardEntities = br.findByMemberIdAndTitle(memberId, searchKeyword, pageable);
@@ -90,11 +79,10 @@ public class ProfileService {
 				boardEntities = br.findAllByMemberId(memberId, pageable);
 			}
 		} else {
-			// 2. 검색어가 없는 경우 전체 목록 조회
+			
 			boardEntities = br.findAllByMemberId(memberId, pageable);
 		}
 		
-		// 3. Page<Entity> 를 Page<DTO> 로 변환하여 반환
 		return boardEntities.map(entity -> BoardDTO.builder()
 				.id(entity.getUser().getId())
 				.title(entity.getTitle())
@@ -102,7 +90,7 @@ public class ProfileService {
 				.viewCount(entity.getViewCount())
 				.createdDate(entity.getCreatedAt())
 				.boardId(entity.getBoardId())
-				// 필요하다면 좋아요 수 등 다른 필드도 매핑
+				// 필요시 좋아요 수 등 다른 필드도 매핑
 				.build()
 		);
 	}
