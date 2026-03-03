@@ -741,12 +741,11 @@ function updatePartnerProfileUI(data) {
 
     const profileBtn = document.getElementById("opponentProfileBtn");
     if (profileBtn) {
-        if (data.opponentId && data.opponentId !== 0) {
-            // ❌ 기존 코드: 여기서 profile 경로로 보내고 있었습니다.
-            // profileBtn.href = "/member/profile/" + data.opponentId;
+        // 👇 숫자 ID(opponentId) 대신 문자열 ID(opponentMemberId)가 있는지 확인!
+        if (data.opponentMemberId) {
 
-            // ⭕ 수정 후: userPage 경로로 변경!
-            profileBtn.href = "/member/userPage/" + data.opponentId;
+            // 👇 숫자 대신 문자열 ID를 붙여서 보냅니다! (예: /member/userPage/test01)
+            profileBtn.href = "/member/userPage/" + data.opponentMemberId;
 
             profileBtn.style.display = "inline-block";
             profileBtn.innerText = "상대방 프로필 확인 >";
