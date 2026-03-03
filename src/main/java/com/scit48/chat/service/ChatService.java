@@ -77,6 +77,8 @@ public class ChatService {
 					.sender(msg.getSenderNickname())
 					.message(msg.getContent())
 					.type(ChatMessageDto.MessageType.valueOf(msg.getMsgType().name()))
+					// 🚨 [수정됨] DB에 저장된 시간을 예쁜 문자열로 변환해서 넘겨줍니다!
+					.time(msg.getCreatedAt() != null ? msg.getCreatedAt().toString() : "")
 					.build();
 			dtos.add(dto);
 		}
@@ -107,6 +109,7 @@ public class ChatService {
 		
 		// 4) 기본값 설정
 		Long oppId = 0L;
+		String oppMemberId = ""; // 🚨 [추가 1] 문자열 아이디 기본값 변수
 		String oppName = "(알 수 없음)";
 		String oppNation = "Unknown";
 		String oppIntro = "대화 상대가 없습니다.";
@@ -123,6 +126,7 @@ public class ChatService {
 		// 5) 상대방 정보 세팅
 		if (opponent != null) {
 			oppId = opponent.getId();
+			oppMemberId = opponent.getMemberId(); // 🚨 [추가 2] 상대방의 문자열 아이디 꺼내기
 			oppName = opponent.getNickname();
 			oppIntro = opponent.getIntro();
 			oppNation = opponent.getNation();
@@ -152,13 +156,14 @@ public class ChatService {
 				.roomId(roomId)
 				.roomName(room.getName())
 				.opponentId(oppId)
+				.opponentMemberId(oppMemberId) // 🚨 [수정 완료] opponentManner가 아니라 opponentMemberId 입니다!
 				.opponentNickname(oppName)
 				.opponentNation(oppNation)
 				.opponentIntro(oppIntro)
 				.opponentProfileImg(oppProfileImg)
 				.opponentProfileImgName(oppProfileImgName)
 				.opponentAge(oppAge)
-				.opponentManner(oppManner)
+				.opponentManner(oppManner)     // 이건 기존에 있던 매너 점수입니다
 				// ✨ [추가] DTO에 언어/레벨 데이터 꽂아주기
 				.opponentNativeLanguage(oppNativeLanguage)
 				.opponentStudyLanguage(oppStudyLanguage)
