@@ -81,6 +81,7 @@ public class ChatController {
 		message.setSenderId(user.getId());
 		message.setSenderMemberId(user.getMemberId());
 		message.setSender(user.getNickname());
+		message.setTime(java.time.LocalDateTime.now().toString());
 		
 		if (ChatMessageDto.MessageType.ENTER.equals(message.getType())) {
 			redisService.userEnter(message.getRoomId());
