@@ -8,12 +8,13 @@
 
     <link rel="stylesheet" th:href="@{/css/userPage.css}" />
     <link rel="stylesheet" th:href="@{/css/layout.css}">
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    const CONTEXT_PATH = /*[[@{/}]]*/ "/";
-    const TARGET_USER_ID = /*[[${user.id}]]*/ 0;
-    /*]]>*/
-</script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const CONTEXT_PATH = /*[[@{/}]]*/ "/";
+        const PAGE_MEMBER_ID = /*[[${user.memberId}]]*/ ""; // 예: sya48 (문자)
+        const PAGE_USER_ID = /*[[${user.id}]]*/ "";         // 추가: DB 고유번호 (숫자)
+        /*]]>*/
+    </script>
     <script type="module" th:src="@{/js/member/userPage.js}"></script>
 </head>
 
@@ -23,21 +24,27 @@
 
 <main class="page">
     <section class="shell">
+
+        <div class="page-hero glass" style="margin-bottom: 30px;">
+            <h1 th:text="|${user.nickname}님의 프로필|">닉네임님의 프로필</h1>
+            <p th:text="|${user.nickname}님의 프로필 · 게시글 · 관심사를 한눈에 확인해보세요.|">닉네임님의 프로필 · 게시글 · 관심사를 한눈에 확인해보세요.</p>
+        </div>
+
         <section class="grid">
 
             <aside class="sidebar">
                 <div class="glass card profile-card">
                     <div class="avatar-wrap">
                         <img id="profileImage" class="avatar"
-                             th:src="${user.profileImageName != null ? '/images/profile/upload/' + user.profileImageName : '/images/profile/default.png'}"
+                             th:src="${user.profileImageName != null ? user.profileImagePath + '/' + user.profileImageName : '/images/profile/default.png'}"
                              alt="profile" />
                     </div>
 
                     <div class="profile-meta">
                         <h3 class="nickname">
                             <span id="nickname" th:text="${user.nickname}">닉네임</span>
-                            <span id="age" class="age" th:if="${user.age != null}" th:text="'(' + ${user.age} + ')'">(24)</span>
-                            <span id="nationFlag" th:text="${user.nation}">🇰🇷</span>
+                            <span id="age" class="age" th:if="${user.age != null}" th:text="'(' + ${user.age} + ')'">(24)</span><span id="nationFlag" class="nation"
+                                  th:text="${#strings.toString(user.nation) == 'KOREA' ? '🇰🇷' : (#strings.toString(user.nation) == 'JAPAN' ? '🇯🇵' : user.nation)}">🇯🇵</span>
                         </h3>
 
                         <div class="likeAndProfileContainer">
@@ -59,9 +66,16 @@
                                 <span id="levelLanguage" class="level-text" th:text="${user.levelLanguage != null ? user.levelLanguage : 'BEGINNER'}">Intermediate</span>
                             </div>
 
-                            <div class="manner-line" th:data-value="${user.manner != null ? user.manner : 36.5}">
-                                <div class="manner-fill" th:style="'width: ' + (${user.manner != null ? user.manner : 36.5}) + '%;'"></div>
-                                <span id="manner" class="manner" th:text="${user.manner != null ? user.manner + '°C' : '36.5°C'}">36.5°C</span>
+                            <div class="manner-line"
+                                 th:data-value="${user.manner != null ? #numbers.formatDecimal(user.manner, 1, 1) : 36.5}">
+
+                                <div class="manner-fill"
+                                     th:style="'width: ' + (${user.manner != null ? #numbers.formatDecimal(user.manner, 1, 1) : 36.5}) + '%;'">
+                                </div>
+
+                                <span id="manner" class="manner"
+                                      th:text="${user.manner != null ? #numbers.formatDecimal(user.manner, 1, 1) + '°C' : '36.5°C'}"> 36.5°C
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -69,7 +83,10 @@
 
                 <div class="glass card profile-card">
                     <div class="profile-intro">
-                        <p id="intro" th:text="${user.intro}">자기소개가 없습니다.</p>
+                        <p id="intro"
+                           th:text="${#strings.isEmpty(user.intro) ? '자기소개를 작성해주세요.' : user.intro}">
+                            자기소개가 없습니다.
+                        </p>
                     </div>
                 </div>
 
@@ -77,13 +94,15 @@
                     <div class="mini-head">
                         <h4>관심사</h4>
                     </div>
+
                     <div class="chip-wrap" id="interestChips">
+
                     </div>
                 </div>
 
     <div class="glass card mini-card">
         <div class="mini-head" style="margin-bottom: 8px;">
-            <h4>💌 현재 연락 중인 이성</h4>
+            <h4>💌 현재 연락 중인 친구</h4>
         </div>
     
         <div style="display:flex; align-items:center; gap:10px; justify-content:space-between;">

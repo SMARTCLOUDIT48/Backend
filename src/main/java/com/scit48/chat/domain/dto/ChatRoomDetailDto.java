@@ -16,6 +16,10 @@ public class ChatRoomDetailDto {
 	
 	// 상대방 정보
 	private Long opponentId;
+	
+	// 🚨 [여기에 추가!] 프론트엔드 프로필 링크 연결용 문자열 ID
+	private String opponentMemberId;
+	
 	private String opponentNickname;
 	private String opponentProfileImg;
 	private String opponentProfileImgName;

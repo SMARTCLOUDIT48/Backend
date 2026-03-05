@@ -40,6 +40,30 @@ public class UserReactionController {
         userReactionService.react(fromUserId, toUserId, reaction);
         return ApiResponse.success(null, "반응 처리 완료");
     }
+	
+	/**
+	 * 현재 로그인한 유저가 특정 유저에게 누른 반응 상태 조회
+	 * 반환값 예시: "LIKE", "DISLIKE", 또는 null(안 누름)
+	 */
+	@GetMapping("/status")
+	public ApiResponse<String> getReactionStatus(
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@RequestParam Long toUserId) {
+		
+		// 비로그인 상태면 아무 반응도 없는 것(null)으로 처리
+		if (userDetails == null) {
+			return ApiResponse.success(null);
+		}
+		
+		Long fromUserId = userDetails.getUser().getId();
+		
+		// 💡 UserReactionService에 getReactionStatus 같은 메서드가 필요합니다!
+		// (DB에서 두 사람 사이의 반응 내역을 찾아 "LIKE"나 "DISLIKE" 문자열로 반환하도록 백엔드에 구현해주세요)
+		String status = userReactionService.getReactionStatus(fromUserId, toUserId);
+		
+		return ApiResponse.success(status);
+	}
+	
 
     /**
      * =========================

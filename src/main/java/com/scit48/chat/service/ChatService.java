@@ -77,6 +77,8 @@ public class ChatService {
 					.sender(msg.getSenderNickname())
 					.message(msg.getContent())
 					.type(ChatMessageDto.MessageType.valueOf(msg.getMsgType().name()))
+					// 🚨 [수정됨] DB에 저장된 시간을 예쁜 문자열로 변환해서 넘겨줍니다!
+					.time(msg.getCreatedAt() != null ? msg.getCreatedAt().toString() : "")
 					.build();
 			dtos.add(dto);
 		}
@@ -107,6 +109,7 @@ public class ChatService {
 		
 		// 4) 기본값 설정
 		Long oppId = 0L;
+		String oppMemberId = ""; // 🚨 [추가 1] 문자열 아이디 기본값 변수
 		String oppName = "(알 수 없음)";
 		String oppNation = "Unknown";
 		String oppIntro = "대화 상대가 없습니다.";
@@ -123,6 +126,7 @@ public class ChatService {
 		// 5) 상대방 정보 세팅
 		if (opponent != null) {
 			oppId = opponent.getId();
+			oppMemberId = opponent.getMemberId(); // 🚨 [추가 2] 상대방의 문자열 아이디 꺼내기
 			oppName = opponent.getNickname();
 			oppIntro = opponent.getIntro();
 			oppNation = opponent.getNation();
@@ -152,13 +156,14 @@ public class ChatService {
 				.roomId(roomId)
 				.roomName(room.getName())
 				.opponentId(oppId)
+				.opponentMemberId(oppMemberId) // 🚨 [수정 완료] opponentManner가 아니라 opponentMemberId 입니다!
 				.opponentNickname(oppName)
 				.opponentNation(oppNation)
 				.opponentIntro(oppIntro)
 				.opponentProfileImg(oppProfileImg)
 				.opponentProfileImgName(oppProfileImgName)
 				.opponentAge(oppAge)
-				.opponentManner(oppManner)
+				.opponentManner(oppManner)     // 이건 기존에 있던 매너 점수입니다
 				// ✨ [추가] DTO에 언어/레벨 데이터 꽂아주기
 				.opponentNativeLanguage(oppNativeLanguage)
 				.opponentStudyLanguage(oppStudyLanguage)
@@ -167,48 +172,58 @@ public class ChatService {
 	}
 	
 	// =================================================================
-	// 4. 채팅방 목록 조회 (🔴 안 읽은 메시지 여부 포함)
+	// 4. 채팅방 목록 조회 (🔴 안 읽은 메시지 여부 포함 + 상대방 정보 포함)
 	// =================================================================
 	@Transactional(readOnly = true)
 	public List<ChatRoomListDto> getMyChatRoomsWithUnread(Long userId) {
 		
-		// 1️⃣ 내가 속한 모든 방 멤버십 가져오기
-		List<ChatRoomMemberEntity> memberships =
-				chatRoomMemberRepository.findMyMemberships(userId);
+		List<ChatRoomMemberEntity> memberships = chatRoomMemberRepository.findMyMemberships(userId);
 		
-		// 2️⃣ roomId -> lastReadMsgId 맵핑 (NULL 방지 및 중복 시 최신값)
 		Map<Long, Long> lastReadMap = memberships.stream()
-				.filter(m -> m.getRoom() != null)
-				.filter(m -> m.getRoom().getRoomId() != null)
+				.filter(m -> m.getRoom() != null && m.getRoom().getRoomId() != null)
 				.collect(Collectors.toMap(
 						m -> m.getRoom().getRoomId(),
 						m -> m.getLastReadMsgId() == null ? 0L : m.getLastReadMsgId(),
 						Math::max
 				));
 		
-		// 3️⃣ 실제 방 목록 가져오기
 		List<ChatRoom> rooms = chatRoomRepository.findMyChatRooms(userId);
-		
-		// 4️⃣ 안 읽음 여부(hasUnread) 계산하여 DTO 변환
 		List<ChatRoomListDto> result = new ArrayList<>();
 		
 		for (ChatRoom room : rooms) {
 			Long roomId = room.getRoomId();
 			
-			// 방의 가장 최신 메시지 ID 조회
 			Long lastMsgId = chatMessageRepository.findLastMessageId(roomId);
 			if (lastMsgId == null) lastMsgId = 0L;
 			
-			// 내가 읽은 마지막 메시지 ID
 			Long lastReadMsgId = lastReadMap.getOrDefault(roomId, 0L);
-			
-			// 안 읽은 메시지가 있는지 판단
 			boolean hasUnread = lastMsgId > lastReadMsgId;
+			
+			// ✨ [추가] 이 방의 멤버들을 조회해서 '나'를 제외한 상대방 찾기
+			List<ChatRoomMemberEntity> roomMembers = chatRoomMemberRepository.findByChatRoomId(roomId);
+			String oppName = "(알 수 없음)";
+			String oppProfileImg = "/images/profile";
+			String oppProfileImgName = "default.png";
+			
+			for (ChatRoomMemberEntity member : roomMembers) {
+				if (member.getUser() != null && !member.getUser().getId().equals(userId)) {
+					oppName = member.getUser().getNickname();
+					if (org.springframework.util.StringUtils.hasText(member.getUser().getProfileImagePath())) {
+						oppProfileImg = member.getUser().getProfileImagePath();
+						oppProfileImgName = member.getUser().getProfileImageName();
+					}
+					break;
+				}
+			}
 			
 			result.add(ChatRoomListDto.builder()
 					.roomId(roomId)
 					.roomName(room.getName())
 					.hasUnread(hasUnread)
+					// ✨ [추가] DTO에 상대방 정보 담기
+					.opponentNickname(oppName)
+					.opponentProfileImg(oppProfileImg)
+					.opponentProfileImgName(oppProfileImgName)
 					.build());
 		}
 		

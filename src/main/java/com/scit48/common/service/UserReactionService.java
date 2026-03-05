@@ -19,7 +19,7 @@ import com.scit48.common.repository.UserRepository;
 @RequiredArgsConstructor
 public class UserReactionService {
 
-    private static final double MANNER_DELTA = 0.2;
+    private static final double MANNER_DELTA = 0.1;
 
     private final UserRepository userRepository;
     private final UserReactionRepository reactionRepository;
@@ -107,4 +107,20 @@ public class UserReactionService {
                 .map(UserDTO::fromEntity)
                 .toList();
     }
+	
+	@Transactional(readOnly = true)
+	public String getReactionStatus(Long fromUserId, Long toUserId) {
+		
+		// 1. DB에서 두 사람 사이의 반응 기록을 찾습니다.
+		Optional<UserReactionEntity> reactionOpt = reactionRepository.findByFromUserIdAndToUserId(fromUserId, toUserId);
+		
+		// 2. 기록이 존재한다면, 해당 반응 타입(Enum)을 문자열로 변환해서 돌려줍니다.
+		if (reactionOpt.isPresent()) {
+			// (주의: ReactionType이 Enum이라면 .name()을 써서 "LIKE", "DISLIKE" 문자로 바꿉니다)
+			return reactionOpt.get().getReaction().name();
+		}
+		
+		// 3. 기록이 없다면 null을 반환하여 프론트엔드에 "아무것도 안 누른 상태"임을 알립니다.
+		return null;
+	}
 }

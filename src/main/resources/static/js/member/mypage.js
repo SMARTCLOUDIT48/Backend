@@ -76,7 +76,7 @@ if (countRes.ok) {
 
     nicknameEl.textContent = user.nickname;
     ageEl.textContent = `(${user.age})`;
-    introEl.textContent = user.intro ?? "자기소개를 작성해 주세요.";
+    introEl.textContent = user.intro ?? "자기소개를 작성해주세요.";
 
     const flagMap = { KOREAN: "🇰🇷", JAPANESE: "🇯🇵" };
     nativeFlagEl.textContent = flagMap[user.nativeLanguage] ?? "❓";
@@ -150,7 +150,7 @@ if (countRes.ok) {
       introEl.textContent = introTextarea.value || "자기소개를 작성해 주세요.";
       levelTextEl.textContent = levelSelect.value;
       modal.classList.add("hidden");
-      alert("프로필 수정 완료");
+      customAlert("프로필 수정 완료");
     }
   });
 });
@@ -653,6 +653,11 @@ async function loadProfileViewList() {
 </button>
 `;
 
+    const btn = item.querySelector(".btn-view");
+    btn.addEventListener("click", () => {
+        location.href = `${CONTEXT_PATH}member/userPage/${user.memberId}`;
+    });
+
       wrap.appendChild(item);
     });
 
@@ -687,7 +692,7 @@ document.addEventListener("click", async (e) => {
 
   } catch (err) {
     console.error(err);
-    alert("채팅방 생성 실패");
+    customAlert("채팅방 생성 실패");
     card.style.pointerEvents = "auto";
   }
 });

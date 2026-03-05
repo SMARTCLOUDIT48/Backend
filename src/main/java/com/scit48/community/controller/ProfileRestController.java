@@ -1,5 +1,8 @@
 package com.scit48.community.controller;
 
+import com.scit48.auth.member.service.MemberInterestService;
+import com.scit48.common.dto.UserDTO;
+import com.scit48.common.dto.UserInterestDTO;
 import com.scit48.common.enums.InterestType;
 import com.scit48.community.service.ProfileService;
 import com.scit48.recommend.domain.dto.RecommendDTO;
@@ -24,11 +27,16 @@ public class ProfileRestController {
 	private final ProfileService profileService;
 	
 	// 1. 유저의 '관심사 목록'만 반환하는 API (interestChips 영역용)
-	@GetMapping("/members/{memberId}/interests")
-	public ResponseEntity<List<InterestType>> getUserInterests(@PathVariable("memberId") String memberId) {
-		log.info("API 요청: {} 님의 관심사 목록 조회", memberId);
+	private final MemberInterestService memberInterestService;
+	
+	@GetMapping("/member/userPage/{memberId}/interests")
+	public ResponseEntity<List<UserInterestDTO>> getUserInterests(@PathVariable("memberId") String memberId) {
 		
-		List<InterestType> interests = profileService.getUserInterests(memberId);
+		UserDTO user = profileService.findByMemberId(memberId);
+		List<UserInterestDTO> interests = memberInterestService.getUserInterests(user.getId());
+		
+		log.info("조회된 관심사 개수: {}", interests.size()); // 백엔드 콘솔 창 확인용
+		
 		return ResponseEntity.ok(interests);
 	}
 	
