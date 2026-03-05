@@ -31,7 +31,7 @@
             <div class="user-profile">
                 <a th:href="${#authentication.name == feed.memberId} ? @{/member/mypage} : @{/member/userPage/{memberId}(memberId=${feed.memberId})}"
                    style="display: block; cursor: pointer;">
-                    <img th:src="${feed.profileImageName != null ? feed.profileImagePath + '/' + feed.profileImageName : '/images/profile/default.png'}"
+                    <img th:src="${(feed.profileImageName != null and feed.profileImageName != 'default.png') ? feed.profileImagePath + '/' + feed.profileImageName : '/images/profile/default.png'}"
                          class="profile-img-sm" alt="프로필">
                 </a>
                 <div class="user-info">
@@ -332,9 +332,10 @@
 
             data.content.forEach(feed => {
                 let profileSrc = '/images/profile/default.png';
-                if (feed.profileImageName) {
+                if (feed.profileImageName && feed.profileImageName !== 'default.png') {
                     const cleanName = feed.profileImageName.replace('/files/', '');
-                    profileSrc = feed.profileImagePath + cleanName;
+                    const basePath = feed.profileImagePath ? feed.profileImagePath : '/images/profile/upload';
+                    profileSrc = basePath + '/' + cleanName;
                 }
 
                 let dateStr = "";
