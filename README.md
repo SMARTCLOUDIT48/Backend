@@ -2,7 +2,9 @@
 
 ## 무스비 프로젝트
 
-JavaSpring, html, css, JavaScript, redis, mysql, Grok AI를 활용해서 만든 언어교환 웹사이트 입니다.
+언어 교환을 목적으로 한 웹 플랫폼으로,
+Java(Spring Boot) 기반 백엔드와 HTML/CSS/JavaScript 프론트엔드로 개발되었습니다.
+또한 Redis, MySQL, Grok AI를 활용하여 매칭 및 AI 기능을 구현했습니다.
 
 ## 📄 배포사이트
 
