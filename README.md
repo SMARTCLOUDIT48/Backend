@@ -145,15 +145,15 @@ Cowork Tools
 
 #### 커뮤니티 게시판
 
-<img src="src/main/resources/static/images/readmeimages/community-board.png" width="500">
+<img src="src/main/resources/static/images/readmeimages/communityboard.png" width="500">
 
 #### 커뮤니티 피드
 
-<img src="src/main/resources/static/images/readmeimages/community-feed.png" width="500">
+<img src="src/main/resources/static/images/readmeimages/communityfeed.png" width="500">
 
 #### 상대 프로필
 
-<img src="src/main/resources/static/images/readmeimages/community-profile.png" width="500">
+<img src="src/main/resources/static/images/readmeimages/communityprofile.png" width="500">
 
 ---
 
