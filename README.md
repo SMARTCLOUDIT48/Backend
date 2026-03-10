@@ -50,6 +50,7 @@ AI
 <img src="https://img.shields.io/badge/Grok%20AI-000000?style=flat&logo=x&logoColor=white"/>
 
 Development Environment  
+<img src="https://img.shields.io/badge/IntelliJ%20IDEA-000000?style=flat&logo=intellijidea&logoColor=white"/> 
 <img src="https://img.shields.io/badge/VSCode-007ACC?style=flat&logo=visualstudiocode&logoColor=white"/>
 
 Version Control  
